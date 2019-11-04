@@ -14,10 +14,10 @@
         <mat-form-field>
           <input formControlName="email" matInput placeholder="Email" autocomplete="on" />
         </mat-form-field>
-
         <mat-form-field>
-          <input formControlName="password" matInput placeholder="Password" autocomplete="on" />
+          <input [type]="showPassword.checked ? 'text' : 'password'" formControlName="password" matInput placeholder="Password" autocomplete="on" />
         </mat-form-field>
+        <mat-checkbox #showPassword style="display: inherit; margin-bottom: 20px;">Show password</mat-checkbox>
       </form>
       <button type="submit" (click)="register()" style="text-align: center">Sign Up</button>
     </mat-card-content>
