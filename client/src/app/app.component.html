@@ -1,22 +1,5 @@
-<!-- Toolbar -->
-<div class="toolbar" role="banner">
-  <span style="margin-left: 40px; color: white;">Welcome to Degree Planning Assistant</span>
-  <div class="spacer"></div>
-  <mat-menu #appMenu="matMenu">
-    <a [routerLink]="['/']">
-      <button mat-menu-item>Home</button>
-    </a>
-    <a [routerLink]="['register']">
-      <button mat-menu-item>Register</button>
-    </a>
-    <a [routerLink]="['login']">
-      <button mat-menu-item>Login</button>
-    </a>
-  </mat-menu>
-
-  <button mat-icon-button [matMenuTriggerFor]="appMenu">Menu</button>
-</div>
-
+<app-navbar></app-navbar>
 <div class="content" role="main">
   <router-outlet></router-outlet>
 </div>
+<app-footer></app-footer>

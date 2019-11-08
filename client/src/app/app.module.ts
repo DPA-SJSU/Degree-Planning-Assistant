@@ -15,6 +15,8 @@ import { LandingComponent } from './landing/landing.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { LoginComponent } from './login/login.component';
 import { ConnectionService } from './connection.service';
+import { NavbarComponent } from './navbar/navbar.component';
+import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,8 @@ import { ConnectionService } from './connection.service';
     LandingComponent,
     RegistrationComponent,
     LoginComponent,
+    NavbarComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,
