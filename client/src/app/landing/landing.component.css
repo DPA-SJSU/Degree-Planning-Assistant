@@ -1,30 +1,9 @@
-/* Layout */
-.d-flex {
-    display: flex;
-}
-.row {
-    flex-direction: row;
-}
-.flex-wrap {
-    flex-wrap: wrap;
-}
-.column {
-    flex-direction: column;
-}
-.justify-content-center {
-    justify-content: center;
-}
-.justify-content-end {
-    justify-content: flex-end;
-}
-.align-items-center {
-    align-items: center;
-}
-
 /* Material UI components */
 .sign-up-btn {
+    color: #ecf0f1;
     font-weight: bold;
     margin-top: 2em;
+    background-color: #1abc9c;
 }
 
 /* Text Card Styling */
@@ -83,10 +62,11 @@
 .header {
     display: block;
     font-size: 48px;
-    color: dodgerblue;
+    color: #1abc9c;
     font-weight: bold;
 }
 .subtitle {
+    color: #636e72;
     font-size: 32px;
 }
 .text-align-center {
@@ -98,7 +78,7 @@
 
 /* Width/Height & Margins */
 .page-size {
-    width: 100vw;
+    width: 100%;
 }
 .vh92 {
     min-height: 92vh;

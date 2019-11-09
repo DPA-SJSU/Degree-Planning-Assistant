@@ -1,1 +1,27 @@
-<p>navbar works!</p>
+<mat-toolbar class="navbar">
+    <div class="navbar-inner">
+        <div class="d-flex row justify-content-center align-items-center">
+            <a routerLink="/" routerLinkActive="active">
+                <button mat-button>Degree Planning Assistant</button>
+            </a>
+        </div>
+        <div *ngIf="!isSmallScreen; else mobileMenu" class="d-flex row justify-content-center align-items-center">
+            <a routerLink="/register" routerLinkActive="active">
+                <button mat-button class="m0 p0 mr2em">Sign up</button>
+            </a>
+            <a routerLink="/login" routerLinkActive="active">
+                <button mat-button class="m0 p0">Sign in</button>
+            </a>
+        </div>
+        <ng-template #mobileMenu>
+            <button mat-icon-button [matMenuTriggerFor]="appMenu">
+                <mat-icon>menu</mat-icon>
+            </button>
+        </ng-template>
+        
+    </div>
+</mat-toolbar>
+<mat-menu #appMenu="matMenu">
+    <button mat-menu-item class="menuBtn">Sign up</button>
+    <button mat-menu-item class="menuBtn">Log in</button>
+</mat-menu>
