@@ -19,7 +19,7 @@ export class RegistrationComponent {
   constructor(private router: Router, private connectionService: ConnectionService) { }
 
   /**
-   * Register new user routes to a new page for registration
+   * Register new user, validating input and server response
    */
   register() {
     if (!this.registrationForm.valid) {
@@ -33,14 +33,22 @@ export class RegistrationComponent {
       password: this.registrationForm.value.password
     };
 
-    const tokenResult = this.connectionService.create_new_user(user);
+    const tokenResult = this.connectionService.sign_in_user(user);
 
-    tokenResult.subscribe((data) => {
-      const config = {
-        userToken: data['token']
-      };
-      console.log('Config & data: ', config, data);
-    });
+    // retrieve token or handle server error
+    tokenResult
+      .subscribe(
+        result => {
+          const config = { userToken: result['token'] };
+          console.log('HTTP config and response: ', config, result);
+          return tokenResult;
+        },
+        err => {
+          console.log('HTTP Error: ', err);
+          this.connectionService.handleError(err);
+        },
+        () => console.log('HTTP request completed.')
+      );
   }
 
   /**

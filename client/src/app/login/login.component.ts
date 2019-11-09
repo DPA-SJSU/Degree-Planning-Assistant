@@ -18,7 +18,7 @@ export class LoginComponent {
   constructor(private router: Router, private connectionService: ConnectionService) { }
 
  /**
-  * Valid
+  * Login existing user, validating input and server response
   */
   login() {
     if (!this.loginForm.valid) {
@@ -33,13 +33,20 @@ export class LoginComponent {
 
     const tokenResult = this.connectionService.sign_in_user(user);
 
-    tokenResult.subscribe((data) => {
-      const config = {
-        userToken: data['token']
-      };
-      console.log('Config & data: ', config, data);
-    });
-
+    // retrieve token or handle server error
+    tokenResult
+      .subscribe(
+        result => {
+          const config = { userToken: result['token'] };
+          console.log('HTTP config and response: ', config, result);
+          return tokenResult;
+        },
+        err => {
+          console.log('HTTP Error: ', err);
+          this.connectionService.handleError(err);
+        },
+        () => console.log('HTTP request completed.')
+      );
   }
 
   /**
