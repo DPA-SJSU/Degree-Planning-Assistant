@@ -1,7 +1,9 @@
 /* Material UI components */
 .sign-up-btn {
+    color: #ecf0f1;
     font-weight: bold;
     margin-top: 2em;
+    background-color: #1abc9c;
 }
 
 /* Text Card Styling */
@@ -60,7 +62,7 @@
 .header {
     display: block;
     font-size: 48px;
-    color: dodgerblue;
+    color: #1abc9c;
     font-weight: bold;
 }
 .subtitle {
