@@ -21,7 +21,7 @@ export class RegistrationComponent {
   /**
    * Register new user, validating input and server response
    */
-  register() {
+  onSubmit() {
     if (!this.registrationForm.valid) {
       alert('Please fill out all form boxes.');
       return;
@@ -33,7 +33,7 @@ export class RegistrationComponent {
       password: this.registrationForm.value.password
     };
 
-    const tokenResult = this.connectionService.sign_in_user(user);
+    const tokenResult = this.connectionService.create_new_user(user);
 
     // retrieve token or handle server error
     tokenResult
@@ -54,7 +54,7 @@ export class RegistrationComponent {
   /**
    * Triggers authentication check of user email and password
    */
-  login() {
+  routeToLogin() {
     this.router.navigate(['login']);
   }
 

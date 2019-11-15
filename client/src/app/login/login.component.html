@@ -17,12 +17,12 @@
         </mat-form-field>
         <mat-checkbox #showPassword style="display: inherit; margin-bottom: 20px;">Show password</mat-checkbox>
       </form>
-      <button type="submit" (click)="login()" style="text-align: center">Login</button>
+      <button type="submit" (click)="onSubmit()" style="text-align: center">Login</button>
     </mat-card-content>
   </mat-card>
 
   <div>
     <p>Or sign up to create an account!</p>
-    <button class="button-center" (click)="register()">Sign Up</button>
+    <button class="button-center" (click)="routeToRegister()">Sign Up</button>
   </div>
 </div>

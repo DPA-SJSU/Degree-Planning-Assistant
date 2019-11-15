@@ -17,10 +17,10 @@ export class LoginComponent {
 
   constructor(private router: Router, private connectionService: ConnectionService) { }
 
- /**
-  * Login existing user, validating input and server response
-  */
-  login() {
+  /**
+   * Login existing user, validating input and server response
+   */
+  onSubmit() {
     if (!this.loginForm.valid) {
       alert('Please fill out all form boxes.');
       return;
@@ -31,28 +31,31 @@ export class LoginComponent {
       password: this.loginForm.value.password
     };
 
-    const tokenResult = this.connectionService.sign_in_user(user);
+    const tokenResult = this.connectionService.login(user);
 
     // retrieve token or handle server error
     tokenResult
       .subscribe(
         result => {
+          // HTTP result: config and data:
           const config = { userToken: result['token'] };
-          console.log('HTTP config and response: ', config, result);
           return tokenResult;
         },
         err => {
-          console.log('HTTP Error: ', err);
+          // HTTP error
           this.connectionService.handleError(err);
         },
-        () => console.log('HTTP request completed.')
+        () => {
+          // HTTP request completed
+          this.router.navigate(['/']);
+        }
       );
   }
 
   /**
    * Register new user routes to a new page for registration
    */
-  register() {
+  routeToRegister() {
     this.router.navigate(['register']);
   }
 

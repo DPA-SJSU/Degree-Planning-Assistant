@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { throwError, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   EMAIL_IS_EMPTY, EMAIL_IS_IN_WRONG_FORMAT, PASSWORD_IS_EMPTY,
   PASSWORD_LENGTH_MUST_BE_MORE_THAN_8, WRONG_PASSWORD, SOME_THING_WENT_WRONG,
@@ -20,6 +21,7 @@ export interface UserData {
 export class ConnectionService {
 
   uri = 'http://localhost:8080';
+  tokenKey = 'tokenKey';
 
   constructor(private http: HttpClient) { }
 
@@ -35,8 +37,36 @@ export class ConnectionService {
    * Login an existing user
    * @param user
    */
-  sign_in_user(user: UserData): Observable<any> {
-    return this.http.post(`${this.uri}/login`, user);
+  login(user: UserData): Observable<any> {
+    return this.http.post(`${this.uri}/login`, user)
+    .pipe(map(userDetails => {
+      localStorage.setItem(this.tokenKey, userDetails['token']);
+      return userDetails;
+    }));
+  }
+
+  /**
+   * See if a user is currently logged in
+   */
+  getCurrentStorageStatus(): string {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  /**
+   * For checking if someone is logged in
+   */
+  isLoggedIn(): boolean {
+    if (this.getCurrentStorageStatus() != null) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Logout a user
+   */
+  logout() {
+    localStorage.removeItem(this.tokenKey);
   }
 
   /**
