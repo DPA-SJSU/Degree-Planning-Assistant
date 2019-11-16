@@ -116,7 +116,7 @@ CREATE TABLE Course_Semester (
 -- Table structure for table `Prerequisite`
 -- 
 
-CREATE TABLE Course_Corequisite (
+CREATE TABLE Course_Prerequisite (
   courseCode VARCHAR(255) NOT NULL,
   PrerequisiteCourseCode VARCHAR(255) NOT NULL
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
