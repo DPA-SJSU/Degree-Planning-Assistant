@@ -70,7 +70,6 @@ button:disabled {
   cursor: auto;
 }
 
-
 footer {
   margin-top: 8px;
   display: flex;
@@ -81,4 +80,24 @@ footer {
 footer a {
   display: flex;
   align-items: center;
+}
+
+.center {
+  width: var(--content-width);
+  min-height: fit-content;
+  position: relative;
+  margin: 30px auto 0;
+}
+
+.login-page {
+  width: var(--content-width);
+  min-height: fit-content;
+  position: relative;
+  margin: 5% auto 0;
+  text-align: center;
+}
+
+.form-list {
+  display: flex;
+  flex-direction: column;
 }
