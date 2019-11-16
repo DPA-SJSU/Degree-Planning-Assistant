@@ -3,7 +3,6 @@
 * {
   font-family: 'Roboto', Arial, sans-serif;
   font-size: 14px;
-  color: #616161;
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -40,7 +39,7 @@ a:hover {
   display: flex;
   margin: 32px auto;
   padding: 0 16px;
-  max-width: 960px;
+  width: 100%;
   flex-direction: column;
   align-items: center;
 }
@@ -100,4 +99,45 @@ footer a {
 .form-list {
   display: flex;
   flex-direction: column;
+}
+/* Layout */
+.d-flex {
+  display: flex;
+}
+.row {
+  flex-direction: row;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.column {
+  flex-direction: column;
+}
+.justify-content-center {
+  justify-content: center;
+}
+.justify-content-space-between {
+  justify-content: space-between
+}
+.justify-content-end {
+  justify-content: flex-end;
+}
+.align-items-center {
+  align-items: center;
+}
+
+.w100 {
+  width: 100%;
+}
+
+.borderBox {
+  box-sizing: border-box;
+}
+
+.m0 {
+  margin: 0;
+}
+
+.p0 {
+  padding: 0;
 }
