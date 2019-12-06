@@ -1,9 +1,9 @@
 {
   "name": "server",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "ENV=prod nodemon -r esm app.js",
+    "start": "ENV=dev node -r esm app.js",
     "dev": "ENV=dev nodemon -r esm app.js"
   },
   "dependencies": {
@@ -15,7 +15,6 @@
     "express": "~4.16.1",
     "express-validator": "^6.2.0",
     "http-errors": "~1.6.3",
-    "mongoose": "^5.7.13",
     "morgan": "~1.9.1",
     "mysql": "^2.17.1",
     "passport": "^0.4.0",
