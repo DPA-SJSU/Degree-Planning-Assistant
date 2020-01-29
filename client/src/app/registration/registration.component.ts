@@ -35,20 +35,23 @@ export class RegistrationComponent {
 
     const tokenResult = this.connectionService.create_new_user(user);
 
-    // retrieve token or handle server error
+      // retrieve token or handle server error
     tokenResult
-      .subscribe(
-        result => {
-          const config = { userToken: result['token'] };
-          console.log('HTTP config and response: ', config, result);
-          return tokenResult;
-        },
-        err => {
-          console.log('HTTP Error: ', err);
-          this.connectionService.handleError(err);
-        },
-        () => console.log('HTTP request completed.')
-      );
+    .subscribe(
+      result => {
+        // HTTP result: config and data:
+        const config = { userToken: result['token'] };
+        return tokenResult;
+      },
+      err => {
+        // HTTP error
+        this.connectionService.handleError(err);
+      },
+      () => {
+        // HTTP request completed
+        this.router.navigate(['/']);
+      }
+    );
   }
 
   /**
