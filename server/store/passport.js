@@ -1,30 +1,25 @@
 /* eslint-disable import/prefer-default-export */
-import { Strategy, ExtractJwt } from "passport-jwt";
-import { config } from "./config";
+import { Strategy, ExtractJwt } from 'passport-jwt';
+import { config, underscoreId } from './config';
+import { User } from '../database/models';
 
 export const applyPassportStrategy = passport => {
   const opts = {};
-
   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-
   opts.secretOrKey = config.passport.secret;
-
   passport.use(
     new Strategy(opts, (payload, done) => {
-      let getUserQuery = `SELECT * FROM User WHERE email like '${payload.email}'`;
-
-      db.query(getUserQuery, (err, rows) => {
-        if (err) return done(err, false);
-
-        if (!rows.length) {
-          return done(null, false, { message: "User Not Found" });
-        } else {
-          if (!bcrypt.compareSync(password, rows[0].password, () => {})) {
-            return done(null, false, { message: "Wrong Password" });
-          } else {
-            return done(null, rows[0]);
-          }
+      User.findOne({ email: payload.email }, (err, user) => {
+        if (err) {
+          return done(err, false);
         }
+        if (user) {
+          return done(null, {
+            email: user.email,
+            _id: user[underscoreId]
+          });
+        }
+        return done(null, false);
       });
     })
   );
