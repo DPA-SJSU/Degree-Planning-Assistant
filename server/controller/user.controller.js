@@ -58,7 +58,6 @@ function createUser(email, password) {
   };
   
   user = new User(data);
-  console.log(user);
   return user.save();
 }
 
@@ -80,14 +79,11 @@ userController.post('/register', validationHook, async (req, res) => {
       const user = await User.findOne({ email });
       if (!user) {
         const createdUser = await createUser(email, password);
-        console.log(2);
         // Sign token
         const newUser = await User.findOne({ email });
-        console.log(newUser);
         const token = jwt.sign({ email }, config.passport.secret, {
           expiresIn: 10000000
         });
-        console.log(token);
         
         const userToReturn = { ...newUser.toJSON(), ...{ token } };
 
@@ -97,7 +93,6 @@ userController.post('/register', validationHook, async (req, res) => {
         generateServerErrorCode(res, 403, 'register email error', USER_EXISTS_ALREADY, 'email');
       }
     } catch (e) {
-      console.log(e);
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
