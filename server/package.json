@@ -11,6 +11,8 @@
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "esm": "^3.2.25",
     "express": "~4.16.1",
     "express-validator": "^6.2.0",
@@ -21,6 +23,7 @@
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "prettier": "^1.19.1",
     "pug": "2.0.0-beta11",
     "sha256": "^0.2.0",
     "sql": "^0.78.0",
@@ -35,9 +38,9 @@
     "babel-preset-es2015": "^6.24.1",
     "eslint": "^6.1.0",
     "eslint-config-airbnb": "^18.0.1",
-    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-react": "^7.18.0",
     "eslint-plugin-react-hooks": "^1.7.0",
     "nodemon": "^1.19.2"
   }

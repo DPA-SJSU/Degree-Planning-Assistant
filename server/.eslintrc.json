@@ -1,9 +1,3 @@
 {
-    "extends": "airbnb",
-    "env": {
-        "node": true
-    },
-    "rules": {
-        "indent": ["error", 2]
-    }
-}
+    "extends": ["airbnb", "plugin:prettier/recommended"]
+  }

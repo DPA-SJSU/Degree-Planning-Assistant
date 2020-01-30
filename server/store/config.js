@@ -12,3 +12,5 @@ export const config = {
     mongoHostName: process.env.ENV === 'prod' ? 'mongodbAtlas' : 'localhost'
   }
 };
+
+export const underscoreId = '_id';

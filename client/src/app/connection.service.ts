@@ -120,10 +120,10 @@ export class ConnectionService {
         resultString += 'Incorrect email or password. Please try again.\n';
         break;
       case USER_EXISTS_ALREADY:
-        resultString += 'Please login to access this feature.';
+        resultString += 'This email is already taken.\n';
         break;
       case USER_DOES_NOT_EXIST:
-        resultString += 'This email is already taken./n';
+        resultString += 'Email not recognized, please sign up.\n';
         break;
       // user trying to access restricted feature
       case TOKEN_IS_EMPTY:

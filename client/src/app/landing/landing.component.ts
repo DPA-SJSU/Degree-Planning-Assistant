@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ConnectionService } from '../connection.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-landing',
@@ -7,9 +9,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LandingComponent implements OnInit {
 
-  constructor() { }
+  constructor(private connectionService: ConnectionService, private router: Router) { }
 
   ngOnInit() {
+  }
+
+  logoutButton() {
+    this.connectionService.logout();
+    this.router.navigate(['login']);
   }
 
 }
