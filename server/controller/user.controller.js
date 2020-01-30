@@ -50,13 +50,15 @@ const validationLoginHook = [
     .withMessage(PASSWORD_LENGTH_MUST_BE_MORE_THAN_8)
 ];
 
-async function createUser(email, password) {
+function createUser(email, password) {
   let user;
   const data = {
     email,
     hashedPassword: generatehashedPassword(password)
   };
+  
   user = new User(data);
+  console.log(user);
   return user.save();
 }
 
@@ -74,24 +76,29 @@ userController.post('/register', validationHook, async (req, res) => {
   } else {
     try {
       const { email, password } = req.body;
+      
       const user = await User.findOne({ email });
       if (!user) {
         const createdUser = await createUser(email, password);
+        console.log(2);
         // Sign token
         const newUser = await User.findOne({ email });
+        console.log(newUser);
         const token = jwt.sign({ email }, config.passport.secret, {
           expiresIn: 10000000
         });
-
+        console.log(token);
+        
         const userToReturn = { ...newUser.toJSON(), ...{ token } };
 
         delete userToReturn.hashedPassword;
         res.status(200).json(userToReturn);
       } else {
-        generateServerErrorCode(res, 403, USER_EXISTS_ALREADY, 'email');
+        generateServerErrorCode(res, 403, 'register email error', USER_EXISTS_ALREADY, 'email');
       }
     } catch (e) {
-      generateServerErrorCode(res, 500, SOME_THING_WENT_WRONG);
+      console.log(e);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 });
@@ -122,13 +129,13 @@ userController.post('/login', validationLoginHook, async (req, res) => {
           delete userToReturn.hashedPassword;
           res.status(200).json(userToReturn);
         } else {
-          generateServerErrorCode(res, 403, WRONG_PASSWORD, 'password');
+          generateServerErrorCode(res, 403, 'login password error', WRONG_PASSWORD, 'password');
         }
       } else {
-        generateServerErrorCode(res, 404, USER_DOES_NOT_EXIST, 'email');
+        generateServerErrorCode(res, 404, 'login email error', USER_DOES_NOT_EXIST, 'email');
       }
     } catch (e) {
-      generateServerErrorCode(res, 500, SOME_THING_WENT_WRONG);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 });

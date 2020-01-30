@@ -73,7 +73,7 @@ Please refer to this link.
 
 # Authors
 
-**Calvin Nguyen** - [NivlaCuong](https://github.com/NivlaCuong)
+**Calvin Nguyen** - [calvinqc](https://github.com/calvinqc)
 
 **Elana Olson** - [ellamaolson](https://github.com/ellamaolson)
 
