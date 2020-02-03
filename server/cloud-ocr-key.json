@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "dpa-sjsu",
+  "private_key_id": "9deab55b2ad0936d43e57d1515f13d01010d0144",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCujXlLOWf7l//7\nq52zP8eZ8a6KV/LEz4xrD981+6/3sVhW7C56YncIVrDa9IdEcGqt7LrkNZAICAfU\n0BfGQISjY4wzSFngbRmMLyxBLqMOvPKn3X5/J4ZQlCbPkgLPsh8iRm1U/2nhOpb/\n/KKIr5kIk0VE4ajtkNUFiQO68L2I02dhIPpw+I5UcyGWvnHFz2PXfXwLEr1qT8Y8\nam34E6RbSMxnPl4GFTh2s1aoGFCOxDJCNpiG972pj/HTHyYHnp5uucGm+rvo0P8q\ntwgeeKDPKzbek4xvEGv5qh0O35v+CJdgI+n9hApra1ZED/uAPIjLlLPGzDuEyga5\nN9WYk5CBAgMBAAECggEAIE5T2C3YRnLz8D7rkYzo4t+dt8IeTvnA2eHWpJWgFF5Q\n5MmSspj9wd/VnLisPmj1/Zm2X11genQOCv+2nr07L0hR3v3xkH1wwIbMkIXSrPwg\nhxwR+PO2Qryg0EMMXSdw5rWVL6mUDZj78IXwCQ9C6hjjtaN0Uf+/xWX9+D/tPGDh\nNXsrmUSHup3duiZvocXX+jOhwPAQiCiz1HriJApnUjE7b2/RqsJOkMfEUMlrDllg\n20RvRCM7gTQ2Nbx2m+T2pTUG3hf2DePrHR2dqZS4sU0bNUC0NExECQqKL1O/ETKU\n95QEGna6opobQjx6TBpIfj/KqcO19bZeIsXa8Fc0hwKBgQDwqfnXx/6y4324Nud1\nlEZP+6kDUSJjKwgrPkBc/mhpazPzV+ZNE34M+qVSNRFANAoDo2nJiYIT24UMdad1\nUIUe9zNOwCmjyc1RNjD1v+DZJ5PJaPfwfUGijNMBEKdQ8bWV+x8AkyBQXv5ttGhe\njtLmxFRJMsUFuYiuL6tbzvv+DwKBgQC5rQDuwJG+VWSL2ZgokESwtCuYqFc2DpWP\nIK2P38V6WPQx48QlR/vz4U/wSCWN38c14KdgiwkqyEazTcWa0jqyNi3ASFwaWdYP\nSxgK5NvBUo+5TiRtSmjZtlFWZRxqOOVj5BM3r56Ocq/2ue9MI36UA3e8YdoyoTdz\nVqG5fZEYbwKBgG6+6TfA0pXjVaEFsvFKcCiyOA5MsbRMww+TL+8bK1UHffqHAnWJ\neMHkPVtdDDktOUZ/VljlrDQTGmCna43ypa+gNb4Rc5fpb0/lzhXoXEHRkpJmeWHz\nYda5Uwf0b+oxsEv6KUQMcBxL+mzlTfnlY2vKALdGY5/Exv7Q9NvkndVFAoGAXe+M\nvT1nfqetCqO3Oy5h0hQUylLAbHTMbXDW3icTvWYrhOH6ZfIZIbUnwCR/+1rvae6S\nP2GX7bENM8Fw63bYgzitxM3W6u3wQiR3sWs/Unr2g4VpIHG4wgxe8hqNWaAXTYYh\nwtZynRagt24yBo8ehruKZCANR/gQGaYGg9VnBrkCgYAJvKDl9pRylh+qdMgXVLWE\nzvtmuZJ2FkDeYxfxkqViKTAXlD1Iibof55MQDpJLFfmbfE13xGVyEr2FDttF7FqH\n9fUHYqsAdL5n2yxXymX9bd/K/zP00hXY045mzsud3FI+1UbC/VnKxnaJgaWK13q3\nyKvjy6K9vqBqhwvTxsts8Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "cloud-ocr-service-account@dpa-sjsu.iam.gserviceaccount.com",
+  "client_id": "100799160488433583986",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cloud-ocr-service-account%40dpa-sjsu.iam.gserviceaccount.com"
+}
