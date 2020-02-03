@@ -9,7 +9,7 @@ import { config } from './store/config';
 import { applyPassportStrategy } from './store/passport';
 import { userController, courseController } from './controller';
 
-var app = express();
+const app = express();
 
 // Set up CORS
 app.use(cors());
@@ -19,7 +19,7 @@ applyPassportStrategy(passport);
 
 app.use(
   bodyParser.urlencoded({
-    extended: true
+    extended: true,
   })
 );
 
@@ -38,6 +38,6 @@ app.listen(port, () => {
   mongoose
     .connect(mongoDBUri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
-      logger.info(`Conneted to mongoDB at ${mongoHostName}`);
+      logger.info(`Connected to mongoDB at ${mongoHostName}`);
     });
 });
