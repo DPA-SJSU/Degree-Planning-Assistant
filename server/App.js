@@ -35,6 +35,11 @@ app.use('/requirement', requirementController);
 app.use('/scan', textScanController);
 app.use('/plan', planController);
 
+/**
+ * Get port from environment and store in Express.
+ */
+const { port, mongoDBUri, mongoHostName } = config.env;
+
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);
   mongoose

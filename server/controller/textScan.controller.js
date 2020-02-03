@@ -82,14 +82,14 @@ textScanController.post(
       ]);
 
       // 2. Generate semesters left
-      // const remainingCourses = await programController.getRemainingCourses(
-      //   coursesTaken,
-      //   {
-      //     school: scanResult.school,
-      //     major: scanResult.major,
-      //     catalogYear: scanResult.catalogYear,
-      //   }
-      // );
+      const remainingCourses = await planController.getRemainingCourses(
+        coursesTaken,
+        {
+          school: scanResult.school,
+          major: scanResult.major,
+          catalogYear: scanResult.catalogYear,
+        }
+      );
 
       // const randomSemesterList = await planController.generateRandomSemesters(
       //   remainingCourses
