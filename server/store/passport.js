@@ -16,7 +16,7 @@ export const applyPassportStrategy = passport => {
         if (user) {
           return done(null, {
             email: user.email,
-            _id: user[underscoreId]
+            _id: user[underscoreId],
           });
         }
         return done(null, false);
