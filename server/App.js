@@ -13,6 +13,7 @@ import {
   semesterController,
   programController,
   textScanController,
+  planController,
 } from './controller';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/course', courseController);
 app.use('/semester', semesterController);
 app.use('/program', programController);
 app.use('/scan', textScanController);
+app.use('/plan', planController);
 
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);
