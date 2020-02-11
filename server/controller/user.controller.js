@@ -4,7 +4,7 @@ import { check, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 
 import {
-  generatehashedPassword,
+  generateHashedPassword,
   generateServerErrorCode,
 } from '../store/utils';
 import { config } from '../store/config';
@@ -24,20 +24,7 @@ import { User } from '../database/models';
 
 const userController = express.Router();
 
-const validationHook = [
-  check('email')
-    .exists()
-    .withMessage(EMAIL_IS_EMPTY)
-    .isEmail()
-    .withMessage(EMAIL_IS_IN_WRONG_FORMAT),
-  check('password')
-    .exists()
-    .withMessage(PASSWORD_IS_EMPTY)
-    .isLength({ min: 8 })
-    .withMessage(PASSWORD_LENGTH_MUST_BE_MORE_THAN_8),
-];
-
-const validationLoginHook = [
+const validation = [
   check('email')
     .exists()
     .withMessage(EMAIL_IS_EMPTY)
@@ -51,21 +38,19 @@ const validationLoginHook = [
 ];
 
 function createUser(email, password) {
-  let user;
   const data = {
     email,
-    hashedPassword: generatehashedPassword(password),
+    hashedPassword: generateHashedPassword(password),
   };
 
-  User.user = new User(data);
-  return user.save();
+  return new User(data);
 }
 
 /**
  * POST/
  * Register a user
  */
-userController.post('/register', validationHook, async (req, res) => {
+userController.post('/register', validation, async (req, res) => {
   const errorsAfterValidation = validationResult(req);
   if (!errorsAfterValidation.isEmpty()) {
     res.status(400).json({
@@ -78,7 +63,7 @@ userController.post('/register', validationHook, async (req, res) => {
 
       const user = await User.findOne({ email });
       if (!user) {
-        const createdUser = await createUser(email, password);
+        await createUser(email, password);
         // Sign token
         const newUser = await User.findOne({ email });
         const token = jwt.sign({ email }, config.passport.secret, {
@@ -108,7 +93,7 @@ userController.post('/register', validationHook, async (req, res) => {
  * POST/
  * Login a user
  */
-userController.post('/login', validationLoginHook, async (req, res) => {
+userController.post('/login', validation, async (req, res) => {
   const errorsAfterValidation = validationResult(req);
   if (!errorsAfterValidation.isEmpty()) {
     res.status(400).json({
