@@ -37,6 +37,7 @@ const programSchema = new mongoose.Schema({
     general_education
     {
         "areaA": {
+<<<<<<< HEAD
             "a1": [...],
             "a2": [...],
             "a3": [...]
@@ -45,15 +46,32 @@ const programSchema = new mongoose.Schema({
             "b1": [...],
             "b2": [...],
             "b3": [...]
+=======
+            "a1": [mongoose.Schema.Types.ObjectId],
+            "a2": [mongoose.Schema.Types.ObjectId],
+            "a3": [mongoose.Schema.Types.ObjectId]
+        },
+        "areaB": {
+            "b1": [mongoose.Schema.Types.ObjectId],
+            "b2": [mongoose.Schema.Types.ObjectId],
+            "b3": [mongoose.Schema.Types.ObjectId]
+>>>>>>> Created Degree Program Schema and basic backend API
         }
         ...
     }
     major_requirements
     {
+<<<<<<< HEAD
         "prepForMajor": [...],
         "coreCourses": [...],
         "requiredCourses": [...],
         "approvedElectives": [...]
+=======
+        "prep_for_major": [mongoose.Schema.Types.ObjectId],
+        "core_courses": [mongoose.Schema.Types.ObjectId],
+        "required_courses": [mongoose.Schema.Types.ObjectId],
+        "approved_electives": [mongoose.Schema.Types.ObjectId]
+>>>>>>> Created Degree Program Schema and basic backend API
     }
 */
 

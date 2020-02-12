@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import { config } from './store/config';
 import { applyPassportStrategy } from './store/passport';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {
   userController,
   courseController,
@@ -16,6 +17,12 @@ import {
 =======
 import { userController, courseController, programController } from './controller';
 >>>>>>> More work on create program validator
+=======
+import { userController, courseController, programController } from './controller';
+=======
+import { userController, programController } from './controller';
+>>>>>>> Created Degree Program Schema and basic backend API
+>>>>>>> Created Degree Program Schema and basic backend API
 
 const app = express();
 
@@ -44,10 +51,13 @@ app.use('/program', programController)
 const { port, mongoDBUri, mongoHostName } = config.env;
 
 app.listen(port, () => {
-  logger.info(`Started successfully server at port ${port}`);
+  logger.info(`Started server successfully at port ${port}`);
   mongoose
     .connect(mongoDBUri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
       logger.info(`Connected to mongoDB at ${mongoHostName}`);
+    })
+    .catch(() => {
+      logger.info(`Failed to connect to MongoDB`);
     });
 });
