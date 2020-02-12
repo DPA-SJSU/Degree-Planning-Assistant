@@ -4,7 +4,7 @@ import { check, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 
 import {
-  generateHashedPassword,
+  generatehashedPassword,
   generateServerErrorCode,
 } from '../store/utils';
 import { config } from '../store/config';
@@ -40,10 +40,11 @@ const validation = [
 function createUser(email, password) {
   const data = {
     email,
-    hashedPassword: generateHashedPassword(password),
+    hashedPassword: generatehashedPassword(password),
   };
 
-  return new User(data);
+  user = new User(data);
+  return user.save();
 }
 
 /**

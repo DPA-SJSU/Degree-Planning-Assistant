@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 // Reference: http://info.sjsu.edu/web-dbgen/catalog/departments/CMPE-section-2.html
 
-const ProgramSchema = new mongoose.Schema({
+const programSchema = new mongoose.Schema({
   major: {
     type: String,
     required: true,
@@ -18,12 +18,12 @@ const ProgramSchema = new mongoose.Schema({
   },
   major_requirements: {
     // Requirements for the major
-    type: Schema.Types.Mixed, // Note that this will require strong validation in the HTTP request to our backend server since it is of type Mixed.
+    type: Schema.Types.Mixed, // Note that this will require strong validation...
     required: true,
   },
   other_requirements: {
     // University requirements such as 'American Institutions'
-    type: Schema.Types.Mixed, // Note that this will require strong validation in the HTTP request to our backend server since it is of type Mixed.
+    type: Schema.Types.Mixed, // Note that this will require strong validation...
     required: true,
   },
 });
@@ -53,4 +53,4 @@ const ProgramSchema = new mongoose.Schema({
     }
 */
 
-export default ProgramSchema;
+export default programSchema;
