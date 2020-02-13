@@ -3,6 +3,10 @@ import mongoose, { Schema } from 'mongoose';
 // Reference: http://info.sjsu.edu/web-dbgen/catalog/departments/CMPE-section-2.html
 
 const programSchema = new mongoose.Schema({
+  school: {
+    type: String,
+    required: true
+  },
   major: {
     type: String,
     required: true,

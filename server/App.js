@@ -7,11 +7,15 @@ import mongoose from 'mongoose';
 
 import { config } from './store/config';
 import { applyPassportStrategy } from './store/passport';
+<<<<<<< HEAD
 import {
   userController,
   courseController,
   semesterController,
 } from './controller';
+=======
+import { userController, courseController, programController } from './controller';
+>>>>>>> More work on create program validator
 
 const app = express();
 
@@ -32,6 +36,7 @@ app.use(bodyParser.json());
 app.use('/', userController);
 app.use('/course', courseController);
 app.use('/semester', semesterController);
+app.use('/program', programController)
 
 /**
  * Get port from environment and store in Express.
