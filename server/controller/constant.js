@@ -71,8 +71,6 @@ export const DEGREE_PROGRAM_ALREADY_EXISTS = 'DEGREE_PROGRAM_ALREADY_EXISTS';
 // The document to be changed does not exist in the database
 export const DEGREE_PROGRAM_NOT_FOUND = 'DEGREE_PROGRAM_NOT_FOUND';
 
-// Severe server error. Check the server console.
-export const SERVER_ERROR = 'SERVER_ERROR';
 /* Edit Profile Constants */
 export const USER_ID_IS_REQUIRED = 'USER_ID_IS_REQUIRED';
 export const USER_ID_IS_EMPTY = 'USER_ID_IS_EMPTY';
@@ -100,3 +98,16 @@ export const INVALID_ID = 'INVALID_ID';
 export const PARAMETERS_REQUIRED = 'PARAMETERS_REQUIRED';
 export const USER_NOT_FOUND = 'USER_NOT_FOUND';
 export const BOOLEAN_VALUES_ONLY = 'BOOLEAN_VALUES_ONLY';
+
+/* Degree Plan Error Codes */
+export const PLAN_ID_IS_EMPTY = 'PLAN_ID_IS_EMPTY';
+export const PARAMETERS_IS_EMPTY = 'PARAMETERS_IS_EMPTY';
+export const PARAMETERS_NOT_RECOGNIZED = 'PARAMETERS_NOT_RECOGNIZED';
+export const INVALID_PARAMETERS = 'INVALID_PARAMETERS';
+export const USER_OR_PLAN_ID_REQUIRED = 'USER_OR_PLAN_ID_REQUIRED';
+export const PLAN_NOT_FOUND = 'PLAN_NOT_FOUND';
+export const SEMESTERS_FIELD_IS_REQUIRED = 'SEMESTERS_FIELD_IS_REQUIRED';
+export const SEMESTERS_IS_INVALID = 'SEMESTERS_IS_INVALID';
+
+// Severe server error. Check the server console.
+export const SERVER_ERROR = 'SERVER_ERROR';

@@ -38,7 +38,7 @@ app.listen(port, () => {
   mongoose
     .connect(mongoDBUri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
-      logger.info(`Connected to mongoDB at ${mongoHostName}`);
+      logger.info(`Connected to MongoDB at ${mongoHostName}`);
     })
     .catch(() => {
       logger.info(`Failed to connect to MongoDB`);
