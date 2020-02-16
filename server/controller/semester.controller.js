@@ -36,7 +36,7 @@ const validateCreateSemester = [
       .withMessage(SEMESTER_COURSES_ARE_EMPTY)
 ]
 
-const validateUpdateGetSemester = [
+const validateSemesterId = [
     check('semester_id')
       .exists()
       .withMessage(SEMESTER_ID_IS_EMPTY)
@@ -105,7 +105,7 @@ semesterController.post(
 semesterController.get(
     '/', 
     passport.authenticate('jwt', { session: false }), 
-    validateUpdateGetSemester, 
+    validateSemesterId, 
     async (req, res) => {
 
     const errorsAfterValidation = validationResult(req);
@@ -137,7 +137,7 @@ semesterController.get(
 semesterController.put(
     '/update', 
     passport.authenticate('jwt', { session: false }), 
-    validateUpdateGetSemester, 
+    validateSemesterId, 
     async (req, res) => {
 
     const errorsAfterValidation = validationResult(req);
@@ -166,6 +166,38 @@ semesterController.put(
                 res.status(200).json(updatedSemester);
             } else {
                 generateServerErrorCode(res, 403, 'update semester error', SEMESTER_NOT_FOUND, 'semester_id');
+            }
+        } catch (e) {
+            generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+        }
+    }
+});
+
+/**
+ * DELETE/
+ * Delete a semester
+ */
+semesterController.delete(
+    '/delete', 
+    passport.authenticate('jwt', { session: false }), 
+    validateSemesterId, 
+    async (req, res) => {
+
+    const errorsAfterValidation = validationResult(req);
+    if(!errorsAfterValidation.isEmpty()) {
+        res.status(400).json({
+            code: 400,
+            errors: errorsAfterValidation.mapped(),
+        })
+    } else {
+        try {
+            const { semester_id } = req.body;
+            const deletedSemester = await Semester.findByIdAndDelete({ _id: semester_id })
+
+            if(deletedSemester) {
+                res.status(200).json(deletedSemester);
+            } else {
+                generateServerErrorCode(res, 403, 'delete semester error', SEMESTER_NOT_FOUND, 'semester_id');
             }
         } catch (e) {
             generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
