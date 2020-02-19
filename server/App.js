@@ -36,12 +36,16 @@ app.use(bodyParser.json());
 
 app.use('/', userController);
 <<<<<<< HEAD
+<<<<<<< HEAD
 app.use('/course', courseController);
 app.use('/semester', semesterController);
 app.use('/program', programController)
 =======
 app.user('/scan-text', textScanController);
 >>>>>>> code skeleton for text scanner
+=======
+app.use('/scan', textScanController);
+>>>>>>> able to call OCR and getting result for parsing
 
 /**
  * Get port from environment and store in Express.
