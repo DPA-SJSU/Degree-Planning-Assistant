@@ -63,7 +63,7 @@ semesterController.createOneSemester = async data => {
           })
             .then(foundSemester => {
               if (!foundSemester) {
-                // 2. TO-DO: Add Pre-req check for each semester before creating/update a plan
+                // TO-DO: Add Pre-req check for each semester before creating/update a plan
                 resolve(new Semester(newData).save());
               } else resolve(foundSemester);
             })
