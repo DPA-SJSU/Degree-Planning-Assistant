@@ -25,12 +25,12 @@ import { Program } from '../database/models';
 const programController = express.Router();
 
 /**
- * @route   POST /program/create/
+ * @route   POST /program/
  * @desc    Creates a new degree program
  * @access  Private
  */
 programController.post(
-  '/create',
+  '/',
   passport.authenticate('jwt', { session: false }),
   validateCreateDegreeProgram,
   async (req, res) => {
@@ -382,12 +382,12 @@ programController.put(
 );
 
 /**
- * @route   DELETE /program/delete/
+ * @route   DELETE /program/
  * @desc    Deletes degree programs identified by it's id
  * @access  Private
  */
 programController.delete(
-  '/delete',
+  '/',
   passport.authenticate('jwt', { session: false }),
   validateDeleteDegreeProgram,
   async (req, res) => {

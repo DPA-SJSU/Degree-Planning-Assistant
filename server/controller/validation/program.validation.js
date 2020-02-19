@@ -33,9 +33,11 @@ export const validateCreateDegreeProgram = [
   body('school')
     .exists()
     .withMessage(SCHOOL_FIELD_IS_REQUIRED)
+    .bail()
     .not()
     .isEmpty()
     .withMessage(SCHOOL_FIELD_IS_EMPTY)
+    .bail()
     .custom(value => {
       if (checkIfLettersOnly(value) === true) {
         return Promise.resolve();
@@ -45,9 +47,11 @@ export const validateCreateDegreeProgram = [
   body('major')
     .exists()
     .withMessage(MAJOR_FIELD_IS_REQUIRED)
+    .bail()
     .not()
     .isEmpty()
     .withMessage(MAJOR_FIELD_IS_EMPTY)
+    .bail()
     .custom(value => {
       if (checkIfLettersOnly(value) === true) {
         return Promise.resolve();
@@ -57,9 +61,11 @@ export const validateCreateDegreeProgram = [
   body('catalog_year')
     .exists()
     .withMessage(CATALOGYEAR_IS_REQUIRED)
+    .bail()
     .not()
     .isEmpty()
     .withMessage(CATALOGYEAR_IS_EMPTY)
+    .bail()
     .isNumeric()
     .isInt()
     .withMessage(CATALOGYEAR_CONTAINS_FORBIDDEN_CHARACTERS),
