@@ -1,5 +1,5 @@
 import express from 'express';
-import { check, validationResult } from 'express-validator';
+import { check, validationResult, query } from 'express-validator';
 
 import passport from 'passport';
 
@@ -12,6 +12,8 @@ import {
   SEMESTER_NOT_FOUND,
   SOME_THING_WENT_WRONG,
   NO_DATA_TO_UPDATE,
+  ID_IS_INVALID,
+  YEAR_CONTAINS_FORBIDDEN_CHARACTERS,
 } from './constant';
 
 import { Semester } from '../database/models';
@@ -25,16 +27,27 @@ const validateCreateSemester = [
     .withMessage(SEMESTER_TERM_IS_EMPTY),
   check('year')
     .exists()
-    .withMessage(SEMESTER_YEAR_IS_EMPTY),
+    .withMessage(SEMESTER_YEAR_IS_EMPTY)
+    .bail()
+    .isNumeric()
+    .isInt()
+    .withMessage(YEAR_CONTAINS_FORBIDDEN_CHARACTERS),
   check('courses')
     .exists()
     .withMessage(SEMESTER_COURSES_ARE_EMPTY),
 ];
 
 const validateSemesterId = [
-  check('semester_id')
+  query('semester_id')
     .exists()
-    .withMessage(SEMESTER_ID_IS_EMPTY),
+    .withMessage(SEMESTER_ID_IS_EMPTY)
+    .not()
+    .isEmpty()
+    .isHexadecimal()
+    .withMessage(ID_IS_INVALID)
+    .bail()
+    .isLength({ min: 24, max: 24 })
+    .withMessage(ID_IS_INVALID),
 ];
 
 function createSemester(data) {
@@ -192,6 +205,7 @@ semesterController.delete(
   passport.authenticate('jwt', { session: false }),
   validateSemesterId,
   async (req, res) => {
+    console.log('Request ', req.query);
     const errorsAfterValidation = validationResult(req);
     if (!errorsAfterValidation.isEmpty()) {
       res.status(400).json({
