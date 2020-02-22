@@ -1,6 +1,6 @@
 export const SOME_THING_WENT_WRONG = 'SOME_THING_WENT_WRONG';
 
-// User error codes
+// User Constants
 export const USER_NAME_IS_EMPTY = 'USER_NAME_IS_EMPTY';
 export const EMAIL_IS_EMPTY = 'EMAIL_IS_EMPTY';
 export const ROLE_IS_EMPTY = 'ROLE_IS_EMPTY';
@@ -14,7 +14,7 @@ export const TOKEN_IS_EMPTY = 'TOKEN_IS_EMPTY';
 export const EMAIL_IS_IN_WRONG_FORMAT = 'EMAIL_IS_IN_WRONG_FORMAT';
 export const NAME_IS_INVALID = 'FIRST_NAME_IS_INVALID';
 
-// for courses
+// Course Constants
 export const COURSE_SCHOOL_IS_EMPTY = 'COURSE_SCHOOL_IS_EMPTY';
 export const COURSE_EXISTS_ALREADY = 'COURSE_EXISTS_ALREADY';
 export const COURSE_DOES_NOT_EXIST = 'COURSE_DOES_NOT_EXIST';
@@ -25,7 +25,7 @@ export const COURSE_DESCRIPTION_IS_EMPTY = 'COURSE_DESCRIPTION_IS_EMPTY';
 export const COURSE_TERMS_OFFERED_IS_EMPTY = 'COURSE_TERMS_OFFERED_IS_EMPTY';
 export const COURSE_ID_IS_EMPTY = 'COURSE_ID_IS_EMPTY';
 
-// for semester
+// Semester Constants
 export const SEMESTER_EXISTS_ALREADY = 'SEMESTER_EXISTS_ALREADY';
 export const SEMESTER_TERM_IS_EMPTY = 'SEMESTER_TERM_IS_EMPTY';
 export const SEMESTER_YEAR_IS_EMPTY = 'SEMESTER_YEAR_IS_EMPTY';
@@ -40,7 +40,7 @@ export const DOES_NOT_CONTAIN_A_DIGIT = 'DOES_NOT_CONTAIN_A_DIGIT';
 export const NO_DATA_TO_UPDATE = 'NO_DATA_TO_UPDATE';
 export const ID_IS_INVALID = 'ID_IS_INVALID';
 
-/* DEGREE PROGRAM ERROR CODES */
+/* Degree Program Constants */
 export const SCHOOL_FIELD_IS_REQUIRED = 'SCHOOL_FIELD_IS_REQUIRED';
 export const SCHOOL_FIELD_IS_EMPTY = 'SCHOOL_FIELD_IS_EMPTY';
 export const SCHOOL_FIELD_CONTAINS_FORBIDDEN_CHARACTERS =
@@ -60,18 +60,14 @@ export const REQUIREMENTOBJECT_IS_EMPTY = 'REQUIREMENTOBJECT_IS_EMPTY';
 export const REQUIREMENTOBJECT_INCORRECT_STRUCTURE =
   'REQUIREMENTOBJECT_INCORRECT_STRUCTURE';
 export const ID_IS_REQUIRED = 'ID_IS_REQUIRED';
-// Either the document ID or all three metadata fields are required
 export const ID_OR_ALL_THREE_OTHER_PARAMETERS_IS_REQUIRED =
   'ID_OR_ALL_THREE_OTHER_PARAMETERS_IS_REQUIRED';
-// Either the document or any one of the three metadata fields are required
 export const ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED =
   'ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED';
-// The document to be created or the new version of the document already exists in the database
 export const DEGREE_PROGRAM_ALREADY_EXISTS = 'DEGREE_PROGRAM_ALREADY_EXISTS';
-// The document to be changed does not exist in the database
 export const DEGREE_PROGRAM_NOT_FOUND = 'DEGREE_PROGRAM_NOT_FOUND';
 
-/* Edit Profile Constants */
+/* Profile Constants */
 export const USER_ID_IS_REQUIRED = 'USER_ID_IS_REQUIRED';
 export const USER_ID_IS_EMPTY = 'USER_ID_IS_EMPTY';
 export const USER_ID_IS_INVALID = 'USER_ID_IS_INVALID';
@@ -99,8 +95,12 @@ export const PARAMETERS_REQUIRED = 'PARAMETERS_REQUIRED';
 export const USER_NOT_FOUND = 'USER_NOT_FOUND';
 export const BOOLEAN_VALUES_ONLY = 'BOOLEAN_VALUES_ONLY';
 
-/* Degree Plan Error Codes */
+/* Degree Plan Constants */
 export const PLAN_ID_IS_EMPTY = 'PLAN_ID_IS_EMPTY';
+export const COURSE_NAMES_ONLY_MUST_BE_BOOLEAN =
+  'COURSE_NAMES_ONLY_MUST_BE_BOOLEAN';
+export const COURSE_NAMES_ONLY_FIELD_IS_EMPTY =
+  'COURSE_NAMES_ONLY_FIELD_IS_EMPTY';
 export const PARAMETERS_IS_EMPTY = 'PARAMETERS_IS_EMPTY';
 export const PARAMETERS_NOT_RECOGNIZED = 'PARAMETERS_NOT_RECOGNIZED';
 export const INVALID_PARAMETERS = 'INVALID_PARAMETERS';

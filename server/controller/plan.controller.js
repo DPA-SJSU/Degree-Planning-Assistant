@@ -21,6 +21,7 @@ import {
   SEMESTERS_FIELD_IS_REQUIRED,
   SEMESTERS_IS_INVALID,
   PLAN_NOT_FOUND,
+  USER_DOES_NOT_EXIST,
 } from './constant';
 
 const planController = express.Router();
@@ -64,17 +65,10 @@ const planController = express.Router();
  * @access  Private
  */
 planController.post(
-  '/',
+  '/userId',
   passport.authenticate('jwt', { session: false }),
   validateCreatePlan,
   async (req, res) => {
-    /*
-      {
-        semesters: [{
-          term, year, difficulty, courses
-        }]
-      }
-    */
     if (!req.body.semesters) {
       return res.status(400).json({ errors: SEMESTERS_FIELD_IS_REQUIRED });
     } else if (validateSemesters(req.body.semesters) === false) {
@@ -100,7 +94,7 @@ planController.post(
  * @access  Private
  */
 planController.put(
-  '/',
+  '/:userId',
   passport.authenticate('jwt', { session: false }),
   validateUpdatePlan,
   async (req, res) => {
@@ -114,11 +108,34 @@ planController.put(
  * @access  Private
  */
 planController.get(
-  '/',
+  '/:userId',
   passport.authenticate('jwt', { session: false }),
   validateFetchPlan,
   async (req, res) => {
-    return res.status(200).json();
+    const errors = validationResult(req);
+    if (errors.isEmpty() === false) {
+      return res.status(400).json(errors);
+    }
+
+    try {
+      const { userId } = req.params;
+      const { courseNamesOnly } = req.query;
+
+      const user = await User.findById(userId, 'degree_plan_id').populate(
+        'degree_plan_id'
+      );
+
+      if (user) {
+        // TODO: Fetch the course names of each semester
+
+        return res.status(200).json(user.degree_plan_id);
+      } else {
+        return res.status(404).json({ error: USER_DOES_NOT_EXIST });
+      }
+    } catch (databaseErr) {
+      logger.info(databaseErr);
+      return res.status(500).json({ error: SERVER_ERROR });
+    }
   }
 );
 

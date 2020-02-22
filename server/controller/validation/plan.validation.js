@@ -1,4 +1,4 @@
-import { body, query } from 'express-validator';
+import { body, param, query } from 'express-validator';
 
 import {
   ID_IS_INVALID,
@@ -7,6 +7,10 @@ import {
   PARAMETERS_IS_EMPTY,
   INVALID_PARAMETERS,
   USER_ID_IS_REQUIRED,
+  USER_ID_IS_EMPTY,
+  USER_ID_IS_INVALID,
+  COURSE_NAMES_ONLY_MUST_BE_BOOLEAN,
+  COURSE_NAMES_ONLY_FIELD_IS_EMPTY,
   PLAN_ID_FIELD_IS_REQUIRED,
 } from '../constant';
 
@@ -59,77 +63,71 @@ export const validateSemesters = semesterArr => {
   }
 };
 
-export const validateUpdatePlan = [
-  body('plan_id')
-    .if(body('plan_id').exists())
-    .not()
-    .isEmpty()
-    .withMessage(PLAN_ID_IS_EMPTY)
+export const validateCreatePlan = [
+  param('userId')
+    .exists()
+    .withMessage(USER_ID_IS_REQUIRED)
     .bail()
-    .isHexadecimal()
-    .withMessage(ID_IS_INVALID)
-    .bail()
-    .unescape()
+    .escape()
     .ltrim()
     .rtrim()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(ID_IS_INVALID),
-  body('user_id')
-    .if(body('plan_id').exists())
     .not()
     .isEmpty()
     .withMessage(USER_ID_IS_EMPTY)
     .bail()
-    .isHexadecimal()
-    .withMessage(ID_IS_INVALID)
+    .isLength({ min: 24, max: 24 })
+    .withMessage(USER_ID_IS_INVALID)
     .bail()
-    .unescape()
+    .isHexadecimal()
+    .withMessage(USER_ID_IS_INVALID),
+];
+
+export const validateUpdatePlan = [
+  param('userId')
+    .exists()
+    .withMessage(USER_ID_IS_REQUIRED)
+    .bail()
+    .escape()
     .ltrim()
     .rtrim()
+    .not()
+    .isEmpty()
+    .withMessage(USER_ID_IS_EMPTY)
+    .bail()
     .isLength({ min: 24, max: 24 })
-    .withMessage(ID_IS_INVALID),
+    .withMessage(USER_ID_IS_INVALID)
+    .bail()
+    .isHexadecimal()
+    .withMessage(USER_ID_IS_INVALID),
 ];
 
 export const validateFetchPlan = [
-  query('plan_id')
-    .if(query('plan_id').exists())
-    .not()
-    .isEmpty()
-    .withMessage(PLAN_ID_IS_EMPTY)
+  param('userId')
+    .exists()
+    .withMessage(USER_ID_IS_REQUIRED)
     .bail()
-    .isHexadecimal()
-    .withMessage(ID_IS_INVALID)
-    .bail()
-    .unescape()
+    .escape()
     .ltrim()
     .rtrim()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(ID_IS_INVALID),
-  query('user_id')
-    .if(query('plan_id').exists())
     .not()
     .isEmpty()
     .withMessage(USER_ID_IS_EMPTY)
     .bail()
-    .isHexadecimal()
-    .withMessage(ID_IS_INVALID)
+    .isLength({ min: 24, max: 24 })
+    .withMessage(USER_ID_IS_INVALID)
     .bail()
-    .unescape()
+    .isHexadecimal()
+    .withMessage(USER_ID_IS_INVALID),
+  query('courseNamesOnly')
+    .escape()
     .ltrim()
     .rtrim()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(ID_IS_INVALID),
-  query('fetch_data')
-    .if(query('fetch_data').exists())
     .not()
     .isEmpty()
-    .withMessage(PARAMETERS_IS_EMPTY)
+    .withMessage(COURSE_NAMES_ONLY_FIELD_IS_EMPTY)
     .bail()
-    .unescape()
-    .ltrim()
-    .rtrim()
     .isBoolean()
-    .withMessage(INVALID_PARAMETERS),
+    .withMessage(COURSE_NAMES_ONLY_MUST_BE_BOOLEAN),
 ];
 
 export const validateDeletePlan = [
