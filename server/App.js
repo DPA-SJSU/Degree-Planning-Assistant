@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 
 import { config } from './store/config';
 import { applyPassportStrategy } from './store/passport';
-import { userController } from './controller';
+import { userController, courseController } from './controller';
 
 var app = express();
 
@@ -26,6 +26,7 @@ app.use(
 app.use(bodyParser.json());
 
 app.use('/', userController);
+app.use('/course', courseController);
 
 /**
  * Get port from environment and store in Express.
