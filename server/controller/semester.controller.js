@@ -83,7 +83,11 @@ semesterController.get(
       try {
         // Get semester ObjectId from query
         const semester_id = req.query.semester_id;
-        const fetchedSemester = await Semester.findOne({ _id: semester_id });
+
+        // Get semester and populate the courses data
+        const fetchedSemester = await await Semester.findOne({
+          _id: semester_id,
+        }).populate('courses');
 
         if (fetchedSemester) {
           res.status(200).json(fetchedSemester);
@@ -180,7 +184,7 @@ semesterController.delete(
         if (deletedSemester) {
           return res
             .status(200)
-            .json({ message: 'deleted a course', deletedSemester });
+            .json({ message: 'deleted a semester', deletedSemester });
         } else {
           generateServerErrorCode(
             res,
