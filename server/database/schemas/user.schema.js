@@ -13,7 +13,7 @@ const userSchema = new Schema({
   address: { type: String },
   phone: { type: String },
   gender: { type: Number },
-  addedInfo: { type: [Object] }
+  addedInfo: { type: [Object] },
 });
 
 /**

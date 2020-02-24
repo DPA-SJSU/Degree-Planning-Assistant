@@ -1,39 +1,37 @@
 import sha256 from 'sha256';
-import { URL } from 'url';
 
-export const generatehashedPassword = password => sha256(password);
+export const generateHashedPassword = password => sha256(password);
 
-export function generateServerErrorCode(res, code, fullError, msg, location = 'server') {
+export function generateServerErrorCode(
+  res,
+  code,
+  fullError,
+  msg,
+  location = 'server'
+) {
   const errors = {};
   errors[location] = {
     fullError,
-    msg
+    msg,
   };
 
   return res.status(code).json({
     code,
     fullError,
-    errors
+    errors,
   });
 }
 
-export const isURL = string => {
-  try {
-    new URL(string);
-    return true;
-  } catch (_) {
-    return false;
-  }
-};
+/**
+ * Removes the undefined properties of an object
+ * Found: https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object/38340374#38340374
+ * @param {Object} obj
+ */
+export function removeUndefinedObjectProps(obj) {
+  Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
+  return obj;
+}
 
-export function checkAllowedKeys(allowedKeys, keys) {
-  if ((allowedKeys && allowedKeys.length > 0) || (keys && keys.length > 0)) {
-    for (let i = 0; i < keys.length; i += 1) {
-      if (!allowedKeys.includes(keys[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return false;
+export function isObjectEmpty(obj) {
+  return Object.keys(obj).length === 0;
 }

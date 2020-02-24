@@ -1,8 +1,12 @@
 import express from 'express';
 import { validationResult } from 'express-validator';
 import passport from 'passport';
-import { generateServerErrorCode } from '../store/utils';
 import { Course } from '../database/models';
+import {
+  generateServerErrorCode,
+  removeUndefinedObjectProps,
+  isObjectEmpty,
+} from '../store/utils';
 import {
   COURSE_EXISTS_ALREADY,
   COURSE_DOES_NOT_EXIST,
@@ -10,7 +14,6 @@ import {
   SOME_THING_WENT_WRONG,
   NO_DATA_TO_UPDATE,
 } from './constant';
-
 import {
   validateCourseCreation,
   validateSingleCourse,
@@ -104,20 +107,6 @@ async function createEmptyCourse(school, code) {
   };
   let newCourse = new Course(data);
   return newCourse.save();
-}
-
-/**
- * Removes the undefined properties of an object
- * Found: https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object/38340374#38340374
- * @param {Object} obj
- */
-function removeUndefinedObjectProps(obj) {
-  Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
-  return obj;
-}
-
-function isObjectEmpty(obj) {
-  return Object.keys(obj).length === 0;
 }
 
 /**
