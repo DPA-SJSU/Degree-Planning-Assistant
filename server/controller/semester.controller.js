@@ -1,71 +1,28 @@
 import express from 'express';
-import { check, validationResult, query } from 'express-validator';
-
+import { validationResult } from 'express-validator';
 import passport from 'passport';
-
+import { Semester } from '../database/models';
+import {
+  generateServerErrorCode,
+  removeUndefinedObjectProps,
+  isObjectEmpty,
+} from '../store/utils';
 import {
   SEMESTER_EXISTS_ALREADY,
-  SEMESTER_TERM_IS_EMPTY,
-  SEMESTER_YEAR_IS_EMPTY,
-  SEMESTER_COURSES_ARE_EMPTY,
-  SEMESTER_ID_IS_EMPTY,
   SEMESTER_NOT_FOUND,
   SOME_THING_WENT_WRONG,
   NO_DATA_TO_UPDATE,
-  ID_IS_INVALID,
-  YEAR_CONTAINS_FORBIDDEN_CHARACTERS,
 } from './constant';
-
-import { Semester } from '../database/models';
-import { generateServerErrorCode } from '../store/utils';
+import {
+  validateCreateSemester,
+  validateSemesterId,
+} from './validation/semester.validation';
 
 const semesterController = express.Router();
-
-const validateCreateSemester = [
-  check('term')
-    .exists()
-    .withMessage(SEMESTER_TERM_IS_EMPTY),
-  check('year')
-    .exists()
-    .withMessage(SEMESTER_YEAR_IS_EMPTY)
-    .bail()
-    .isNumeric()
-    .isInt()
-    .withMessage(YEAR_CONTAINS_FORBIDDEN_CHARACTERS),
-  check('courses')
-    .exists()
-    .withMessage(SEMESTER_COURSES_ARE_EMPTY),
-];
-
-const validateSemesterId = [
-  query('semester_id')
-    .exists()
-    .withMessage(SEMESTER_ID_IS_EMPTY)
-    .not()
-    .isEmpty()
-    .isHexadecimal()
-    .withMessage(ID_IS_INVALID)
-    .bail()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(ID_IS_INVALID),
-];
 
 function createSemester(data) {
   let semester = new Semester(data);
   return semester.save();
-}
-/**
- * Removes the undefined properties of an object
- * Found: https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object/38340374#38340374
- * @param {Object} obj
- */
-function removeUndefinedObjectProps(obj) {
-  Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
-  return obj;
-}
-
-function isObjectEmpty(obj) {
-  return Object.keys(obj).length === 0;
 }
 
 /**

@@ -21,3 +21,17 @@ export function generateServerErrorCode(
     errors,
   });
 }
+
+/**
+ * Removes the undefined properties of an object
+ * Found: https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object/38340374#38340374
+ * @param {Object} obj
+ */
+export function removeUndefinedObjectProps(obj) {
+  Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
+  return obj;
+}
+
+export function isObjectEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
