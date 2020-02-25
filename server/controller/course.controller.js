@@ -10,9 +10,9 @@ import {
 import {
   COURSE_EXISTS_ALREADY,
   COURSE_DOES_NOT_EXIST,
-  SCHOOl_DOES_NOT_EXIST,
   SOME_THING_WENT_WRONG,
   NO_DATA_TO_UPDATE,
+  SCHOOL_DOES_NOT_EXIST,
 } from './constant';
 import {
   validateCourseCreation,
@@ -271,7 +271,7 @@ courseController.get(
             res,
             403,
             'school courses retrieval error',
-            SCHOOl_DOES_NOT_EXIST,
+            SCHOOL_DOES_NOT_EXIST,
             'school'
           );
         }
