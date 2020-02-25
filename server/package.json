@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "ENV=prod nodemon -r esm app.js",
-    "dev": "ENV=dev nodemon -r esm app.js"
+    "dev": "ENV=dev nodemon -r esm app.js",
+    "start-w": "set ENV=prod&& nodemon -r esm app.js",
+    "dev-w": "set ENV=dev&& nodemon -r esm app.js"
   },
   "dependencies": {
     "bcrypt": "^3.0.6",

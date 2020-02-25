@@ -8,6 +8,7 @@
     "i": "npm run i-client && npm run i-backend",
     "client": "cd client/ && npm start",
     "server": "cd server/ && npm run dev",
-    "start": "npm run client"
+    "start": "npm run client",
+    "server-w": "cd server/ && npm run dev-w"
   }
 }

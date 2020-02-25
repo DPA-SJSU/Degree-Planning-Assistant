@@ -1,19 +1,17 @@
 import express from 'express';
-import { check, validationResult } from 'express-validator';
 
 import jwt from 'jsonwebtoken';
 
 import {
-  generateHashedPassword,
+  generatehashedPassword,
   generateServerErrorCode,
 } from '../store/utils';
 import { config } from '../store/config';
 
+import { validationResult } from 'express-validator';
+import { validation } from "./validation/user.validation";
+
 import {
-  PASSWORD_IS_EMPTY,
-  PASSWORD_LENGTH_MUST_BE_MORE_THAN_8,
-  EMAIL_IS_EMPTY,
-  EMAIL_IS_IN_WRONG_FORMAT,
   SOME_THING_WENT_WRONG,
   USER_EXISTS_ALREADY,
   WRONG_PASSWORD,
@@ -24,26 +22,14 @@ import { User } from '../database/models';
 
 const userController = express.Router();
 
-const validation = [
-  check('email')
-    .exists()
-    .withMessage(EMAIL_IS_EMPTY)
-    .isEmail()
-    .withMessage(EMAIL_IS_IN_WRONG_FORMAT),
-  check('password')
-    .exists()
-    .withMessage(PASSWORD_IS_EMPTY)
-    .isLength({ min: 8 })
-    .withMessage(PASSWORD_LENGTH_MUST_BE_MORE_THAN_8),
-];
-
 function createUser(email, password) {
   const data = {
     email,
-    hashedPassword: generateHashedPassword(password),
+    hashedPassword: generatehashedPassword(password),
   };
 
-  return new User(data);
+  user = new User(data);
+  return user.save();
 }
 
 /**

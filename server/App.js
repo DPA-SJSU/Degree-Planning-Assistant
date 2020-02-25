@@ -11,6 +11,7 @@ import {
   userController,
   courseController,
   semesterController,
+  programController
 } from './controller';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(bodyParser.json());
 app.use('/', userController);
 app.use('/course', courseController);
 app.use('/semester', semesterController);
+app.use('/program', programController)
 
 /**
  * Get port from environment and store in Express.
@@ -39,10 +41,13 @@ app.use('/semester', semesterController);
 const { port, mongoDBUri, mongoHostName } = config.env;
 
 app.listen(port, () => {
-  logger.info(`Started successfully server at port ${port}`);
+  logger.info(`Started server successfully at port ${port}`);
   mongoose
     .connect(mongoDBUri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
       logger.info(`Connected to mongoDB at ${mongoHostName}`);
+    })
+    .catch(() => {
+      logger.info(`Failed to connect to MongoDB`);
     });
 });
