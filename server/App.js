@@ -7,22 +7,12 @@ import mongoose from 'mongoose';
 
 import { config } from './store/config';
 import { applyPassportStrategy } from './store/passport';
-<<<<<<< HEAD
-<<<<<<< HEAD
 import {
   userController,
   courseController,
   semesterController,
+  programController
 } from './controller';
-=======
-import { userController, courseController, programController } from './controller';
->>>>>>> More work on create program validator
-=======
-import { userController, courseController, programController } from './controller';
-=======
-import { userController, programController } from './controller';
->>>>>>> Created Degree Program Schema and basic backend API
->>>>>>> Created Degree Program Schema and basic backend API
 
 const app = express();
 
