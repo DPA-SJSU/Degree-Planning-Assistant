@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 import sha256 from 'sha256';
 
 const userSchema = new Schema({
-  hashedPassword: {
+  hashed_password: {
     type: String,
     required: true,
   },
@@ -56,7 +56,7 @@ const userSchema = new Schema({
   },
   degreePlanId: {
     type: Schema.Types.ObjectId,
-    ref: 'program',
+    ref: 'Plan',
   },
 });
 
@@ -64,7 +64,7 @@ const userSchema = new Schema({
  * @param {*} password
  */
 userSchema.methods.comparePassword = function comparePassword(password) {
-  return this.hashedPassword === sha256(password);
+  return this.hashed_password === sha256(password);
 };
 
 export default userSchema;

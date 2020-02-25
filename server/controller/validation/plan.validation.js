@@ -4,10 +4,7 @@ import {
   ID_IS_INVALID,
   PLAN_ID_IS_EMPTY,
   USER_ID_IS_EMPTY,
-  PARAMETERS_IS_EMPTY,
-  INVALID_PARAMETERS,
   USER_ID_IS_REQUIRED,
-  USER_ID_IS_EMPTY,
   USER_ID_IS_INVALID,
   COURSE_NAMES_ONLY_MUST_BE_BOOLEAN,
   COURSE_NAMES_ONLY_FIELD_IS_EMPTY,
@@ -119,13 +116,14 @@ export const validateFetchPlan = [
     .isHexadecimal()
     .withMessage(USER_ID_IS_INVALID),
   query('courseNamesOnly')
-    .escape()
-    .ltrim()
-    .rtrim()
+    .if(query('courseNamesOnly').exists())
     .not()
     .isEmpty()
     .withMessage(COURSE_NAMES_ONLY_FIELD_IS_EMPTY)
     .bail()
+    .escape()
+    .ltrim()
+    .rtrim()
     .isBoolean()
     .withMessage(COURSE_NAMES_ONLY_MUST_BE_BOOLEAN),
 ];
