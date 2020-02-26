@@ -7,16 +7,13 @@ import mongoose from 'mongoose';
 
 import { config } from './store/config';
 import { applyPassportStrategy } from './store/passport';
-<<<<<<< HEAD
 import {
   userController,
   courseController,
   semesterController,
-  programController
+  programController,
+  textScanController,
 } from './controller';
-=======
-import { userController, textScanController } from './controller';
->>>>>>> code skeleton for text scanner
 
 const app = express();
 
@@ -35,17 +32,10 @@ app.use(
 app.use(bodyParser.json());
 
 app.use('/', userController);
-<<<<<<< HEAD
-<<<<<<< HEAD
 app.use('/course', courseController);
 app.use('/semester', semesterController);
-app.use('/program', programController)
-=======
-app.user('/scan-text', textScanController);
->>>>>>> code skeleton for text scanner
-=======
+app.use('/program', programController);
 app.use('/scan', textScanController);
->>>>>>> able to call OCR and getting result for parsing
 
 /**
  * Get port from environment and store in Express.
@@ -58,11 +48,8 @@ app.listen(port, () => {
     .connect(mongoDBUri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
       logger.info(`Connected to mongoDB at ${mongoHostName}`);
-<<<<<<< HEAD
     })
     .catch(() => {
       logger.info(`Failed to connect to MongoDB`);
-=======
->>>>>>> code skeleton for text scanner
     });
 });

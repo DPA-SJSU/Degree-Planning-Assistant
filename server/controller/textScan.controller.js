@@ -1,47 +1,43 @@
 /* eslint-disable no-restricted-syntax */
 import express from 'express';
-// import { Course, Semester } from '../database/models';
+import multer from 'multer';
+import passport from 'passport';
 
 import CloudOcr from '../Scanning/cloudOCR';
+import courseController from './course.controller';
 
+const upload = multer({ dest: 'uploads/' });
 const textScanController = express.Router();
-
-function getCourseInfo(listOfWordText) {
-  const school = 'sjsu';
-  const code = `${listOfWordText[0]} ${listOfWordText[1]}`;
-  const creditIndex = listOfWordText.length - 5;
-  const title = listOfWordText.slice(2, creditIndex).join(' ');
-  const credit = listOfWordText[creditIndex];
-  return { school, code, title, credit };
-}
 
 /**
  * POST/
- * Scan text and input into Course & Semester Schema
+ * Scan PDF File and input into Course & Semester Schema
  */
-textScanController.post('/ocr', (req, res) => {
-  const fileName = './Scanning/test/test1.pdf';
-  CloudOcr.scan(fileName)
-    .then(scanResult => {
-      console.log(scanResult);
-      res.status(200).json(scanResult);
-    })
-    .catch(e => {
-      return res.status(500).json({ err: e });
-    });
-});
+textScanController.post(
+  '/ocr',
+  // passport.authenticate('jwt', { session: false }),
+  upload.single('pdf'),
+  (req, res) => {
+    const { user } = req;
+    const fileName = req.file.path;
+    CloudOcr.scan(fileName)
+      .then(scanResult => {
+        // Create a semester, and add to the database
+        // scanResult.semesterList.forEach(semester => createSemester(semester));
 
-textScanController.post('/plain', (req, res) => {
-  const { text } = req.body;
+        // Create a Degree Plan, and add Semester to Plan
 
-  const semester = {};
-  const course = {};
+        // Loop through the course => findId of the course based on school code and add to User's CoursesTaken Array
+        scanResult.takenCourseList.forEach(course =>
+          courseController.retrieveCourseWithOption(course, res)
+        );
 
-  // Semester: season, year,
-  // course: C
-
-  // Scan for Semester
-  res.status(200).json('Scan Plain Text POST/ API');
-});
+        res.status(200).json(scanResult);
+      })
+      .catch(e => {
+        return res.status(500).json({ err: e });
+      });
+  }
+);
 
 export default textScanController;

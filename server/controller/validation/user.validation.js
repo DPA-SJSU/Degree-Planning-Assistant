@@ -57,9 +57,8 @@ export const checkIfCorrectGradDate = obj => {
       return false;
     }
     return true;
-  } else {
-    return false;
   }
+  return false;
 };
 
 export const validateRegisterUser = [
@@ -133,9 +132,8 @@ export const validateEditProfile = [
     .custom(value => {
       if (checkIfLettersOnly(value) === true) {
         return Promise.resolve();
-      } else {
-        return Promise.reject(AVATAR_TYPE_IS_INVALID);
       }
+      return Promise.reject(AVATAR_TYPE_IS_INVALID);
     }),
   body('firstName') // Optional
     .if(body('firstName').exists()) // IF the client included first_name, then validate it
@@ -149,9 +147,8 @@ export const validateEditProfile = [
     .custom(value => {
       if (checkIfLettersOnly(value) === true) {
         return Promise.resolve();
-      } else {
-        return Promise.reject(FIRST_NAME_IS_INVALID);
       }
+      return Promise.reject(FIRST_NAME_IS_INVALID);
     }),
   body('lastName') // Optional
     .if(body('lastName').exists()) // IF the client included lastName, then validate it
@@ -165,9 +162,8 @@ export const validateEditProfile = [
     .custom(value => {
       if (checkIfLettersOnly(value) === true) {
         return Promise.resolve();
-      } else {
-        return Promise.reject(LAST_NAME_IS_INVALID);
       }
+      return Promise.reject(LAST_NAME_IS_INVALID);
     }),
   body('bio') // Optional
     .if(body('bio').exists()) // IF the client included bio, then validate it
@@ -192,9 +188,8 @@ export const validateEditProfile = [
     .custom(value => {
       if (checkIfLettersOnly(value) === true) {
         return Promise.resolve();
-      } else {
-        return Promise.reject(MAJOR_IS_INVALID);
       }
+      return Promise.reject(MAJOR_IS_INVALID);
     }),
   body('minor') // Optional
     .if(body('minor').exists()) // IF the client included minor, then validate it
@@ -208,9 +203,8 @@ export const validateEditProfile = [
     .custom(value => {
       if (checkIfLettersOnly(value) === true) {
         return Promise.resolve();
-      } else {
-        return Promise.reject(MINOR_IS_INVALID);
       }
+      return Promise.reject(MINOR_IS_INVALID);
     }),
   body('catalogYear') // Optional
     .if(body('catalogYear').exists()) // IF the client included catalog_year, then validate it
