@@ -60,26 +60,7 @@ export const validateSemesters = semesterArr => {
   }
 };
 
-export const validateCreatePlan = [
-  param('userId')
-    .exists()
-    .withMessage(USER_ID_IS_REQUIRED)
-    .bail()
-    .escape()
-    .ltrim()
-    .rtrim()
-    .not()
-    .isEmpty()
-    .withMessage(USER_ID_IS_EMPTY)
-    .bail()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(USER_ID_IS_INVALID)
-    .bail()
-    .isHexadecimal()
-    .withMessage(USER_ID_IS_INVALID),
-];
-
-export const validateUpdatePlan = [
+export const validateUserId = [
   param('userId')
     .exists()
     .withMessage(USER_ID_IS_REQUIRED)
@@ -126,23 +107,4 @@ export const validateFetchPlan = [
     .rtrim()
     .isBoolean()
     .withMessage(COURSE_NAMES_ONLY_MUST_BE_BOOLEAN),
-];
-
-export const validateDeletePlan = [
-  body('plan_id')
-    .exists()
-    .withMessage(PLAN_ID_FIELD_IS_REQUIRED)
-    .bail()
-    .not()
-    .isEmpty()
-    .withMessage(PLAN_ID_IS_EMPTY)
-    .bail()
-    .isHexadecimal()
-    .withMessage(ID_IS_INVALID)
-    .bail()
-    .unescape()
-    .ltrim()
-    .rtrim()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(ID_IS_INVALID),
 ];

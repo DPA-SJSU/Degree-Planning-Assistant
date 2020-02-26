@@ -1,4 +1,4 @@
-import express, { json } from 'express';
+import express from 'express';
 import { Plan, Semester, User } from '../database/models';
 
 import logger from 'winston';
@@ -7,11 +7,9 @@ import passport from 'passport';
 
 import { validationResult } from 'express-validator';
 import {
-  validateCreatePlan,
+  validateUserId,
   validateFetchPlan,
-  validateUpdatePlan,
   validateSemesters,
-  validateDeletePlan,
 } from './validation/plan.validation';
 
 import {
@@ -21,52 +19,20 @@ import {
   USER_DOES_NOT_EXIST,
   USER_ALREADY_HAS_PLAN,
   FAILED_TO_CREATE_PLAN,
+  USER_DOES_NOT_HAVE_DEGREE_PLAN,
 } from './constant';
 
 const planController = express.Router();
 
-/*
-  --- SEMESTER SCHEMA ---
-  term: { type: String, required: true },
-  year: { type: String, required: true },
-  difficulty: { type: String },
-  courses: [{ type: Schema.Types.ObjectId, ref: 'Course', required: true }],
-
-  --- COURSE SCHEMA ---
-  school: { type: String, required: true, uppercase: true },
-  code: { type: String, required: true, uppercase: true },
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  prerequisites: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Course',
-      required: true,
-      uppercase: true,
-    },
-  ],
-  corequisites: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Course',
-      required: true,
-      uppercase: true,
-    },
-  ],
-  difficulty: { type: Number },
-  impaction: { type: Number },
-  termsOffered: { type: String, required: true },
-*/
-
 /**
  * @route   POST /plan/:userId
- * @desc    Creates a new degree plan
+ * @desc    Creates a new degree plan for the given user id
  * @access  Private
  */
 planController.post(
   '/:userId',
   passport.authenticate('jwt', { session: false }),
-  validateCreatePlan,
+  validateUserId,
   async (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty() === false) {
@@ -130,13 +96,13 @@ planController.post(
 
 /**
  * @route   PUT /plan/:userId
- * @desc    Update degree plans by the user's ID
+ * @desc    Update degree plans by the user's id
  * @access  Private
  */
 planController.put(
   '/:userId',
   passport.authenticate('jwt', { session: false }),
-  validateUpdatePlan,
+  validateUserId,
   async (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty() === false) {
@@ -195,8 +161,8 @@ planController.put(
 );
 
 /**
- * @route   GET /plan
- * @desc    Fetches degree plans
+ * @route   GET /plan/:userId
+ * @desc    Fetches degree plans by by the user's id
  * @access  Private
  */
 planController.get(
@@ -231,30 +197,50 @@ planController.get(
 );
 
 /**
- * @route   DELETE /plan
- * @desc    Delete degree plans by user_id or plan_id
+ * @route   DELETE /plan/:userId
+ * @desc    Delete degree plans by the user's id
  * @access  Private
  */
 planController.delete(
-  '/',
+  '/:userId',
   passport.authenticate('jwt', { session: false }),
-  validateDeletePlan,
+  validateUserId,
   async (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty() === false) {
-      return res.status(400).json();
+      return res.status(400).json(errors);
     }
 
     try {
-      const deleteResult = await Plan.deleteOne({ _id: req.body.plan_id });
-      // TODO: Check if a document is deleted or not then return res accordingly
+      const { userId } = req.params;
+      let user = await User.findById(userId, 'degree_plan_id');
+
+      if (!user) {
+        return res.status(404).json({ error: USER_DOES_NOT_EXIST });
+      } else if (!user.degree_plan_id) {
+        return res.status(404).json({ error: USER_DOES_NOT_HAVE_DEGREE_PLAN });
+      }
+
+      const deletedPlan = await Plan.deleteOne({ _id: user.degree_plan_id });
+      if (deletedPlan.n < 1) {
+        return res.status(404).json({ error: USER_DOES_NOT_HAVE_DEGREE_PLAN });
+      }
+
+      user = await User.updateOne(
+        { _id: user._id },
+        { degree_plan_id: undefined }
+      );
+
+      if (user.n < 1) {
+        return res.status(404).json({ error: USER_DOES_NOT_HAVE_DEGREE_PLAN });
+      }
 
       return res.status(200).json();
     } catch (databaseErr) {
+      console.log(databaseErr);
+      logger.info(databaseErr);
       return res.status(500).json({ error: SERVER_ERROR });
     }
-
-    return res.status(200).json();
   }
 );
 
