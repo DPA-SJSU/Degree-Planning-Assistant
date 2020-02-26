@@ -5,7 +5,6 @@
 import express from 'express';
 import multer from 'multer';
 import passport from 'passport';
-// import { Course, Semester } from '../database/models';
 
 import CloudOcr from '../Scanning/cloudOCR';
 
@@ -13,8 +12,6 @@ import semesterController from './semester.controller';
 import courseController from './course.controller';
 import programController from './program.controller';
 import planController from './plan.controller';
-
-import CloudOcr from '../store/Scanning/cloudOCR';
 
 import { User, Course, Semester, Plan } from '../database/models';
 

@@ -140,7 +140,7 @@ userController.post('/login', validateLoginUser, (req, res) => {
             );
         });
     } catch (e) {
-      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   });
 });
