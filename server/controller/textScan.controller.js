@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import express from 'express';
 // import { Course, Semester } from '../database/models';
 
@@ -5,27 +6,25 @@ import CloudOcr from '../Scanning/cloudOCR';
 
 const textScanController = express.Router();
 
-/**
- * SPRING SEMESTER  2018
-UGD - Undergraduate Degree
-MAJOR: BS Software Engineering
-                                    UA     UG     UE    GR   GP   GPA
-ENGR  10     Intro to Engr          3.0    3.0    3.0   A   12.0
-MATH  42     Discrete Math          3.0    3.0    3.0   A   12.0
-MATH  161A   Appl Prob & Stats I    3.0    3.0    3.0   B+   9.9
-SE    131    Software Engr I        3.0    3.0    3.0   A-  11.1
- */
+function getCourseInfo(listOfWordText) {
+  const school = 'sjsu';
+  const code = `${listOfWordText[0]} ${listOfWordText[1]}`;
+  const creditIndex = listOfWordText.length - 5;
+  const title = listOfWordText.slice(2, creditIndex).join(' ');
+  const credit = listOfWordText[creditIndex];
+  return { school, code, title, credit };
+}
 
 /**
  * POST/
  * Scan text and input into Course & Semester Schema
  */
 textScanController.post('/ocr', (req, res) => {
-  // const fileName = './pdf-testing.pdf';
-  const fileName = './pdf-transcript-testing.pdf';
+  const fileName = './Scanning/test/test1.pdf';
   CloudOcr.scan(fileName)
     .then(scanResult => {
-      return res.status(200).json({ Result: scanResult });
+      console.log(scanResult);
+      res.status(200).json(scanResult);
     })
     .catch(e => {
       return res.status(500).json({ err: e });
