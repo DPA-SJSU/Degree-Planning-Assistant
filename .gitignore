@@ -4,5 +4,8 @@ package-lock.json
 server/cloud-ocr-key.json
 server/pdf-transcript-testing.pdf
 server/pdf-testing.pdf
+server/uploads/
+server/store/Scanning/test
 
 .DS_STORE
+

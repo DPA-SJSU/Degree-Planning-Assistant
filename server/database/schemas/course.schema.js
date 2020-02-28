@@ -3,8 +3,9 @@ import { Schema } from 'mongoose';
 const courseSchema = new Schema({
   school: { type: String, required: true, uppercase: true },
   code: { type: String, required: true, uppercase: true },
-  title: { type: String, required: true, default: null },
-  description: { type: String, required: true, default: null },
+  title: { type: String, required: true, default: '' },
+  credit: { type: String },
+  description: { type: String },
   prerequisites: [
     {
       type: Schema.Types.ObjectId,
@@ -25,7 +26,7 @@ const courseSchema = new Schema({
   ],
   difficulty: { type: Number, default: 0 },
   impaction: { type: Number, default: 0 },
-  termsOffered: { type: String, required: true, default: null },
+  termsOffered: { type: String },
 });
 
 export default courseSchema;

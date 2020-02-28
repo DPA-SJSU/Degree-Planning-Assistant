@@ -62,6 +62,27 @@ semesterController.post(
   }
 );
 
+const getSemesterWithOption = (res, option = {}) => {
+  try {
+    return Semester.find(option)
+      .populate('courses')
+      .then(fetchedSemester => {
+        return res.status(200).json(fetchedSemester);
+      })
+      .catch(e => {
+        return generateServerErrorCode(
+          res,
+          403,
+          e,
+          SEMESTER_NOT_FOUND,
+          'semesterId'
+        );
+      });
+  } catch (e) {
+    return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+  }
+};
+
 /**
  * GET/
  * Get a semester
@@ -72,29 +93,15 @@ semesterController.get(
   validateSemesterId,
   (req, res) => {
     validationHandler(req, res, () => {
-      try {
-        const { _id } = req.query;
-
-        Semester.findOne({ _id })
-          .populate('courses')
-          .then(fetchedSemester => {
-            res.status(200).json(fetchedSemester);
-          })
-          .catch(e => {
-            generateServerErrorCode(
-              res,
-              403,
-              e,
-              SEMESTER_NOT_FOUND,
-              'semesterId'
-            );
-          });
-      } catch (e) {
-        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-      }
+      const { _id } = req.query;
+      getSemesterWithOption(res, { _id });
     });
   }
 );
+
+semesterController.get('/all', (req, res) => {
+  validationHandler(req, res, () => getSemesterWithOption(res));
+});
 
 /**
  * PUT/
@@ -175,5 +182,12 @@ semesterController.delete(
     });
   }
 );
+
+semesterController.delete('/all', (req, res) => {
+  return Semester.deleteMany({}, err => {
+    if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+    res.status(200).json('success delete all');
+  });
+});
 
 export default semesterController;

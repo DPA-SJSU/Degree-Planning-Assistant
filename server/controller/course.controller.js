@@ -188,7 +188,7 @@ courseController.delete(
  */
 courseController.delete(
   '/all',
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     Course.deleteMany({}, (err, result) => {
       if (err) {
@@ -200,42 +200,32 @@ courseController.delete(
 );
 
 /**
- * Get the ObjectId of a course based on school (schl) and course code
- * Or initialize a new course and retrieve the ObjectId
- * @param {String} school
- * @param {String} code
- * @returns {ObjectId} ObjectId
- */
-courseController.getObjectId = async (school, code) => {
-  try {
-    const course = await Course.findOne({
-      school,
-      code,
-    });
-
-    if (!course) {
-      const createdCourse = await courseController.createCourse(school, code);
-      return new ObjectId(createdCourse._id);
-    }
-    return new ObjectId(course._id);
-  } catch (e) {
-    console.log('getObjectId() Error: ', e);
-    return e;
-  }
-};
-
-/**
  * Loop though an array of Courses to get the ObjectId of each
  * @param {String} school
  * @param {[String]} codes
  * @returns {[ObjectId]} [ObjectId]
  */
-courseController.getAllCourseId = (school, codes) => {
+courseController.getAllCourseId = async (school, codes) => {
   try {
     const coursesWithIds = [];
-    codes.forEach(async code => {
-      const objId = await courseController.getObjectId(school, code);
-      coursesWithIds.push(objId);
+    await codes.forEach(code => {
+      Course.findOne(
+        {
+          school,
+          code,
+        },
+        async (err, foundCourse) => {
+          let id;
+          if (err) {
+            const createdCourse = await courseController.createCourse({
+              school,
+              code,
+            });
+            id = new ObjectId(createdCourse._id);
+          } else id = new ObjectId(foundCourse._id);
+          coursesWithIds.push(id);
+        }
+      );
     });
     return coursesWithIds;
   } catch (e) {
@@ -252,10 +242,12 @@ courseController.getAllCourseId = (school, codes) => {
 courseController.createCourse = async (data, option = 'EMPTY') => {
   try {
     let course = data;
+    // console.log(course);
     if (option === 'EMPTY') {
       course = {
         school: data.school,
         code: data.code,
+        title: data.title,
       };
     } else {
       course.prerequisites = await courseController.getAllCourseId(

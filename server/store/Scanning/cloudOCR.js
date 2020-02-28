@@ -2,8 +2,6 @@ import fs from 'fs';
 import { promisify } from 'util';
 import gCloudVision from '@google-cloud/vision';
 
-import { User, Course, Semester } from '../database/models';
-
 const { ImageAnnotatorClient } = gCloudVision.v1p4beta1;
 const readFileAsync = promisify(fs.readFile);
 
@@ -11,7 +9,25 @@ const client = new ImageAnnotatorClient();
 
 const CloudOCR = {};
 
-CloudOCR.TranscriptMapping = new Map();
+const TranscriptMapping = new Map();
+TranscriptMapping.takenCourseList = [];
+TranscriptMapping.semesterList = [];
+TranscriptMapping.otherInfo = [];
+
+const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
+const creditCondition = ['1.0', '2.0', '3.0'];
+const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
+
+let otherInfo;
+let currentSemester;
+let startingTermFound = false;
+let count = 0;
+
+const addCourseToSemester = course => {
+  TranscriptMapping.takenCourseList.push(course);
+  if (TranscriptMapping.semesterList[currentSemester])
+    TranscriptMapping.semesterList[currentSemester].courses.push(course);
+};
 
 /**
  * Used in transcriptHandler() to get course info
@@ -27,70 +43,49 @@ const getCourseInfo = listOfWordText => {
 };
 
 /**
- *
- * @param {*} paragraph
+ * Checking case and Map the info to the right type
+ * @param {Array} listOfWordText  A list of words in a sentence
+ * @param {String} sentence       A whole sentence which is scanned by OCR
  */
-const mergeAllLettersToWord = paragraph => {
+const caseChecking = async paragraph => {
   const listOfWordText = [];
   paragraph.words.forEach(word => {
     const wordText = word.symbols.map(symbol => symbol.text).join('');
     listOfWordText.push(wordText);
   });
-  return listOfWordText;
-};
-
-/**
- * Checking case and Map the info to the right type
- * @param {Array} listOfWordText  A list of words in a sentence
- * @param {String} sentence       A whole sentence which is scanned by OCR
- */
-const caseChecking = (listOfWordText, sentence) => {
-  const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
-  const creditCondition = ['1.0', '2.0', '3.0'];
-  const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
-
-  let otherInfo;
-  let currentSemester;
-  let startingTermFound = false;
-  let count = 0;
+  const sentence = listOfWordText.join(' ');
 
   switch (true) {
-    case listOfWordText.length === 2 &&
-      !Number.isNaN(listOfWordText[1]) &&
-      listOfWordText[0].length <= 4:
-      CloudOCR.TranscriptMapping.takenCourseList.push(
-        getCourseInfo(listOfWordText)
-      );
-      break;
-
     case listOfWordText.includes('AP'):
-      CloudOCR.TranscriptMapping.takenCourseList.push(sentence);
+      TranscriptMapping.otherInfo.push(sentence);
       break;
     case listOfWordText.includes('SEMESTER') && listOfWordText.length === 3: {
       const semester = {
         term: listOfWordText[0],
         year: parseInt(listOfWordText[2], 10),
-        courseTaken: [],
+        courses: [],
       };
 
       if (!startingTermFound) {
-        CloudOCR.TranscriptMapping.startingSem = semester;
-        currentSemester = semester;
+        TranscriptMapping.startingSem = semester;
         startingTermFound = true;
       } else {
-        semester.year = currentSemester.year + count;
+        semester.year = TranscriptMapping.startingSem.year + count;
         if (semesterSeason.indexOf(listOfWordText[0]) === 2) count += 1;
       }
-      CloudOCR.TranscriptMapping.semesterList.push(semester);
+      TranscriptMapping.semesterList.push(semester);
+      currentSemester = TranscriptMapping.semesterList.length - 1;
       break;
     }
     case listOfWordText.includes('MAJOR'):
-      CloudOCR.TranscriptMapping.major = sentence;
+      TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
       break;
-    case creditCondition.some(el => listOfWordText.includes(el)):
-      CloudOCR.TranscriptMapping.takenCourseList.push(
-        getCourseInfo(listOfWordText)
-      );
+    case (creditCondition.some(credit => listOfWordText.includes(credit)) &&
+      listOfWordText[0].length <= 4) ||
+      (listOfWordText.length === 2 &&
+        listOfWordText[0].length <= 4 &&
+        !isNaN(listOfWordText[1])):
+      await addCourseToSemester(getCourseInfo(listOfWordText));
       break;
     case wstCondition.every(el => listOfWordText.includes(el)):
       if (listOfWordText[listOfWordText.indexOf(':') + 1] === 'ELIGIBLE') {
@@ -98,10 +93,9 @@ const caseChecking = (listOfWordText, sentence) => {
       } else {
         otherInfo = `[WST]: NOT Qualify for taking upper courses such as 100W Course`;
       }
-      CloudOCR.TranscriptMapping.otherInfo.push(otherInfo);
+      TranscriptMapping.otherInfo.push(otherInfo);
       break;
     default:
-      // console.log(`[Other]: ${sentence}`);
       break;
   }
 };
@@ -111,26 +105,17 @@ const caseChecking = (listOfWordText, sentence) => {
  * @param {Responses received from GCLOUD OCR} responses
  */
 const transcriptHandler = responses => {
-  CloudOCR.TranscriptMapping = new Map({
-    takenCourseList: [],
-    semesterList: [],
-    otherInfo: [],
-  });
-
   responses.forEach(response => {
     response.fullTextAnnotation.pages.forEach(page => {
       page.blocks.forEach(block => {
         block.paragraphs.forEach(paragraph => {
-          const listOfWordText = mergeAllLettersToWord(paragraph);
-          const sentence = listOfWordText.join(' ');
-
-          caseChecking(listOfWordText, sentence);
+          caseChecking(paragraph);
         });
       });
     });
   });
 
-  return CloudOCR.TranscriptMapping;
+  return TranscriptMapping;
 };
 
 /**
@@ -158,8 +143,6 @@ CloudOCR.scan = async fileName => {
   try {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
-    console.log(responses);
-
     const result = await transcriptHandler(responses);
     return result;
   } catch (e) {
