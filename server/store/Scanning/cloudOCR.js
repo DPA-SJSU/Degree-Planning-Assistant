@@ -9,6 +9,7 @@ const client = new ImageAnnotatorClient();
 
 const CloudOCR = {};
 
+let DocumentMapping = new Map();
 const TranscriptMapping = new Map();
 TranscriptMapping.takenCourseList = [];
 TranscriptMapping.semesterList = [];
@@ -42,19 +43,20 @@ const getCourseInfo = listOfWordText => {
   return { school, code, title, credit };
 };
 
+const programParser = async (listOfWordText, sentence) => {
+  console.log(listOfWordText);
+  switch (true) {
+    default:
+      break;
+  }
+};
+
 /**
  * Checking case and Map the info to the right type
  * @param {Array} listOfWordText  A list of words in a sentence
  * @param {String} sentence       A whole sentence which is scanned by OCR
  */
-const caseChecking = async paragraph => {
-  const listOfWordText = [];
-  paragraph.words.forEach(word => {
-    const wordText = word.symbols.map(symbol => symbol.text).join('');
-    listOfWordText.push(wordText);
-  });
-  const sentence = listOfWordText.join(' ');
-
+const transcriptParser = async (listOfWordText, sentence) => {
   switch (true) {
     case listOfWordText.includes('AP'):
       TranscriptMapping.otherInfo.push(sentence);
@@ -104,24 +106,39 @@ const caseChecking = async paragraph => {
  * Parse Transcript File to get course and semester and other info.
  * @param {Responses received from GCLOUD OCR} responses
  */
-const transcriptHandler = responses => {
+const documentHandler = (responses, option) => {
   responses.forEach(response => {
     response.fullTextAnnotation.pages.forEach(page => {
       page.blocks.forEach(block => {
         block.paragraphs.forEach(paragraph => {
-          caseChecking(paragraph);
+          const listOfWordText = [];
+          paragraph.words.forEach(word => {
+            const wordText = word.symbols.map(symbol => symbol.text).join('');
+            listOfWordText.push(wordText);
+          });
+
+          const sentence = listOfWordText.join(' ');
+          switch (option) {
+            case 'transcript':
+              transcriptParser(listOfWordText, sentence);
+              break;
+            case 'program':
+              programParser(listOfWordText, sentence);
+              break;
+            default:
+              break;
+          }
         });
       });
     });
   });
-
   return TranscriptMapping;
 };
 
 /**
  * Main function that will be called by textScannerController
  */
-CloudOCR.scan = async fileName => {
+CloudOCR.scan = async (fileName, option) => {
   const inputConfig = {
     mimeType: 'application/pdf',
     content: await readFileAsync(fileName),
@@ -143,7 +160,7 @@ CloudOCR.scan = async fileName => {
   try {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
-    const result = await transcriptHandler(responses);
+    const result = await documentHandler(responses, option);
     return result;
   } catch (e) {
     return e;

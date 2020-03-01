@@ -66,27 +66,20 @@ programController.post(
         otherRequirements,
       };
 
-      // Check if there is already an existing degree program with the given school, major, catalogYear
-      const existingDegreeProgram = await Program.findOne({
-        school,
-        major,
-        catalogYear,
-      });
+      Program.findOne(
+        { school, major, catalogYear },
+        async (err, existingDegreeProgram) => {
+          if (existingDegreeProgram)
+            res.status(403).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
 
-      if (existingDegreeProgram) {
-        // The degree program already exists
-        return res.status(409).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
-      }
+          const newDegreeProgram = new Program(data);
+          await newDegreeProgram.save();
 
-      // Create new degree program and save it in MongoDB
-      const newDegreeProgram = new Program(data);
-      await newDegreeProgram.save();
-
-      // return code 200 as resource is successfully saved
-      return res.status(200).json();
+          res.status(200).json(newDegreeProgram);
+        }
+      );
     } catch (e) {
-      // return code 500 in the case of database error
-      return res.status(500).json({ error: SERVER_ERROR });
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );

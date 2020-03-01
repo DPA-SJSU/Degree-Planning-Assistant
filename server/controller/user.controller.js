@@ -56,7 +56,7 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
     try {
       const { email, password } = req.body;
 
-      User.findOne({ email }).then(async (err, foundUser) => {
+      User.findOne({ email }).then(async foundUser => {
         if (!foundUser) {
           await userController.createUser(email, password);
           // Sign token
@@ -88,11 +88,11 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
  * POST/
  * Login a user
  */
-userController.post('/login', validateLoginUser, async (req, res) => {
+userController.post('/login', validateLoginUser, (req, res) => {
   validationHandler(req, res, async () => {
     try {
       const { email, password } = req.body;
-      await User.findOne({ email }).then((err, user) => {
+      User.findOne({ email }).then(user => {
         if (user && user.email) {
           const isPasswordMatched = user.comparePassword(password);
           if (isPasswordMatched) {
@@ -102,26 +102,26 @@ userController.post('/login', validateLoginUser, async (req, res) => {
             });
             const userToReturn = { ...user.toJSON(), ...{ token } };
             delete userToReturn.hashedPassword;
-            return res.status(200).json(userToReturn);
-          }
-          return generateServerErrorCode(
+            res.status(200).json(userToReturn);
+          } else
+            generateServerErrorCode(
+              res,
+              403,
+              'login password error',
+              WRONG_PASSWORD,
+              'password'
+            );
+        } else
+          generateServerErrorCode(
             res,
-            403,
-            'login password error',
-            WRONG_PASSWORD,
-            'password'
+            404,
+            'login email error',
+            USER_DOES_NOT_EXIST,
+            'email'
           );
-        }
-        return generateServerErrorCode(
-          res,
-          404,
-          'login email error',
-          USER_DOES_NOT_EXIST,
-          'email'
-        );
       });
     } catch (e) {
-      return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   });
 });

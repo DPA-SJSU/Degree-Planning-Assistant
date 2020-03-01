@@ -19,7 +19,12 @@ import { SOME_THING_WENT_WRONG } from './constant';
 const upload = multer({ dest: 'uploads/' });
 const textScanController = express.Router();
 
-const addCourseId = async courses => {
+/**
+ * Find course ID of all courses and return a new course List that has course id
+ * @param {[JSON Object]} courses
+ * return {} newCourseList
+ */
+const addCourseIdToNewList = async courses => {
   const newCourseList = [];
   for (const course of courses) {
     const school = course.school.toUpperCase();
@@ -45,18 +50,19 @@ const addCourseId = async courses => {
  */
 textScanController.post(
   '/ocr',
-  // passport.authenticate('jwt', { session: false }),
   upload.single('pdf'),
+  // passport.authenticate('jwt', { session: false }),
   (req, res) => {
     const { user } = req;
     const fileName = req.file.path;
     CloudOcr.scan(fileName)
       .then(async scanResult => {
+        console.log(scanResult);
         // 1. Create a semester, and add to the database
-        for (const semester of scanResult.semesterList) {
-          semester.courses = await addCourseId(semester.courses);
-          await semesterController.createSemester(semester);
-        }
+        // for (const semester of scanResult.semesterList) {
+        //   semester.courses = await addCourseIdToNewList(semester.courses);
+        //   await semesterController.createSemester(semester);
+        // }
 
         // Create a Degree Plan, and add Semester ID + userID
 
