@@ -108,7 +108,8 @@ semesterController.post(
   (req, res) => {
     validationHandler(req, res, async () => {
       try {
-        const semester = await Semester.findOne(req.body);
+        const { term, year, courses } = req.body;
+        const semester = await Semester.findOne({ term, year, courses });
 
         if (!semester) {
           const newSemester = await semesterController.createOneSemester(
@@ -193,7 +194,7 @@ semesterController.put(
           );
         }
       } catch (e) {
-        return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       }
     });
   }

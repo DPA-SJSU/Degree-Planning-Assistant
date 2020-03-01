@@ -48,6 +48,14 @@ const getCourseInfo = listOfWordText => {
   return { school, code, title, credit };
 };
 
+const programParser = async (listOfWordText, sentence) => {
+  console.log(listOfWordText);
+  switch (true) {
+    default:
+      break;
+  }
+};
+
 /**
  * Checking case and Map the info to the right type
  * @param {Array} listOfWordText  A list of words in a sentence
@@ -200,7 +208,6 @@ CloudOCR.scan = async (fileName, option) => {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
     const result = await documentHandler(responses, option);
-
     return result;
   } catch (e) {
     return e;

@@ -131,6 +131,90 @@ courseController.getPopulatedCourse = (options, res) => {
  */
 
 /**
+ * Loop though an array of Courses to get the ObjectId of each
+ * @param {String} school
+ * @param {[String]} codes
+ * @returns {[ObjectId]} [ObjectId]
+ */
+courseController.getAllCourseId = async (school, codes) => {
+  try {
+    const coursesWithIds = [];
+    await codes.forEach(code => {
+      Course.findOne({ school, code }, async (err, foundCourse) => {
+        let id;
+        if (err) {
+          const createdCourse = await courseController.createCourse({
+            school,
+            code,
+          });
+          id = new ObjectId(createdCourse._id);
+        } else id = new ObjectId(foundCourse._id);
+        coursesWithIds.push(id);
+      });
+    });
+    return coursesWithIds;
+  } catch (e) {
+    return e;
+  }
+};
+
+/**
+ * Creates a new Course with correct reference to ObjectId of prerequisites and corequisites
+ * Option default = 'EMPTY' means to create a course with only required data: {school, code, title}
+ * Create a course with data that has specific prereq and coreq with option = 'NONE_EMPTY'. Ex: createCourse({school, code, title}, 'NONE_EMPTY')
+ * @param {courseInfo} data
+ * @returns {Course} Course
+ */
+courseController.createCourse = async (data, option = 'EMPTY') => {
+  try {
+    let course = data;
+    if (option === 'EMPTY') {
+      course = {
+        school: data.school,
+        code: data.code,
+        title: data.title,
+      };
+    } else {
+      course.prerequisites = await courseController.getAllCourseId(
+        data.school,
+        data.prerequisites
+      );
+      course.corequisites = await courseController.getAllCourseId(
+        data.school,
+        data.corequisites
+      );
+    }
+
+    return new Course(course).save();
+  } catch (e) {
+    return e;
+  }
+};
+
+/**
+ * @param {Object} options
+ */
+courseController.getPopulatedCourse = (options, res) => {
+  try {
+    Course.find(options)
+      .populate('prerequisites corequisites')
+      .then(foundCourse => {
+        if (foundCourse) res.status(200).json(foundCourse);
+        else
+          generateServerErrorCode(
+            res,
+            403,
+            'school courses retrieval error',
+            SCHOOL_DOES_NOT_EXIST,
+            'school, code'
+          );
+      });
+  } catch (e) {
+    generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+  }
+};
+
+/**
  * POST/
  * Create a new course, requires authentication of user
  */
@@ -300,99 +384,5 @@ courseController.delete(
     });
   }
 );
-
-/**
- * Get the ObjectId of a course based on school (schl) and course code
- * Or initialize a new course and retrieve the ObjectId
- * @param {String} school
- * @param {String} code
- * @returns {ObjectId} ObjectId
- */
-courseController.getObjectId = async (school, code) => {
-  try {
-    const course = await Course.findOne({
-      school,
-      code,
-    });
-
-    if (!course) {
-      const createdCourse = await courseController.createCourse(school, code);
-      return new ObjectId(createdCourse._id);
-    }
-    return new ObjectId(course._id);
-  } catch (e) {
-    console.log('getObjectId() Error: ', e);
-    return e;
-  }
-};
-
-/**
- * Loop though an array of Courses to get the ObjectId of each
- * @param {String} school
- * @param {[String]} codes
- * @returns {[ObjectId]} [ObjectId]
- */
-courseController.getAllCourseId = (school, codes) => {
-  try {
-    const coursesWithIds = [];
-    codes.forEach(async code => {
-      const objId = await courseController.getObjectId(school, code);
-      coursesWithIds.push(objId);
-    });
-    return coursesWithIds;
-  } catch (e) {
-    console.log('getAllCourseId() Error: ', e);
-    return e;
-  }
-};
-
-/**
- * Creates a new Course with correct reference to ObjectId of prerequisites and corequisites
- * @param {} data
- * @returns {Course} Course
- */
-courseController.createCourse = async (data, option = 'EMPTY') => {
-  try {
-    let course = data;
-    if (option === 'EMPTY') {
-      course = {
-        school: data.school,
-        code: data.code,
-      };
-    } else {
-      course.prerequisites = await courseController.getAllCourseId(
-        data.school,
-        data.prerequisites
-      );
-      course.corequisites = await courseController.getAllCourseId(
-        data.school,
-        data.corequisites
-      );
-    }
-
-    return new Course(course).save();
-  } catch (e) {
-    return e;
-  }
-};
-
-courseController.retrieveCourseWithOption = (options, res) => {
-  try {
-    return Course.find(options)
-      .populate('prerequisites corequisites')
-      .then(foundCourse => {
-        if (foundCourse) return res.status(200).json(foundCourse);
-        return generateServerErrorCode(
-          res,
-          403,
-          'school courses retrieval error',
-          SCHOOL_DOES_NOT_EXIST,
-          'school, code'
-        );
-      });
-  } catch (e) {
-    return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-  }
-};
 
 export default courseController;

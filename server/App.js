@@ -42,11 +42,6 @@ app.use('/plan', planController);
 app.use('/scan', textScanController);
 >>>>>>> [improvement]: upload a file to scan
 
-/**
- * Get port from environment and store in Express.
- */
-const { port, mongoDBUri, mongoHostName } = config.env;
-
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);
   mongoose
