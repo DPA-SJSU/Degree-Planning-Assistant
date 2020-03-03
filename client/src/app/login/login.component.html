@@ -1,5 +1,5 @@
-<div class="login-page">
-  <mat-card>
+<div class="flex-row center-everything">
+  <mat-card style="text-align: center">
     <mat-card-title>
       Degree Planning Assistant
     </mat-card-title>
@@ -9,20 +9,37 @@
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="login()" class="form-list">
         <mat-form-field>
-          <input formControlName="email" matInput placeholder="Email" autocomplete="on" />
+          <input
+            formControlName="email"
+            matInput
+            placeholder="Email"
+            autocomplete="on"
+          />
         </mat-form-field>
         <mat-form-field>
-          <input [type]="showPassword.checked ? 'text' : 'password'" formControlName="password" matInput
-            placeholder="Password" autocomplete="on" />
+          <input
+            [type]="showPassword.checked ? 'text' : 'password'"
+            formControlName="password"
+            matInput
+            placeholder="Password"
+            autocomplete="on"
+          />
         </mat-form-field>
-        <mat-checkbox #showPassword style="display: inherit; margin-bottom: 20px;">Show password</mat-checkbox>
+        <mat-checkbox
+          #showPassword
+          style="display: inherit; margin-bottom: 20px;"
+          >Show password</mat-checkbox
+        >
       </form>
-      <button type="submit" (click)="onSubmit()" style="text-align: center">Login</button>
+      <button type="submit" (click)="onSubmit()" style="text-align: center">
+        Login
+      </button>
     </mat-card-content>
   </mat-card>
-
-  <div>
-    <p>Or sign up to create an account!</p>
-    <button class="button-center" (click)="routeToRegister()">Sign Up</button>
-  </div>
+</div>
+<div class="flex-row center-everything">
+  <p>Or sign up to create an account!</p>
+</div>
+<div class="flex-row center-everything">
+  <button class="button-center" (click)="routeToRegister()">Sign Up</button>
 </div>

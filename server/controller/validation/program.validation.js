@@ -26,7 +26,7 @@ const checkIfLettersOnly = str => {
 
 // VALIDATION FOR CREATE DEGREE PROGRAM
 export const validateCreateDegreeProgram = [
-  body(['school', 'major', 'catalog_year'])
+  body(['school', 'major', 'catalogYear'])
     .unescape()
     .ltrim()
     .rtrim(),
@@ -58,7 +58,7 @@ export const validateCreateDegreeProgram = [
       }
       return Promise.reject(MAJOR_FIELD_CONTAINS_FORBIDDEN_CHARACTERS);
     }),
-  body('catalog_year')
+  body('catalogYear')
     .exists()
     .withMessage(CATALOGYEAR_IS_REQUIRED)
     .bail()
@@ -138,8 +138,8 @@ export const validateFetchDegreeProgram = [
     .unescape()
     .ltrim()
     .rtrim(),
-  query('catalog_year')
-    .if(query('catalog_year').exists())
+  query('catalogYear')
+    .if(query('catalogYear').exists())
     .not()
     .isEmpty()
     .withMessage(CATALOGYEAR_IS_EMPTY)
@@ -169,11 +169,11 @@ export const validateUpdateDegreeProgramByParam = [
   body([
     'school',
     'major',
-    'catalog_year',
+    'catalogYear',
     'id',
-    'new_school',
-    'new_major',
-    'new_catalog_year',
+    'newSchool',
+    'newMajor',
+    'newCatalogYear',
   ])
     .unescape()
     .ltrim()
@@ -216,7 +216,7 @@ export const validateUpdateDegreeProgramByParam = [
       }
       return Promise.reject(MAJOR_FIELD_CONTAINS_FORBIDDEN_CHARACTERS);
     }),
-  body('catalog_year')
+  body('catalogYear')
     .if(
       body('id')
         .not()
@@ -232,8 +232,8 @@ export const validateUpdateDegreeProgramByParam = [
     .isNumeric()
     .isInt()
     .withMessage(CATALOGYEAR_CONTAINS_FORBIDDEN_CHARACTERS),
-  body('new_school')
-    .if(body('new_school').exists())
+  body('newSchool')
+    .if(body('newSchool').exists())
     .not()
     .isEmpty()
     .withMessage(SCHOOL_FIELD_IS_EMPTY)
@@ -244,8 +244,8 @@ export const validateUpdateDegreeProgramByParam = [
       }
       return Promise.reject(SCHOOL_FIELD_CONTAINS_FORBIDDEN_CHARACTERS);
     }),
-  body('new_major')
-    .if(body('new_major').exists())
+  body('newMajor')
+    .if(body('newMajor').exists())
     .not()
     .isEmpty()
     .withMessage(MAJOR_FIELD_IS_EMPTY)
@@ -256,8 +256,8 @@ export const validateUpdateDegreeProgramByParam = [
       }
       return Promise.reject(MAJOR_FIELD_CONTAINS_FORBIDDEN_CHARACTERS);
     }),
-  body('new_catalog_year')
-    .if(body('new_catalog_year').exists())
+  body('newCatalogYear')
+    .if(body('newCatalogYear').exists())
     .not()
     .isEmpty()
     .withMessage(CATALOGYEAR_IS_EMPTY)
@@ -269,7 +269,7 @@ export const validateUpdateDegreeProgramByParam = [
 
 // VALIDATING UPDATING DEGREE PROGRAMS BY ID
 export const validateUpdateDegreeProgramById = [
-  body(['id', 'school', 'major', 'catalog_year'])
+  body(['id', 'school', 'major', 'catalogYear'])
     .unescape()
     .ltrim()
     .rtrim(),
@@ -308,8 +308,8 @@ export const validateUpdateDegreeProgramById = [
       }
       return Promise.reject(MAJOR_FIELD_CONTAINS_FORBIDDEN_CHARACTERS);
     }),
-  body('catalog_year')
-    .if(body('catalog_year').exists())
+  body('catalogYear')
+    .if(body('catalogYear').exists())
     .not()
     .isEmpty()
     .withMessage(CATALOGYEAR_IS_EMPTY)
@@ -321,7 +321,7 @@ export const validateUpdateDegreeProgramById = [
 
 // VALIDATING DELETING DEGREE PROGRAMS
 export const validateDeleteDegreeProgram = [
-  body(['id', 'school', 'major', 'catalog_year'])
+  body(['id', 'school', 'major', 'catalogYear'])
     .unescape()
     .ltrim()
     .rtrim(),
@@ -337,7 +337,7 @@ export const validateDeleteDegreeProgram = [
         .exists()
     )
     .if(
-      body('catalog_year')
+      body('catalogYear')
         .not()
         .exists()
     )
@@ -380,7 +380,7 @@ export const validateDeleteDegreeProgram = [
       }
       return Promise.reject(MAJOR_FIELD_CONTAINS_FORBIDDEN_CHARACTERS);
     }),
-  body('catalog_year')
+  body('catalogYear')
     .if(
       body('id')
         .not()

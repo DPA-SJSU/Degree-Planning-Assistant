@@ -54,7 +54,7 @@ semesterController.post(
             403,
             'create semester error',
             SEMESTER_EXISTS_ALREADY,
-            'semester_id'
+            'semesterId'
           );
         }
       } catch (e) {
@@ -82,11 +82,11 @@ semesterController.get(
     } else {
       try {
         // Get semester ObjectId from query
-        const semester_id = req.query.semester_id;
+        const semesterId = req.query.semesterId;
 
         // Get semester and populate the courses data
-        const fetchedSemester = await await Semester.findOne({
-          _id: semester_id,
+        const fetchedSemester = await Semester.findOne({
+          _id: semesterId,
         }).populate('courses');
 
         if (fetchedSemester) {
@@ -97,7 +97,7 @@ semesterController.get(
             403,
             'get semester error',
             SEMESTER_NOT_FOUND,
-            'semester_id'
+            'semesterId'
           );
         }
       } catch (e) {
@@ -125,7 +125,7 @@ semesterController.put(
     } else {
       try {
         // Get semester ObjectId from query
-        const semester_id = req.query.semester_id;
+        const semesterId = req.query.semesterId;
         const updateData = removeUndefinedObjectProps(req.body);
 
         // Check if there is data to update
@@ -134,7 +134,7 @@ semesterController.put(
         }
 
         const updatedSemester = await Semester.findByIdAndUpdate(
-          { _id: semester_id },
+          { _id: semesterId },
           updateData,
           { useFindAndModify: false }
         );
@@ -147,7 +147,7 @@ semesterController.put(
             403,
             'update semester error',
             SEMESTER_NOT_FOUND,
-            'semester_id'
+            'semesterId'
           );
         }
       } catch (e) {
@@ -176,9 +176,9 @@ semesterController.delete(
     } else {
       try {
         // Get semester ObjectId from query
-        const semester_id = req.query.semester_id;
+        const semesterId = req.query.semesterId;
         const deletedSemester = await Semester.findByIdAndDelete({
-          _id: semester_id,
+          _id: semesterId,
         });
 
         if (deletedSemester) {
@@ -191,7 +191,7 @@ semesterController.delete(
             403,
             'delete semester error',
             SEMESTER_NOT_FOUND,
-            'semester_id'
+            'semesterId'
           );
         }
       } catch (e) {

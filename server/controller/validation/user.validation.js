@@ -23,6 +23,8 @@ import {
   PASSWORD_LENGTH_MUST_BE_MORE_THAN_8,
   EMAIL_IS_EMPTY,
   EMAIL_IS_IN_WRONG_FORMAT,
+  ID_IS_INVALID,
+  BOOLEAN_VALUES_ONLY,
 } from '../constant';
 
 const checkIfLettersOnly = str => {
@@ -152,7 +154,7 @@ export const validateEditProfile = [
       }
     }),
   body('lastName') // Optional
-    .if(body('lastName').exists()) // IF the client included last_name, then validate it
+    .if(body('lastName').exists()) // IF the client included lastName, then validate it
     .not()
     .isEmpty()
     .withMessage(LAST_NAME_IS_EMPTY)
@@ -224,65 +226,116 @@ export const validateEditProfile = [
 ];
 
 export const validateFetchProfile = [
-  param('userId')
-    .exists()
-    .withMessage(USER_ID_IS_REQUIRED)
-    .bail()
-    .escape()
-    .ltrim()
-    .rtrim()
-    .not()
-    .isEmpty()
-    .withMessage(USER_ID_IS_EMPTY)
-    .bail()
-    .isHexadecimal()
-    .withMessage(USER_ID_IS_INVALID)
-    .bail()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(USER_ID_IS_INVALID),
   query('email') // Optional
     .if(query('email').exists()) // IF the client included email, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('avatarUrl') // Optional
-    .if(query('avatarUrl').exists()) // IF the client included avatar_url, then validate it
+    .if(query('avatarUrl').exists()) // IF the client included avatarUrl, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('avatarType') // Optional
-    .if(query('avatarType').exists()) // IF the client included avatar_type, then validate it
+    .if(query('avatarType').exists()) // IF the client included avatarType, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('firstName') // Optional
-    .if(query('firstName').exists()) // IF the client included first_name, then validate it
+    .if(query('firstName').exists()) // IF the client included firstName, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('lastName') // Optional
-    .if(query('lastName').exists()) // IF the client included last_name, then validate it
+    .if(query('lastName').exists()) // IF the client included lastName, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('bio') // Optional
     .if(query('bio').exists()) // IF the client included bio, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('major') // Optional
     .if(query('major').exists()) // IF the client included major, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('minor') // Optional
     .if(query('minor').exists()) // IF the client included minor, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
   query('catalogYear') // Optional
-    .if(query('catalogYear').exists()) // IF the client included catalog_year, then validate it
+    .if(query('catalogYear').exists()) // IF the client included catalogYear, then validate it
     .escape()
     .ltrim()
-    .rtrim(),
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
+  query('coursesTaken')
+    .if(query('coursesTaken').exists())
+    .escape()
+    .ltrim()
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
+  query('gradDate')
+    .if(query('gradDate').exists())
+    .escape()
+    .ltrim()
+    .rtrim()
+    .isBoolean()
+    .withMessage(BOOLEAN_VALUES_ONLY)
+    .bail()
+    .toBoolean(),
+];
+
+export const validateFetchCoursesTaken = [
+  query('userId')
+    .exists()
+    .withMessage(USER_ID_IS_EMPTY)
+    .not()
+    .isEmpty()
+    .isHexadecimal()
+    .withMessage(ID_IS_INVALID)
+    .bail()
+    .isLength({ min: 24, max: 24 })
+    .withMessage(ID_IS_INVALID),
 ];

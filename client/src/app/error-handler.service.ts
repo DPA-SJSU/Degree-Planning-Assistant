@@ -79,6 +79,7 @@ export class ErrorHandlerService {
         break;
       // user trying to access restricted feature
       case TOKEN_IS_EMPTY:
+        resultString = "Trying to access a restricted feature./n";
         break;
       case NAME_IS_INVALID:
         resultString += "Name is invalid";

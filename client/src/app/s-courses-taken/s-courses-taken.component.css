@@ -1,0 +1,31 @@
+.add-courses-btn {
+  font-weight: bold;
+  font-size: 24px;
+  cursor: pointer;
+  color: #ffffff;
+  background-color: #55efc4;
+  transition: background-color 0.25s;
+  border-radius: 25px;
+  padding: 8px 20px;
+  margin-top: 16px;
+}
+
+.chip {
+  background-color: #ecf0f1;
+}
+
+.chip:hover {
+  background-color: #d6d6d6;
+}
+
+.chip:active {
+  background-color: #d6d6d6;
+}
+
+.add-courses-btn:hover {
+  background-color: #48dbb2;
+}
+
+.add-courses-btn:active {
+  background-color: #48dbb2;
+}

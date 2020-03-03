@@ -1,5 +1,5 @@
-<div class="login-page">
-  <mat-card>
+<div class="flex-row center-everything">
+  <mat-card style="text-align: center">
     <mat-card-title>
       Degree Planning Assistant
     </mat-card-title>
@@ -7,24 +7,51 @@
       Sign up to create an account!
     </mat-card-subtitle>
     <mat-card-content>
-      <form [formGroup]="registrationForm" (ngSubmit)="register()" class="form-list">
+      <form
+        [formGroup]="registrationForm"
+        (ngSubmit)="register()"
+        class="form-list"
+      >
         <mat-form-field>
-          <input formControlName="name" matInput placeholder="Name" autocomplete="on" />
+          <input
+            formControlName="name"
+            matInput
+            placeholder="Name"
+            autocomplete="on"
+          />
         </mat-form-field>
         <mat-form-field>
-          <input formControlName="email" matInput placeholder="Email" autocomplete="on" />
+          <input
+            formControlName="email"
+            matInput
+            placeholder="Email"
+            autocomplete="on"
+          />
         </mat-form-field>
         <mat-form-field>
-          <input [type]="showPassword.checked ? 'text' : 'password'" formControlName="password" matInput placeholder="Password" autocomplete="on" />
+          <input
+            [type]="showPassword.checked ? 'text' : 'password'"
+            formControlName="password"
+            matInput
+            placeholder="Password"
+            autocomplete="on"
+          />
         </mat-form-field>
-        <mat-checkbox #showPassword style="display: inherit; margin-bottom: 20px;">Show password</mat-checkbox>
+        <mat-checkbox
+          #showPassword
+          style="display: inherit; margin-bottom: 20px;"
+          >Show password</mat-checkbox
+        >
       </form>
-      <button type="submit" (click)="onSubmit()" style="text-align: center">Sign Up</button>
+      <button type="submit" (click)="onSubmit()" style="text-align: center">
+        Sign Up
+      </button>
     </mat-card-content>
   </mat-card>
-
-  <div>
-    <p>Or sign in to access an existing account!</p>
-    <button class="button-center" (click)="routeToLogin()">Login</button>
-  </div>
+</div>
+<div class="flex-row center-everything">
+  <p>Or sign in to access an existing account!</p>
+</div>
+<div class="flex-row center-everything">
+  <button class="button-center" (click)="routeToLogin()">Login</button>
 </div>

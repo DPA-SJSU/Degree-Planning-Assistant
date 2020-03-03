@@ -8,6 +8,7 @@ import {
   validateLoginUser,
   validateEditProfile,
   validateFetchProfile,
+  validateFetchCoursesTaken,
   checkIfCorrectGradDate,
 } from './validation/user.validation';
 import { validationResult } from 'express-validator';
@@ -53,7 +54,7 @@ function createUser(email, password) {
     degreePlanId: undefined,
   };
 
-  user = new User(data);
+  const user = new User(data);
   return user.save();
 }
 
@@ -203,15 +204,15 @@ userController.put(
       // exists before adding it into the object. It is important that we don't include keys that
       // don't exist so that their values in the database aren't changed.
       const itemsToBeUpdated = {
-        ...(avatarUrl && { avatar_url: avatarUrl }),
-        ...(avatarType && { avatar_type: avatarType }),
-        ...(firstName && { first_name: firstName }),
-        ...(lastName && { last_name: lastName }),
+        ...(avatarUrl && { avatarUrl: avatarUrl }),
+        ...(avatarType && { avatarType: avatarType }),
+        ...(firstName && { firstName: firstName }),
+        ...(lastName && { lastName: lastName }),
         ...(bio && { bio }),
         ...(major && { major }),
         ...(minor && { minor }),
-        ...(catalogYear && { catalog_year: catalogYear }),
-        ...(gradDate && { grad_date: gradDate }),
+        ...(catalogYear && { catalogYear: catalogYear }),
+        ...(gradDate && { gradDate: gradDate }),
       };
 
       // Query the database with the data to be changed and the id of the user to be changed
@@ -235,21 +236,63 @@ userController.put(
   }
 );
 
+//  @route  PUT /coursesTaken
+//  @desc   Updates a user's coursesTaken
+//  @access Private
+userController.put(
+  '/coursesTaken',
+  passport.authenticate('jwt', { session: false }),
+  validateFetchCoursesTaken,
+  async (req, res) => {
+    const errorsAfterValidation = validationResult(req);
+    if (!errorsAfterValidation.isEmpty()) {
+      res.status(400).json({
+        code: 400,
+        errors: errorsAfterValidation.mapped(),
+      });
+    } else {
+      try {
+        // Get course ObjectId from query
+        const userId = req.query.userId;
+        const coursesTaken = req.body;
+
+        // Query the database with the data to be changed and the id of the user to be changed
+        const updatedUser = await User.updateOne({ _id: userId }, coursesTaken);
+
+        // If there is a value that had been modified then the update was successful.
+        if (updatedUser.n > 0) {
+          res.status(200).json(updatedUser.n);
+        } else {
+          generateServerErrorCode(
+            res,
+            403,
+            'courses taken update error',
+            USER_NOT_FOUND,
+            'userId'
+          );
+        }
+      } catch (e) {
+        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      }
+    }
+  }
+);
+
 //  @route  GET /profile
 //  @desc   Fetches a user's profile
 //  @access Private
 userController.get(
-  '/profile/:userId',
+  '/profile',
   passport.authenticate('jwt', { session: false }),
   validateFetchProfile,
   async (req, res) => {
-    // Check if validators found invalid input
-    const errors = validationResult(req);
+    let errors = validationResult(req);
+
     if (errors.isEmpty() === false) {
       return res.status(400).json(errors);
     }
 
-    const { userId } = req.params;
+    const { user } = req;
     const {
       email,
       avatarUrl,
@@ -257,6 +300,7 @@ userController.get(
       firstName,
       lastName,
       bio,
+      coursesTaken,
       major,
       minor,
       catalogYear,
@@ -273,24 +317,36 @@ userController.get(
         ...(firstName && { firstName: true }),
         ...(lastName && { lastName: true }),
         ...(bio && { bio: true }),
+        ...(coursesTaken && { coursesTaken: true }),
         ...(major && { major: true }),
         ...(minor && { minor: true }),
         ...(catalogYear && { catalogYear: true }),
         ...(gradDate && { gradDate: true }),
       };
 
+      let fetchedUser;
+
       // If client doesn't specify anything, fetch everything but the unnecessary fields
       if (Object.keys(itemsToBeFetched).length === 0) {
         itemsToBeFetched = {
           _id: false,
           hashedPassword: false,
-          degree_plan_id: false,
-          is_admin: false,
+          degreePlanId: false,
+          isAdmin: false,
         };
+        fetchedUser = await User.findOne(
+          { _id: user._id },
+          itemsToBeFetched
+        ).populate('coursesTaken');
+      } else if (itemsToBeFetched.coursesTaken) {
+        fetchedUser = await User.findOne(
+          { _id: user._id },
+          itemsToBeFetched
+        ).populate('coursesTaken');
+      } else {
+        // Fetch the document using the projection object
+        fetchedUser = await User.findOne({ _id: user._id }, itemsToBeFetched);
       }
-
-      // Fetch the document using the projection object
-      const fetchedUser = await User.findOne({ _id: userId }, itemsToBeFetched);
 
       // Check if document was fetched. if so, include in response
       if (fetchedUser) {
@@ -300,6 +356,7 @@ userController.get(
         return res.status(404).json({ errors: USER_NOT_FOUND });
       }
     } catch (databaseError) {
+      console.log(databaseError);
       logger.info(databaseError);
       return res.status(500).json({ errors: SERVER_ERROR });
     }

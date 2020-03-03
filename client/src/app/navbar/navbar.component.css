@@ -1,34 +1,14 @@
 /* Component Layout */
 .navbar-inner {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.navbar {
-    margin: 0;
-    padding: 0;
-    background-color: #1abc9c;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .mr2em {
-    margin-right: 1em;
-}
-
-/* Styling */
-a {
-    text-decoration: none;
-}
-
-button {
-    color: #ecf0f1;
+  margin-right: 1em;
 }
 
 .menuBtn {
-    color: #636e72;
+  color: #636e72;
 }

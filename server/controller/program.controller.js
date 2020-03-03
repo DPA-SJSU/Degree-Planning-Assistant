@@ -34,43 +34,39 @@ programController.post(
   passport.authenticate('jwt', { session: false }),
   validateCreateDegreeProgram,
   async (req, res) => {
-    // Validate the string inputs (school, major, catalog_year)
+    // Validate the string inputs (school, major, catalogYear)
     let errors = validationResult(req);
 
-    // Validate the object inputs (general_education, major_requirements, other_requirements)
-    const {
-      general_education,
-      major_requirements,
-      other_requirements,
-    } = req.body;
+    // Validate the object inputs (generalEducation, majorRequirements, otherRequirements)
+    const { generalEducation, majorRequirements, otherRequirements } = req.body;
 
     let objStructureErrors = { errors: [] };
-    validateObjStructure(general_education, objStructureErrors.errors, false);
-    validateObjStructure(major_requirements, objStructureErrors.errors, false);
-    validateObjStructure(other_requirements, objStructureErrors.errors, false);
+    validateObjStructure(generalEducation, objStructureErrors.errors, false);
+    validateObjStructure(majorRequirements, objStructureErrors.errors, false);
+    validateObjStructure(otherRequirements, objStructureErrors.errors, false);
 
     // Check if validators detected errors in input
     if (errors.isEmpty() === false || objStructureErrors.errors.length > 0) {
       return res.status(400).json({ errors, objStructureErrors });
     }
 
-    const { school, major, catalog_year } = req.body;
+    const { school, major, catalogYear } = req.body;
 
     try {
       const data = {
         school,
         major,
-        catalog_year,
-        general_education,
-        major_requirements,
-        other_requirements,
+        catalogYear,
+        generalEducation,
+        majorRequirements,
+        otherRequirements,
       };
 
-      // Check if there is already an existing degree program with the given school, major, catalog_year
+      // Check if there is already an existing degree program with the given school, major, catalogYear
       const existingDegreeProgram = await Program.findOne({
         school,
         major,
-        catalog_year,
+        catalogYear,
       });
 
       if (existingDegreeProgram) {
@@ -84,7 +80,7 @@ programController.post(
 
       // return code 200 as resource is successfully saved
       return res.status(200).json();
-    } catch {
+    } catch (e) {
       // return code 500 in the case of database error
       return res.status(500).json({ error: SERVER_ERROR });
     }
@@ -93,7 +89,7 @@ programController.post(
 
 /**
  * @route   GET /program/
- * @desc    Fetches degree programs using the id, school, major, or catalog_year parameters
+ * @desc    Fetches degree programs using the id, school, major, or catalogYear parameters
  * @access  Private
  */
 programController.get(
@@ -109,9 +105,9 @@ programController.get(
       !req.query.id &&
       !req.query.school &&
       !req.query.major &&
-      !req.query.catalog_year
+      !req.query.catalogYear
     ) {
-      // Either the id or all three school, major, catalog_year fields are required
+      // Either the id or all three school, major, catalogYear fields are required
       return res
         .status(400)
         .json({ error: ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED });
@@ -122,11 +118,7 @@ programController.get(
     for (const key in req.query) {
       if (key === 'id') {
         formattedQuery['_id'] = req.query['id'];
-      } else if (
-        key === 'school' ||
-        key === 'major' ||
-        key === 'catalog_year'
-      ) {
+      } else if (key === 'school' || key === 'major' || key === 'catalogYear') {
         formattedQuery[key] = req.query[key];
       }
     }
@@ -138,7 +130,7 @@ programController.get(
       }
       // No degree program that contains the parameters have been found
       return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
-    } catch {
+    } catch (e) {
       // Database error
       return res.status(500).json({ error: SERVER_ERROR });
     }
@@ -157,29 +149,29 @@ const updatebyParameters = async (res, params) => {
   let willDuplicate; // Flag used to detect duplication
 
   const {
-    new_school,
-    new_major,
-    new_catalog_year,
+    newSchool,
+    newMajor,
+    newCatalogYear,
     school,
     major,
-    catalog_year,
-    general_education,
-    major_requirements,
-    other_requirements,
+    catalogYear,
+    generalEducation,
+    majorRequirements,
+    otherRequirements,
   } = params;
 
-  // If the old and new inputs for school, major, catalog_year are the same, then no need to check if there will be duplications in the database
+  // If the old and new inputs for school, major, catalogYear are the same, then no need to check if there will be duplications in the database
   // Otherwise, check if the resulting degree program already exists in the database
   if (
-    (new_school && school !== new_school) ||
-    (new_major && major !== new_major) ||
-    (new_catalog_year && catalog_year !== new_catalog_year)
+    (newSchool && school !== newSchool) ||
+    (newMajor && major !== newMajor) ||
+    (newCatalogYear && catalogYear !== newCatalogYear)
   ) {
     willDuplicate = await Program.findOne(
       {
-        school: new_school ? new_school : school,
-        major: new_major ? new_major : major,
-        catalog_year: new_catalog_year ? new_catalog_year : catalog_year,
+        school: newSchool ? newSchool : school,
+        major: newMajor ? newMajor : major,
+        catalogYear: newCatalogYear ? newCatalogYear : catalogYear,
       },
       { _id: true }
     );
@@ -187,23 +179,23 @@ const updatebyParameters = async (res, params) => {
 
   if (!willDuplicate) {
     const newData = {
-      school: new_school ? new_school : school,
-      major: new_major ? new_major : major,
-      catalog_year: new_catalog_year ? new_catalog_year : catalog_year,
+      school: newSchool ? newSchool : school,
+      major: newMajor ? newMajor : major,
+      catalogYear: newCatalogYear ? newCatalogYear : catalogYear,
     };
 
-    if (general_education) {
-      newData['general_education'] = general_education;
+    if (generalEducation) {
+      newData['generalEducation'] = generalEducation;
     }
-    if (major_requirements) {
-      newData['major_requirements'] = major_requirements;
+    if (majorRequirements) {
+      newData['majorRequirements'] = majorRequirements;
     }
-    if (other_requirements) {
-      newData['other_requirements'] = other_requirements;
+    if (otherRequirements) {
+      newData['otherRequirements'] = otherRequirements;
     }
 
     const writeResult = await Program.updateOne(
-      { school, major, catalog_year },
+      { school, major, catalogYear },
       { $set: newData }
     );
 
@@ -222,7 +214,7 @@ const updatebyParameters = async (res, params) => {
 
 /**
  * @route   PUT /program/updateByParameters/
- * @desc    Updates degree programs using the school, major, and catalog_year parameters
+ * @desc    Updates degree programs using the school, major, and catalogYear parameters
  * @access  Private
  */
 programController.put(
@@ -230,23 +222,23 @@ programController.put(
   passport.authenticate('jwt', { session: false }),
   validateUpdateDegreeProgramByParam,
   async (req, res) => {
-    // Validate the string inputs (school, major, catalog_year)
+    // Validate the string inputs (school, major, catalogYear)
     let errors = validationResult(req);
 
-    // Validate the object inputs (general_education, major_requirements, other_requirements)
+    // Validate the object inputs (generalEducation, majorRequirements, otherRequirements)
     let objStructureErrors = { errors: [] };
     validateObjStructure(
-      req.body.general_education,
+      req.body.generalEducation,
       objStructureErrors.errors,
       true
     );
     validateObjStructure(
-      req.body.major_requirements,
+      req.body.majorRequirements,
       objStructureErrors.errors,
       true
     );
     validateObjStructure(
-      req.body.other_requirements,
+      req.body.otherRequirements,
       objStructureErrors.errors,
       true
     );
@@ -273,13 +265,13 @@ programController.put(
  * @param {Object} params The HTTP request object containing user input
  */
 const updateById = async (res, params) => {
-  const { id, school, major, catalog_year } = params;
+  const { id, school, major, catalogYear } = params;
 
   let projectionObj = {
     _id: false,
-    general_education: false,
-    major_requirements: false,
-    other_requirements: false,
+    generalEducation: false,
+    majorRequirements: false,
+    otherRequirements: false,
   };
 
   const degreeProgramToEdit = await Program.findOne({ _id: id }, projectionObj);
@@ -287,9 +279,7 @@ const updateById = async (res, params) => {
     {
       school: school ? school : degreeProgramToEdit.school,
       major: major ? major : degreeProgramToEdit.major,
-      catalog_year: catalog_year
-        ? catalog_year
-        : degreeProgramToEdit.catalog_year,
+      catalogYear: catalogYear ? catalogYear : degreeProgramToEdit.catalogYear,
     },
     { _id: true }
   );
@@ -299,7 +289,7 @@ const updateById = async (res, params) => {
     for (const prop in params) {
       if (
         prop !== 'id' &&
-        (prop === 'school' || prop === 'major' || prop === 'catalog_year')
+        (prop === 'school' || prop === 'major' || prop === 'catalogYear')
       ) {
         newData[prop] = params[prop];
       }
@@ -309,7 +299,7 @@ const updateById = async (res, params) => {
       {
         school: degreeProgramToEdit.school,
         major: degreeProgramToEdit.major,
-        catalog_year: degreeProgramToEdit.catalog_year,
+        catalogYear: degreeProgramToEdit.catalogYear,
       },
       { $set: newData }
     );
@@ -337,23 +327,23 @@ programController.put(
   passport.authenticate('jwt', { session: false }),
   validateUpdateDegreeProgramById,
   async (req, res) => {
-    // Validate the string inputs (school, major, catalog_year)
+    // Validate the string inputs (school, major, catalogYear)
     let errors = validationResult(req);
 
-    // Validate the object inputs (general_education, major_requirements, other_requirements)
+    // Validate the object inputs (generalEducation, majorRequirements, otherRequirements)
     let objStructureErrors = { errors: [] };
     validateObjStructure(
-      req.body.general_education,
+      req.body.generalEducation,
       objStructureErrors.errors,
       true
     );
     validateObjStructure(
-      req.body.major_requirements,
+      req.body.majorRequirements,
       objStructureErrors.errors,
       true
     );
     validateObjStructure(
-      req.body.other_requirements,
+      req.body.otherRequirements,
       objStructureErrors.errors,
       true
     );
@@ -363,10 +353,10 @@ programController.put(
       return res.status(400).json({ errors, objStructureErrors });
     }
 
-    const { school, major, catalog_year } = req.body;
+    const { school, major, catalogYear } = req.body;
 
     // Check if at least one field other than id has been entered. Otherwise there is nothing to update.
-    if (!school && !major && !catalog_year) {
+    if (!school && !major && !catalogYear) {
       // Must choose a field to update
       return res.status(400).json();
     }
@@ -397,10 +387,10 @@ programController.delete(
       return res.status(400).json(errors);
     }
 
-    const { id, school, major, catalog_year } = req.body;
+    const { id, school, major, catalogYear } = req.body;
 
-    if (!id && (!school || !major || !catalog_year)) {
-      // Either just the id or all three school, major, catalog_year fields are required
+    if (!id && (!school || !major || !catalogYear)) {
+      // Either just the id or all three school, major, catalogYear fields are required
       return res
         .status(400)
         .json({ error: ID_OR_ALL_THREE_OTHER_PARAMETERS_IS_REQUIRED });
@@ -414,7 +404,7 @@ programController.delete(
         deleteResult = await Program.deleteOne({
           school,
           major,
-          catalog_year,
+          catalogYear,
         });
       }
 

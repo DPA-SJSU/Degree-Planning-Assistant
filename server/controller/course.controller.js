@@ -174,10 +174,10 @@ courseController.get(
     } else {
       try {
         // Get course ObjectId from query
-        const course_id = req.query.course_id;
+        const courseId = req.query.courseId;
 
         const fetchedCourse = await Course.findOne({
-          _id: course_id,
+          _id: courseId,
         }).populate('prerequisites corequisites');
 
         if (fetchedCourse) {
@@ -188,7 +188,7 @@ courseController.get(
             403,
             'course retrieval error',
             COURSE_DOES_NOT_EXIST,
-            'course_id'
+            'courseId'
           );
         }
       } catch (e) {
@@ -300,7 +300,7 @@ courseController.put(
     } else {
       try {
         // Get course ObjectId from query
-        const course_id = req.query.course_id;
+        const courseId = req.query.courseId;
 
         // Remove undefined properties
         const updateData = removeUndefinedObjectProps(req.body);
@@ -311,7 +311,7 @@ courseController.put(
         }
 
         const updatedCourse = await Course.findByIdAndUpdate(
-          { _id: course_id },
+          { _id: courseId },
           updateData,
           { useFindAndModify: false, new: true }
         );
@@ -324,7 +324,7 @@ courseController.put(
             403,
             'update course error',
             COURSE_DOES_NOT_EXIST,
-            'course_id'
+            'courseId'
           );
         }
       } catch (e) {
@@ -345,10 +345,10 @@ courseController.delete(
   async (req, res) => {
     try {
       // Get course ObjectId from query
-      const course_id = req.query.course_id;
+      const courseId = req.query.courseId;
 
       const deletedCourse = await Course.findByIdAndDelete({
-        _id: course_id,
+        _id: courseId,
       });
 
       if (deletedCourse) {
@@ -361,7 +361,7 @@ courseController.delete(
           403,
           'delete course error',
           COURSE_DOES_NOT_EXIST,
-          'course_id'
+          'courseId'
         );
       }
     } catch (e) {

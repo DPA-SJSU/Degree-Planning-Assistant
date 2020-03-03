@@ -1,129 +1,100 @@
 /* Material UI components */
 .sign-up-btn {
-    color: #ecf0f1;
-    font-weight: bold;
-    margin-top: 2em;
-    background-color: #1abc9c;
+  color: white;
+  font-weight: bold;
+  margin-top: 2em;
+  background-color: #1abc9c;
 }
 
 /* Text Card Styling */
 .card {
-    max-width: 600px;
-    margin: 2em;
-    position: relative;
-    animation-name: fadeInDown;
-    animation-duration: 0.75s;
-    animation-fill-mode: forwards;
+  max-width: 600px;
+  margin: 2em;
+  position: relative;
+  animation-name: fadeInDown;
+  animation-duration: 0.75s;
+  animation-fill-mode: forwards;
 }
 
 /* Spacers */
 .viewport {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    box-sizing: border-box
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
 }
-.viewport-col {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    box-sizing: border-box
+
+.vh92 {
+  min-height: 92vh;
 }
-.horizontal-line {
-    width: 90%;
-    border-bottom: 1px solid #95a5a6;
-    margin: auto;
-    padding: 0;
+
+.vh99 {
+  min-height: 99vh;
 }
+
 .mr5em {
-    margin-right: 5em;
+  margin-right: 5em;
 }
+
 .ml5em {
-    margin-left: 5em;
+  margin-left: 5em;
 }
-.pm0 {
-    margin: 0;
-    padding: 0;
-}
+
 .mb05em {
-    margin-bottom: 0.5em;
-}
-.w100 {
-    width: 100%;
+  margin-bottom: 0.5em;
 }
 
 /* Fonts */
 .header {
-    display: block;
-    font-size: 48px;
-    color: #1abc9c;
-    font-weight: bold;
-}
-.subtitle {
-    color: #636e72;
-    font-size: 32px;
-}
-.text-align-center {
-    text-align: center;
-}
-.text-align-right {
-    text-align: right;
+  display: block;
+  font-size: 48px;
+  color: #1abc9c;
+  font-weight: bold;
 }
 
-/* Width/Height & Margins */
-.page-size {
-    width: 100%;
-}
-.vh92 {
-    min-height: 92vh;
-}
-.vh99 {
-    min-height: 99vh;
+.subtitle {
+  color: #636e72;
+  font-size: 32px;
 }
 
 /* Placeholder */
 .placeholder-img {
-    width: 95%;
-    height: 60%;
-    max-width: 500px;
-    max-height: 350px;
-    margin: 2em;
-    position: relative;
-    animation-name: fadeInUp;
-    animation-duration: 0.75s;
-    animation-fill-mode: forwards;
+  width: 95%;
+  height: 60%;
+  max-width: 500px;
+  max-height: 350px;
+  margin: 2em;
+  position: relative;
+  animation-name: fadeInUp;
+  animation-duration: 0.75s;
+  animation-fill-mode: forwards;
 }
 
 /* Simple animations */
 @keyframes fadeInDown {
-    from {
-        bottom: 2em;
-        opacity: 0;
-    }
-    to {
-        bottom: 0px;
-        opacity: 1;
-    }
+  from {
+    bottom: 2em;
+    opacity: 0;
+  }
+  to {
+    bottom: 0px;
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInUp {
-    from {
-        top: 2em;
-        opacity: 0;
-    }
-    to {
-        top: 0px;
-        opacity: 1;
-    }
+  from {
+    top: 2em;
+    opacity: 0;
+  }
+  to {
+    top: 0px;
+    opacity: 1;
+  }
 }
 
 /* Test */
 .border {
-    border: 1px solid black;
+  border: 1px solid black;
 }

@@ -1,38 +1,49 @@
-<div class="d-flex column flex-wrap justify-content-center align-items-center page-size">
-    <div class="viewport vh92">
-        <div class="d-flex column justify-content-center card">
-            <div class="d-flex row justify-content-center align-items-center w100 pm0">
-                <p class="header pm0 mb05em">College Course Planning, Simplified</p>
-            </div>
-            <p class="subtitle pm0">Create a well thought out course plan that lets you get your degree on time while avoiding pitfalls.</p>
-            <div class="d-flex row align-items-center">
-                <button mat-raised-button class="sign-up-btn">
-                    Sign me up
-                </button>
-            </div>
-        </div>
-        <img src="../../assets/placeholderImg-desk.jpg" class="placeholder-img" />
+<div class="flex-container">
+  <div class="flex-row viewport vh92">
+    <div class="flex-column-card">
+      <div class="flex-row center-everything w100 mp0">
+        <p class="header mp0 mb05em">College Course Planning, Simplified</p>
+      </div>
+      <p class="subtitle mp0">
+        Create a well thought out course plan that lets you get your degree on
+        time while avoiding pitfalls.
+      </p>
+      <div class="flex-row align-items-center">
+        <a routerLink="/register" routerLinkActive="active">
+          <button mat-raised-button class="sign-up-btn">
+            Sign me up
+          </button>
+        </a>
+      </div>
     </div>
-    <div class="horizontal-line"></div>
-    <div class="viewport vh99">
-            <img src="../../assets/placeholderImg-books.jpg" class="placeholder-img">
-        <div class="d-flex column justify-content-center card">
-                <div class="d-flex justify-content-end row align-items-center pm0">
-                    <p class="header pm0 mb05em">Students First</p>
-                </div>
-            <p class="subtitle text-align-right pm0">A degree planner that lets you know of important factors such as impaction, class difficulty, and course availability.</p>
-        </div>
+    <img src="../../assets/placeholderImg-desk.jpg" class="placeholder-img" />
+  </div>
+  <div class="horizontal-line"></div>
+  <div class="flex-row viewport vh99">
+    <img src="../../assets/placeholderImg-books.jpg" class="placeholder-img" />
+    <div class="flex-column-card">
+      <div class="flex-row justify-content-end align-items-center mp0">
+        <p class="header mp0 mb05em">Students First</p>
+      </div>
+      <p class="subtitle text-align-right mp0">
+        A degree planner that lets you know of important factors such as
+        impaction, class difficulty, and course availability.
+      </p>
     </div>
-    <div class="horizontal-line"></div>
-    <div class ="viewport-col vh99">
-        <div class="d-flex column justify-content-center align-items-center card">
-            <div class="d-flex row justify-content-center align-items-center w100 pm0">
-                <p class="header pm0 mb05em">Adapt To Changes</p>
-            </div>
-            <p class="subtitle text-align-center pm0">College life is unpredictable. Our app helps you adapt to your changing needs.</p>
-        </div>
-        <img src="../../assets/placeholderImg-write.jpg" class="placeholder-img">
+  </div>
+  <div class="horizontal-line"></div>
+  <div class="flex-column viewport vh99">
+    <div class="flex-column-card align-items-center">
+      <div class="flex-row center-everything w100 mp0">
+        <p class="header mp0 mb05em">Adapt To Changes</p>
+      </div>
+      <p class="subtitle text-align-center mp0">
+        College life is unpredictable. Our app helps you adapt to your changing
+        needs.
+      </p>
     </div>
+    <img src="../../assets/placeholderImg-write.jpg" class="placeholder-img" />
+  </div>
 </div>
 
 <button (click)="logoutButton()">Logout</button>

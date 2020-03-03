@@ -10,29 +10,29 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  avatar_url: {
+  avatarUrl: {
     type: String,
   },
-  avatar_type: {
+  avatarType: {
     type: String,
   },
-  first_name: {
+  firstName: {
     type: String,
   },
-  last_name: {
+  lastName: {
     type: String,
   },
   bio: {
     type: String,
   },
-  is_admin: {
+  isAdmin: {
     type: Boolean,
     isRequired: true,
   },
-  courses_taken: {
-    type: Array,
-  },
-  grad_date: {
+  coursesTaken: [
+    { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+  ],
+  gradDate: {
     year: {
       type: Number,
     },
@@ -46,10 +46,10 @@ const userSchema = new Schema({
   minor: {
     type: String,
   },
-  catalog_year: {
+  catalogYear: {
     type: Number,
   },
-  degree_plan_id: {
+  degreePlanId: {
     type: Schema.Types.ObjectId,
     ref: 'program',
   },

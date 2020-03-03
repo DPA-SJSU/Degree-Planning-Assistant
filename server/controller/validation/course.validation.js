@@ -46,7 +46,7 @@ export const validateSchoolCourses = [
 ];
 
 export const validateCourseId = [
-  query('course_id')
+  query('courseId')
     .exists()
     .withMessage(COURSE_ID_IS_EMPTY)
     .not()

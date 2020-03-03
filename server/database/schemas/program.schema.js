@@ -5,27 +5,27 @@ import mongoose, { Schema } from 'mongoose';
 const programSchema = new mongoose.Schema({
   school: {
     type: String,
-    required: true
+    required: true,
   },
   major: {
     type: String,
     required: true,
   },
-  catalog_year: {
+  catalogYear: {
     type: Number,
     required: true,
   },
-  general_education: {
+  generalEducation: {
     // General education requirements A - E
     type: Schema.Types.Mixed, // Note that this will require strong validation in the HTTP request to our backend server since it is of type Mixed.
     required: true,
   },
-  major_requirements: {
+  majorRequirements: {
     // Requirements for the major
     type: Schema.Types.Mixed, // Note that this will require strong validation...
     required: true,
   },
-  other_requirements: {
+  otherRequirements: {
     // University requirements such as 'American Institutions'
     type: Schema.Types.Mixed, // Note that this will require strong validation...
     required: true,
@@ -33,8 +33,8 @@ const programSchema = new mongoose.Schema({
 });
 
 /*
-    Examples of how the data for general_education and major_requirements would look like:
-    general_education
+    Examples of how the data for generalEducation and majorRequirements would look like:
+    generalEducation
     {
         "areaA": {
             "a1": [mongoose.Schema.Types.ObjectId],
@@ -48,12 +48,12 @@ const programSchema = new mongoose.Schema({
         }
         ...
     }
-    major_requirements
+    majorRequirements
     {
-        "prep_for_major": [mongoose.Schema.Types.ObjectId],
-        "core_courses": [mongoose.Schema.Types.ObjectId],
-        "required_courses": [mongoose.Schema.Types.ObjectId],
-        "approved_electives": [mongoose.Schema.Types.ObjectId]
+        "prepForMajor": [mongoose.Schema.Types.ObjectId],
+        "coreCourses": [mongoose.Schema.Types.ObjectId],
+        "requiredCourses": [mongoose.Schema.Types.ObjectId],
+        "approvedElectives": [mongoose.Schema.Types.ObjectId]
     }
 */
 

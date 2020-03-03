@@ -1,0 +1,38 @@
+<div class="width100vw flex-column align-items-center">
+  <mat-expansion-panel
+    *ngIf="profile | async as userProfile"
+    class="card-section"
+  >
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <p class="section-header">Courses Taken</p>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="flex-column align-items-start">
+      <mat-chip-list>
+        <mat-chip *ngFor="let course of userProfile?.coursesTaken" class="chip">
+          <span *ngIf="course?.code" class="body1 chip-clr">{{
+            course.code
+          }}</span>
+        </mat-chip>
+      </mat-chip-list>
+      <div class="add-courses-btn" (click)="showPopup = true">
+        +
+      </div>
+    </div>
+  </mat-expansion-panel>
+</div>
+
+<app-popup
+  [isOpen]="showPopup"
+  title="Test pop-up"
+  (onClose)="popupStatus($event)"
+  (onInput)="getPopupData($event)"
+>
+  This is the content of the pop-up (thanks to transclusion aka content
+  projection)
+  <h3>Courses Taken:</h3>
+  <p *ngFor="let course of userProfile?.coursesTaken">
+    <span *ngIf="course?.code">{{ course.code }}</span>
+  </p>
+</app-popup>

@@ -37,7 +37,7 @@ export class RegistrationComponent {
       password: this.registrationForm.value.password
     };
 
-    const tokenResult = this.userService.create_new_user(user);
+    const tokenResult = this.userService.registerNewUser(user);
 
     // retrieve token or handle server error
     tokenResult.subscribe(
