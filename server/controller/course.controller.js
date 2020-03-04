@@ -140,9 +140,9 @@ courseController.getAllCourseId = async (school, codes) => {
   try {
     const coursesWithIds = [];
     await codes.forEach(code => {
-      Course.findOne({ school, code }, async (err, foundCourse) => {
+      Course.findOne({ school, code }, async foundCourse => {
         let id;
-        if (err) {
+        if (!foundCourse) {
           const createdCourse = await courseController.createCourse({
             school,
             code,
@@ -376,7 +376,7 @@ courseController.delete(
  */
 courseController.delete(
   '/all',
-  // passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Course.deleteMany({}, (err, result) => {
       if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);

@@ -81,7 +81,7 @@ programController.post(
     try {
       Program.findOne(
         { school, major, catalogYear },
-        async (err, existingDegreeProgram) => {
+        async existingDegreeProgram => {
           if (existingDegreeProgram)
             return res
               .status(403)

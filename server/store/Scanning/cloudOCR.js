@@ -74,7 +74,6 @@ const transcriptParser = async paragraph => {
   });
 
   const sentence = listOfWordText.join(' ');
-
   switch (true) {
     // Check for AP Courses
     case listOfWordText.includes('AP'):

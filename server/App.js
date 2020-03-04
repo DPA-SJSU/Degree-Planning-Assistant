@@ -13,11 +13,8 @@ import {
   semesterController,
   programController,
   textScanController,
-<<<<<<< HEAD
   planController,
   requirementController,
-=======
->>>>>>> [improvement]: upload a file to scan
 } from './controller';
 
 const app = express();
@@ -34,13 +31,9 @@ app.use('/', userController);
 app.use('/course', courseController);
 app.use('/semester', semesterController);
 app.use('/program', programController);
-<<<<<<< HEAD
 app.use('/requirement', requirementController);
 app.use('/scan', textScanController);
 app.use('/plan', planController);
-=======
-app.use('/scan', textScanController);
->>>>>>> [improvement]: upload a file to scan
 
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);
@@ -51,11 +44,7 @@ app.listen(port, () => {
       useFindAndModify: false,
     })
     .then(() => {
-<<<<<<< HEAD
       logger.info(`Connected to MongoDB at ${mongoHostName}`);
-=======
-      logger.info(`Connected to mongoDB at ${mongoHostName}`);
->>>>>>> [improvement]: upload a file to scan
     })
     .catch(() => {
       logger.info(`Failed to connect to MongoDB`);
