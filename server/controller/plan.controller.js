@@ -48,10 +48,10 @@ planController.post(
       const { semesters } = req.body;
 
       // First check if the user exists and if it already has a degree plan
-      const checkIfUserHasPlan = await User.findById(userId, 'degree_plan_id');
+      const checkIfUserHasPlan = await User.findById(userId, 'degreePlanId');
       if (!checkIfUserHasPlan) {
         return res.status(404).json({ error: USER_DOES_NOT_EXIST });
-      } else if (checkIfUserHasPlan.degree_plan_id) {
+      } else if (checkIfUserHasPlan.degreePlanId) {
         return res.status(409).json({ error: USER_ALREADY_HAS_PLAN });
       }
 
@@ -75,10 +75,10 @@ planController.post(
       });
       newDegreePlan = await newDegreePlan.save();
 
-      // Update the User's degree_plan_id field with the id of the new degree plan
+      // Update the User's degreePlanId field with the id of the new degree plan
       const setUserPlan = await User.updateOne(
         { _id: userId },
-        { degree_plan_id: newDegreePlan._id }
+        { degreePlanId: newDegreePlan._id }
       );
 
       if (setUserPlan.n < 1) {
@@ -118,13 +118,12 @@ planController.put(
       const { semesters } = req.body;
 
       // Check if the user exists and if they already have a degree plan
-      const userToUpdate = await User.findById(
-        userId,
-        'degree_plan_id'
-      ).populate('degree_plan_id');
+      const userToUpdate = await User.findById(userId, 'degreePlanId').populate(
+        'degreePlanId'
+      );
       if (!userToUpdate) {
         return res.status(404).json({ error: USER_DOES_NOT_EXIST });
-      } else if (!userToUpdate.degree_plan_id) {
+      } else if (!userToUpdate.degreePlanId) {
         return res.status(404).json({ error: USER_DOES_NOT_HAVE_PLAN });
       }
 
@@ -143,7 +142,7 @@ planController.put(
       }
 
       const updateDegreePlan = await Plan.updateOne(
-        { _id: userToUpdate.degree_plan_id },
+        { _id: userToUpdate.degreePlanId },
         { semesters: newSemestersArr }
       );
 
@@ -178,14 +177,12 @@ planController.get(
     try {
       const { userId } = req.params;
 
-      let planId = await User.findById(userId, 'degree_plan_id');
+      let planId = await User.findById(userId, 'degreePlanId');
 
       if (!planId) {
         return res.status(404).json({ error: USER_DOES_NOT_EXIST });
       } else {
-        planId = await Plan.findById(planId.degree_plan_id).populate(
-          'semesters'
-        );
+        planId = await Plan.findById(planId.degreePlanId).populate('semesters');
         return res.status(200).json(planId);
       }
     } catch (databaseErr) {
@@ -213,22 +210,22 @@ planController.delete(
 
     try {
       const { userId } = req.params;
-      let user = await User.findById(userId, 'degree_plan_id');
+      let user = await User.findById(userId, 'degreePlanId');
 
       if (!user) {
         return res.status(404).json({ error: USER_DOES_NOT_EXIST });
-      } else if (!user.degree_plan_id) {
+      } else if (!user.degreePlanId) {
         return res.status(404).json({ error: USER_DOES_NOT_HAVE_DEGREE_PLAN });
       }
 
-      const deletedPlan = await Plan.deleteOne({ _id: user.degree_plan_id });
+      const deletedPlan = await Plan.deleteOne({ _id: user.degreePlanId });
       if (deletedPlan.n < 1) {
         return res.status(404).json({ error: USER_DOES_NOT_HAVE_DEGREE_PLAN });
       }
 
       user = await User.updateOne(
         { _id: user._id },
-        { degree_plan_id: undefined }
+        { degreePlanId: undefined }
       );
 
       if (user.n < 1) {
