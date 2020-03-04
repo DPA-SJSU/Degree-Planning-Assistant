@@ -87,7 +87,6 @@ planController.post(
         return res.status(200).json();
       }
     } catch (databaseErr) {
-      console.log(databaseErr);
       logger.info(databaseErr);
       return res.status(500).json({ error: SERVER_ERROR });
     }
@@ -152,7 +151,6 @@ planController.put(
         return res.status(200).json();
       }
     } catch (databaseErr) {
-      console.log(databaseErr);
       logger.info(databaseErr);
       return res.status(500).json({ error: SERVER_ERROR });
     }
@@ -186,7 +184,6 @@ planController.get(
         return res.status(200).json(planId);
       }
     } catch (databaseErr) {
-      console.log(databaseErr);
       logger.info(databaseErr);
       return res.status(500).json({ error: SERVER_ERROR });
     }
@@ -234,7 +231,6 @@ planController.delete(
 
       return res.status(200).json();
     } catch (databaseErr) {
-      console.log(databaseErr);
       logger.info(databaseErr);
       return res.status(500).json({ error: SERVER_ERROR });
     }

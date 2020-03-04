@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 import sha256 from 'sha256';
 
 const userSchema = new Schema({
-  hashed_password: {
+  hashedPassword: {
     type: String,
     required: true,
   },
@@ -64,7 +64,7 @@ const userSchema = new Schema({
  * @param {*} password
  */
 userSchema.methods.comparePassword = function comparePassword(password) {
-  return this.hashed_password === sha256(password);
+  return this.hashedPassword === sha256(password);
 };
 
 export default userSchema;
