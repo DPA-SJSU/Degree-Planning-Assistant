@@ -1,11 +1,9 @@
 package-lock.json
 
 # Server Ignore
-server/cloud-ocr-key.json
-server/pdf-transcript-testing.pdf
-server/pdf-testing.pdf
 server/uploads/
 server/store/Scanning/test
+server/store/Scanning/cloud-ocr-key.json
 
 .DS_STORE
 

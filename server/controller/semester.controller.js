@@ -28,14 +28,13 @@ const semesterController = express.Router();
  * @param {*} res
  * @param {Object} option condition to get the semester. Default = {} means to get all semesters
  */
-semesterController.getSemesterWithPopulatedCourse = (option = {}, res) => {
+semesterController.getSemesterWithPopulatedCourse = (option, res) => {
   try {
-    Semester.find({})
+    Semester.find(option)
       .populate('courses')
       .then(fetchedSemester => res.status(200).json(fetchedSemester))
       .catch(e => {
-        res.status(403).json({ error: 'error' });
-        // generateServerErrorCode(res, 403, e, SEMESTER_NOT_FOUND, 'semesterId');
+        generateServerErrorCode(res, 403, e, SEMESTER_NOT_FOUND, 'semester');
       });
   } catch (e) {
     generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
@@ -47,8 +46,7 @@ semesterController.getSemesterWithPopulatedCourse = (option = {}, res) => {
  * @param {Object} data
  */
 semesterController.createSemester = data => {
-  const semester = new Semester(data);
-  return semester.save();
+  return new Semester(data).save();
 };
 
 /**
@@ -74,7 +72,7 @@ semesterController.post(
             403,
             'create semester error',
             SEMESTER_EXISTS_ALREADY,
-            'semester_id'
+            'semesterId'
           );
       } catch (e) {
         generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
@@ -170,14 +168,15 @@ semesterController.delete(
           },
           (err, deletedSemester) => {
             if (deletedSemester)
-              return res.status(200).json({ deleted: deletedSemester });
-            return generateServerErrorCode(
-              res,
-              403,
-              'delete semester error',
-              SEMESTER_NOT_FOUND,
-              'semester'
-            );
+              res.status(200).json({ deleted: deletedSemester });
+            else
+              generateServerErrorCode(
+                res,
+                403,
+                'delete semester error',
+                SEMESTER_NOT_FOUND,
+                'semester'
+              );
           }
         );
       } catch (e) {
@@ -194,11 +193,11 @@ semesterController.delete(
  */
 semesterController.delete(
   '/all',
-  // passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Semester.deleteMany({}, (err, result) => {
       if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-      res.status(200).json(result);
+      else res.status(200).json(result);
     });
   }
 );

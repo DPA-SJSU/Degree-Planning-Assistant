@@ -26,7 +26,7 @@ export const validateCreateSemester = [
 ];
 
 export const validateSemesterId = [
-  query('semester_id')
+  query('_id')
     .exists()
     .withMessage(SEMESTER_ID_IS_EMPTY)
     .not()

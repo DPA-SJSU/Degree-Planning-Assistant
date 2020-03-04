@@ -68,7 +68,7 @@ programController.post(
 
       Program.findOne(
         { school, major, catalogYear },
-        async (err, existingDegreeProgram) => {
+        async existingDegreeProgram => {
           if (existingDegreeProgram)
             res.status(403).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
 
@@ -130,7 +130,7 @@ programController.get(
       return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
     } catch (e) {
       // Database error
-      return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -188,22 +188,22 @@ const updateByParameters = async (res, params) => {
       { $set: newData },
       (err, updatedProgram) => {
         if (err)
-          return generateServerErrorCode(
+          generateServerErrorCode(
             res,
             500,
             'degree Program not found',
             DEGREE_PROGRAM_NOT_FOUND
           );
-        return res.status(200).json(updatedProgram);
+        else res.status(200).json(updatedProgram);
       }
     );
-  }
-  return generateServerErrorCode(
-    res,
-    500,
-    'degree Program already existed',
-    DEGREE_PROGRAM_ALREADY_EXISTS
-  );
+  } else
+    generateServerErrorCode(
+      res,
+      500,
+      'degree Program already existed',
+      DEGREE_PROGRAM_ALREADY_EXISTS
+    );
 };
 
 /**
@@ -242,7 +242,7 @@ programController.put(
     try {
       await updateByParameters(res, req.body);
     } catch (e) {
-      return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -344,7 +344,7 @@ programController.put(
     try {
       await updateById(res, req.body);
     } catch (e) {
-      return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -390,7 +390,7 @@ programController.delete(
       }
       return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
     } catch (e) {
-      return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );

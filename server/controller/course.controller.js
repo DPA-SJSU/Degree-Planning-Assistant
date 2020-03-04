@@ -38,9 +38,9 @@ courseController.getAllCourseId = async (school, codes) => {
   try {
     const coursesWithIds = [];
     await codes.forEach(code => {
-      Course.findOne({ school, code }, async (err, foundCourse) => {
+      Course.findOne({ school, code }, async foundCourse => {
         let id;
-        if (err) {
+        if (!foundCourse) {
           const createdCourse = await courseController.createCourse({
             school,
             code,
@@ -124,18 +124,19 @@ courseController.post(
     validationHandler(req, res, () => {
       try {
         const { school, code } = req.body;
-        Course.findOne({ school, code }, (err, foundCourse) => {
+        Course.findOne({ school, code }, foundCourse => {
           if (!foundCourse)
             courseController
               .createCourse({ school, code }, 'NONE_EMPTY')
               .then(createdCourse => res.status(200).json(createdCourse));
-          generateServerErrorCode(
-            res,
-            403,
-            'course creation error',
-            COURSE_EXISTS_ALREADY,
-            'school, code'
-          );
+          else
+            generateServerErrorCode(
+              res,
+              403,
+              'course creation error',
+              COURSE_EXISTS_ALREADY,
+              'school, code'
+            );
         });
       } catch (e) {
         generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
@@ -155,7 +156,7 @@ courseController.get(
   (req, res) => {
     validationHandler(req, res, () => {
       const { _id } = req.query;
-      courseController.getPopulatedCourse({ _id });
+      courseController.getPopulatedCourse({ _id }, res);
     });
   }
 );
@@ -270,7 +271,7 @@ courseController.delete(
  */
 courseController.delete(
   '/all',
-  // passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Course.deleteMany({}, (err, result) => {
       if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);

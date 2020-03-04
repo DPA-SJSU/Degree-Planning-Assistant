@@ -56,7 +56,14 @@ const programParser = async (listOfWordText, sentence) => {
  * @param {Array} listOfWordText  A list of words in a sentence
  * @param {String} sentence       A whole sentence which is scanned by OCR
  */
-const transcriptParser = async (listOfWordText, sentence) => {
+const transcriptParser = async paragraph => {
+  const listOfWordText = [];
+  paragraph.words.forEach(word => {
+    const wordText = word.symbols.map(symbol => symbol.text).join('');
+    listOfWordText.push(wordText);
+  });
+
+  const sentence = listOfWordText.join(' ');
   switch (true) {
     case listOfWordText.includes('AP'):
       TranscriptMapping.otherInfo.push(sentence);
@@ -111,19 +118,12 @@ const documentHandler = (responses, option) => {
     response.fullTextAnnotation.pages.forEach(page => {
       page.blocks.forEach(block => {
         block.paragraphs.forEach(paragraph => {
-          const listOfWordText = [];
-          paragraph.words.forEach(word => {
-            const wordText = word.symbols.map(symbol => symbol.text).join('');
-            listOfWordText.push(wordText);
-          });
-
-          const sentence = listOfWordText.join(' ');
           switch (option) {
             case 'transcript':
-              transcriptParser(listOfWordText, sentence);
+              transcriptParser(paragraph);
               break;
             case 'program':
-              programParser(listOfWordText, sentence);
+              programParser(paragraph);
               break;
             default:
               break;

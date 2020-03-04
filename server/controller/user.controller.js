@@ -68,18 +68,18 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
           const userToReturn = { ...newUser.toJSON(), ...{ token } };
 
           delete userToReturn.hashedPassword;
-          return res.status(200).json(userToReturn);
-        }
-        return generateServerErrorCode(
-          res,
-          403,
-          'register email error',
-          USER_EXISTS_ALREADY,
-          'email'
-        );
+          res.status(200).json(userToReturn);
+        } else
+          generateServerErrorCode(
+            res,
+            403,
+            'register email error',
+            USER_EXISTS_ALREADY,
+            'email'
+          );
       });
     } catch (e) {
-      return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   });
 });
@@ -159,48 +159,44 @@ userController.put(
         !catalogYear &&
         !gradDate
       ) {
-        return generateServerErrorCode(
+        generateServerErrorCode(
           res,
           400,
           'Parameter is missing',
           PARAMETERS_REQUIRED
         );
-      }
-
-      if (gradDate && checkIfCorrectGradDate(gradDate) === false) {
-        return generateServerErrorCode(
+      } else if (gradDate && checkIfCorrectGradDate(gradDate) === false) {
+        generateServerErrorCode(
           res,
           400,
           'grad date is invalid',
           INVALID_GRAD_DATE
         );
-      }
+      } else
+        try {
+          const itemsToBeUpdated = {
+            ...(avatarUrl && { avatar_url: avatarUrl }),
+            ...(avatarType && { avatar_type: avatarType }),
+            ...(firstName && { first_name: firstName }),
+            ...(lastName && { last_name: lastName }),
+            ...(bio && { bio }),
+            ...(major && { major }),
+            ...(minor && { minor }),
+            ...(catalogYear && { catalog_year: catalogYear }),
+            ...(gradDate && { grad_date: gradDate }),
+          };
 
-      try {
-        const itemsToBeUpdated = {
-          ...(avatarUrl && { avatar_url: avatarUrl }),
-          ...(avatarType && { avatar_type: avatarType }),
-          ...(firstName && { first_name: firstName }),
-          ...(lastName && { last_name: lastName }),
-          ...(bio && { bio }),
-          ...(major && { major }),
-          ...(minor && { minor }),
-          ...(catalogYear && { catalog_year: catalogYear }),
-          ...(gradDate && { grad_date: gradDate }),
-        };
-
-        User.updateOne(
-          { _id: user._id },
-          itemsToBeUpdated,
-          (err, updatedUser) => {
-            if (err)
-              return generateServerErrorCode(res, 500, err, USER_NOT_FOUND);
-            return res.status(200).json(updatedUser);
-          }
-        );
-      } catch (e) {
-        return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-      }
+          User.updateOne(
+            { _id: user._id },
+            itemsToBeUpdated,
+            (err, updatedUser) => {
+              if (err) generateServerErrorCode(res, 500, err, USER_NOT_FOUND);
+              else res.status(200).json(updatedUser);
+            }
+          );
+        } catch (e) {
+          generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+        }
     });
   }
 );
@@ -213,22 +209,14 @@ userController.put(
   passport.authenticate('jwt', { session: false }),
   validateFetchCoursesTaken,
   async (req, res) => {
-    const errorsAfterValidation = validationResult(req);
-    if (!errorsAfterValidation.isEmpty()) {
-      res.status(400).json({
-        code: 400,
-        errors: errorsAfterValidation.mapped(),
-      });
-    } else {
+    validationHandler(req, res, async () => {
       try {
-        // Get course ObjectId from query
-        const userId = req.query.userId;
-        const coursesTaken = req.body;
-
-        // Query the database with the data to be changed and the id of the user to be changed
-        const updatedUser = await User.updateOne({ _id: userId }, coursesTaken);
-
-        // If there is a value that had been modified then the update was successful.
+        const { user } = req;
+        const { coursesTaken } = req.body;
+        const updatedUser = await User.updateOne(
+          { _id: user._id },
+          coursesTaken
+        );
         if (updatedUser.n > 0) {
           res.status(200).json(updatedUser.n);
         } else {
@@ -243,7 +231,7 @@ userController.put(
       } catch (e) {
         generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       }
-    }
+    });
   }
 );
 
@@ -295,13 +283,12 @@ userController.get(
 
         User.findOne({ _id: user._id }, itemsToBeFetched).then(
           (err, fetchedUser) => {
-            if (err)
-              return generateServerErrorCode(res, 404, err, USER_NOT_FOUND);
-            return res.status(200).json(fetchedUser);
+            if (err) generateServerErrorCode(res, 404, err, USER_NOT_FOUND);
+            else res.status(200).json(fetchedUser);
           }
         );
       } catch (e) {
-        return generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       }
     });
   }

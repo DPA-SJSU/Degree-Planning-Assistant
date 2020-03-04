@@ -49,20 +49,20 @@ const addCourseIdToNewList = async courses => {
  * Scan PDF File and input into Course & Semester Schema
  */
 textScanController.post(
-  '/ocr',
+  '/',
   upload.single('pdf'),
-  // passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
     const { user } = req;
+    const { option } = req.query;
     const fileName = req.file.path;
-    CloudOcr.scan(fileName)
+    CloudOcr.scan(fileName, option)
       .then(async scanResult => {
-        console.log(scanResult);
         // 1. Create a semester, and add to the database
-        // for (const semester of scanResult.semesterList) {
-        //   semester.courses = await addCourseIdToNewList(semester.courses);
-        //   await semesterController.createSemester(semester);
-        // }
+        for (const semester of scanResult.semesterList) {
+          semester.courses = await addCourseIdToNewList(semester.courses);
+          await semesterController.createSemester(semester);
+        }
 
         // Create a Degree Plan, and add Semester ID + userID
 

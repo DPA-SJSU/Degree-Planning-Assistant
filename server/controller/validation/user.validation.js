@@ -25,6 +25,7 @@ import {
   EMAIL_IS_IN_WRONG_FORMAT,
   ID_IS_INVALID,
   BOOLEAN_VALUES_ONLY,
+  FIRST_NAME_IS_INVALID,
 } from '../constant';
 
 const checkIfLettersOnly = str => {
@@ -322,7 +323,7 @@ export const validateFetchProfile = [
 ];
 
 export const validateFetchCoursesTaken = [
-  query('userId')
+  query('_id')
     .exists()
     .withMessage(USER_ID_IS_EMPTY)
     .not()
