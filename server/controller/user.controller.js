@@ -4,6 +4,9 @@ import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 
+import { validationResult } from 'express-validator';
+
+import jwt from 'jsonwebtoken';
 import {
   validateRegisterUser,
   validateLoginUser,
