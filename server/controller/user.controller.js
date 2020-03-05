@@ -284,7 +284,7 @@ userController.put(
 userController.get(
   '/profile',
   passport.authenticate('jwt', { session: false }),
-  validateFetchProfile,
+  // validateFetchProfile,
   async (req, res) => {
     let errors = validationResult(req);
 
@@ -358,6 +358,7 @@ userController.get(
     } catch (databaseError) {
       console.log(databaseError);
       logger.info(databaseError);
+      console.log('Thee error: ', databaseError);
       return res.status(500).json({ errors: SERVER_ERROR });
     }
   }

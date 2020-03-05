@@ -9,25 +9,25 @@ import { Observable } from "rxjs";
 })
 export class SCoursesTakenComponent implements OnInit {
   profile: Observable<UserProfile>;
-  showPopup = false;
-  popupData: string;
+  showModal = false;
+  modalData: string;
   constructor(private userService: UserService) {
     this.profile = this.userService.getProfile("coursesTaken");
   }
 
   /**
-   * Recieve a boolean from the child component PopupComponent
-   * to determine if the popup is closed.
+   * Recieve a boolean from the child component ModalComponent
+   * to determine if the modal is closed.
    * @param $event
    */
-  popupStatus($event) {
+  modalStatus($event) {
     console.log("The event: ", $event);
-    this.showPopup = $event;
+    this.showModal = $event;
   }
 
-  getPopupData($event) {
+  getModalData($event) {
     console.log("The data event: ", $event);
-    this.popupData = $event;
+    this.modalData = $event;
   }
 
   ngOnInit() {}

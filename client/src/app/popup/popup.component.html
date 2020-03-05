@@ -1,21 +1,18 @@
-<div class="modalW" *ngIf="isOpen">
-  <div class="modalW-content">
-    <div class="modalW-header">
-      <span class="close" (click)="closePopup()">
-        &times;
-      </span>
-      <h2>{{ title }}</h2>
-      <mat-form-field>
-        <mat-label>Input Data</mat-label>
-        <input matInput [(ngModel)]="popupData" />
-      </mat-form-field>
-    </div>
-    <div class="modalW-body">
+<mat-card class="mini-card">
+  <mat-card-header>
+    <mat-card-title>
+      {{ title | uppercase }}
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{ subtitle | titlecase }}
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <span class="mini-card-content-title">
+      {{ contentTitle | titlecase }}
+    </span>
+    <p class="mini-card-description">
       <ng-content></ng-content>
-    </div>
-    <div class="modalW-footer">
-      <button class="cancel-button" (click)="closePopup()">Cancel</button>
-      <button (click)="sendInputData()">Submit</button>
-    </div>
-  </div>
-</div>
+    </p>
+  </mat-card-content>
+</mat-card>

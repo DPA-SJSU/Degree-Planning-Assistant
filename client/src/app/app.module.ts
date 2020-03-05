@@ -15,7 +15,6 @@ import { LayoutModule } from "@angular/cdk/layout";
 import { MatIconModule } from "@angular/material/icon";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatChipsModule } from "@angular/material/chips";
-import { MatDialogModule } from "@angular/material/dialog";
 
 import { AppComponent } from "./app.component";
 import { LandingComponent } from "./landing/landing.component";
@@ -25,6 +24,7 @@ import { UserService } from "./user.service";
 import { NavbarComponent } from "./navbar/navbar.component";
 import { FooterComponent } from "./footer/footer.component";
 import { SCoursesTakenComponent } from "./s-courses-taken/s-courses-taken.component";
+import { ModalComponent } from "./modal/modal.component";
 import { PopupComponent } from "./popup/popup.component";
 
 @NgModule({
@@ -36,6 +36,7 @@ import { PopupComponent } from "./popup/popup.component";
     NavbarComponent,
     FooterComponent,
     SCoursesTakenComponent,
+    ModalComponent,
     PopupComponent
   ],
   imports: [
@@ -55,10 +56,9 @@ import { PopupComponent } from "./popup/popup.component";
     LayoutModule,
     MatIconModule,
     MatExpansionModule,
-    MatChipsModule,
-    MatDialogModule
+    MatChipsModule
   ],
-  entryComponents: [PopupComponent],
+  entryComponents: [ModalComponent, PopupComponent],
   providers: [UserService],
   bootstrap: [AppComponent]
 })
