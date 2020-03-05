@@ -83,26 +83,27 @@ export const validateObjStructure = (obj, errArr, optional) => {
 
   if (!obj && optional === true) {
     return;
-  } else if (!obj && optional === false) {
+  }
+  if (!obj && optional === false) {
     errArr.push(errorObjectFactory(REQUIREMENTOBJECT_IS_REQUIRED));
   } else if (obj.constructor !== Object) {
     errArr.push(errorObjectFactory(REQUIREMENTOBJECT_NOT_AN_OBJECT));
   } else if (Object.keys(obj).length === 0) {
     errArr.push(errorObjectFactory(REQUIREMENTOBJECT_IS_EMPTY));
   } else {
-    for (const property in obj) {
+    obj.forEach(property => {
       if (obj[property].constructor === Object) {
-        for (const innerProperty in obj[property]) {
+        obj[property].forEach(innerProperty => {
           if (obj[property][innerProperty].constructor !== Array) {
             errArr.push(
               errorObjectFactory(REQUIREMENTOBJECT_INCORRECT_STRUCTURE)
             );
           }
-        }
+        });
       } else if (obj[property].constructor !== Array) {
         errArr.push(errorObjectFactory(REQUIREMENTOBJECT_INCORRECT_STRUCTURE));
       }
-    }
+    });
   }
 };
 

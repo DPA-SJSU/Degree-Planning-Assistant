@@ -1,11 +1,12 @@
 import sha256 from 'sha256';
+import { validationResult } from 'express-validator';
 
 export const generateHashedPassword = password => sha256(password);
 
 export function generateServerErrorCode(
   res,
   code,
-  fullError,
+  fullError = '',
   msg,
   location = 'server'
 ) {
@@ -20,6 +21,18 @@ export function generateServerErrorCode(
     fullError,
     errors,
   });
+}
+
+export function validationHandler(req, res, next) {
+  const errorsAfterValidation = validationResult(req);
+  if (!errorsAfterValidation.isEmpty()) {
+    return res.status(400).json({
+      code: 400,
+      errors: errorsAfterValidation.mapped(),
+    });
+  }
+
+  return next();
 }
 
 /**

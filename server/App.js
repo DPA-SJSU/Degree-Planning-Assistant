@@ -11,34 +11,25 @@ import {
   userController,
   courseController,
   semesterController,
-  programController
+  programController,
+  textScanController,
 } from './controller';
 
 const app = express();
-
-// Set up CORS
-app.use(cors());
+const { port, mongoDBUri, mongoHostName } = config.env;
 
 // Apply strategy to passport
 applyPassportStrategy(passport);
 
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
-
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use('/', userController);
 app.use('/course', courseController);
 app.use('/semester', semesterController);
-app.use('/program', programController)
-
-/**
- * Get port from environment and store in Express.
- */
-const { port, mongoDBUri, mongoHostName } = config.env;
+app.use('/program', programController);
+app.use('/scan', textScanController);
 
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);

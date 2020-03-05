@@ -30,9 +30,14 @@ const userSchema = new Schema({
     isRequired: true,
   },
   coursesTaken: [
-    { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Course',
+      required: true,
+      uppercase: true,
+    },
   ],
-  gradDate: {
+  grad_date: {
     year: {
       type: Number,
     },

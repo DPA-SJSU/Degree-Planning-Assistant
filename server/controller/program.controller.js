@@ -1,8 +1,10 @@
+/* eslint-disable no-underscore-dangle */
 import express from 'express';
 
 import passport from 'passport';
 
 import { validationResult } from 'express-validator';
+
 import {
   validateCreateDegreeProgram,
   validateFetchDegreeProgram,
@@ -12,12 +14,14 @@ import {
   validateObjStructure,
 } from './validation/program.validation';
 
+import { generateServerErrorCode } from '../store/utils';
+
 import {
   ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED,
   DEGREE_PROGRAM_ALREADY_EXISTS,
   DEGREE_PROGRAM_NOT_FOUND,
-  SERVER_ERROR,
   ID_OR_ALL_THREE_OTHER_PARAMETERS_IS_REQUIRED,
+  SOME_THING_WENT_WRONG,
 } from './constant';
 
 import { Program } from '../database/models';
@@ -35,12 +39,12 @@ programController.post(
   validateCreateDegreeProgram,
   async (req, res) => {
     // Validate the string inputs (school, major, catalogYear)
-    let errors = validationResult(req);
+    const errors = validationResult(req);
 
-    // Validate the object inputs (generalEducation, majorRequirements, otherRequirements)
+    // Validate the object inputs (general_education, major_requirements, other_requirements)
     const { generalEducation, majorRequirements, otherRequirements } = req.body;
 
-    let objStructureErrors = { errors: [] };
+    const objStructureErrors = { errors: [] };
     validateObjStructure(generalEducation, objStructureErrors.errors, false);
     validateObjStructure(majorRequirements, objStructureErrors.errors, false);
     validateObjStructure(otherRequirements, objStructureErrors.errors, false);
@@ -62,27 +66,20 @@ programController.post(
         otherRequirements,
       };
 
-      // Check if there is already an existing degree program with the given school, major, catalogYear
-      const existingDegreeProgram = await Program.findOne({
-        school,
-        major,
-        catalogYear,
-      });
+      Program.findOne(
+        { school, major, catalogYear },
+        async existingDegreeProgram => {
+          if (existingDegreeProgram)
+            res.status(403).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
 
-      if (existingDegreeProgram) {
-        // The degree program already exists
-        return res.status(409).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
-      }
+          const newDegreeProgram = new Program(data);
+          await newDegreeProgram.save();
 
-      // Create new degree program and save it in MongoDB
-      const newDegreeProgram = new Program(data);
-      await newDegreeProgram.save();
-
-      // return code 200 as resource is successfully saved
-      return res.status(200).json();
+          res.status(200).json(newDegreeProgram);
+        }
+      );
     } catch (e) {
-      // return code 500 in the case of database error
-      return res.status(500).json({ error: SERVER_ERROR });
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -101,7 +98,8 @@ programController.get(
     if (errors.isEmpty() === false) {
       // All or some inputs are invalid
       return res.status(400).json(errors);
-    } else if (
+    }
+    if (
       !req.query.id &&
       !req.query.school &&
       !req.query.major &&
@@ -113,15 +111,15 @@ programController.get(
         .json({ error: ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED });
     }
 
-    let formattedQuery = {};
+    const formattedQuery = {};
 
-    for (const key in req.query) {
+    req.query.forEach(key => {
       if (key === 'id') {
-        formattedQuery['_id'] = req.query['id'];
+        formattedQuery._id = req.query.id;
       } else if (key === 'school' || key === 'major' || key === 'catalogYear') {
         formattedQuery[key] = req.query[key];
       }
-    }
+    });
 
     try {
       const queryResult = await Program.find(formattedQuery);
@@ -132,7 +130,7 @@ programController.get(
       return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
     } catch (e) {
       // Database error
-      return res.status(500).json({ error: SERVER_ERROR });
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -143,10 +141,8 @@ programController.get(
  * @param {Object} res    The HTTP response object
  * @param {Object} params The HTTP request object that contains user input
  */
-const updatebyParameters = async (res, params) => {
-  // Possible Duplication: There is a possibility that the resulting edit to a degree program will lead to multiple degree programs of the same major, catalog year, and school
-  // To avoid this we must first check if a duplication will occur.
-  let willDuplicate; // Flag used to detect duplication
+const updateByParameters = async (res, params) => {
+  let willDuplicate;
 
   const {
     newSchool,
@@ -169,9 +165,9 @@ const updatebyParameters = async (res, params) => {
   ) {
     willDuplicate = await Program.findOne(
       {
-        school: newSchool ? newSchool : school,
-        major: newMajor ? newMajor : major,
-        catalogYear: newCatalogYear ? newCatalogYear : catalogYear,
+        school: newSchool || school,
+        major: newMajor || major,
+        catalogYear: newCatalogYear || catalogYear,
       },
       { _id: true }
     );
@@ -179,37 +175,35 @@ const updatebyParameters = async (res, params) => {
 
   if (!willDuplicate) {
     const newData = {
-      school: newSchool ? newSchool : school,
-      major: newMajor ? newMajor : major,
-      catalogYear: newCatalogYear ? newCatalogYear : catalogYear,
+      school: newSchool || school,
+      major: newMajor || major,
+      catalogYear: newCatalogYear || catalogYear,
+      generalEducation: generalEducation || {},
+      majorRequirements: majorRequirements || {},
+      otherRequirements: otherRequirements || {},
     };
 
-    if (generalEducation) {
-      newData['generalEducation'] = generalEducation;
-    }
-    if (majorRequirements) {
-      newData['majorRequirements'] = majorRequirements;
-    }
-    if (otherRequirements) {
-      newData['otherRequirements'] = otherRequirements;
-    }
-
-    const writeResult = await Program.updateOne(
+    Program.updateOne(
       { school, major, catalogYear },
-      { $set: newData }
+      { $set: newData },
+      (err, updatedProgram) => {
+        if (err)
+          generateServerErrorCode(
+            res,
+            500,
+            'degree Program not found',
+            DEGREE_PROGRAM_NOT_FOUND
+          );
+        else res.status(200).json(updatedProgram);
+      }
     );
-
-    if (writeResult.nModified === 1) {
-      // Documents were successfully edited or no edits were required
-      return res.status(200).json();
-    } else {
-      // No documents modified as no matches were found
-      return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
-    }
-  } else {
-    // The resulting edit to the degree program will result in duplicate degree programs and must be rejected
-    return res.status(409).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
-  }
+  } else
+    generateServerErrorCode(
+      res,
+      500,
+      'degree Program already existed',
+      DEGREE_PROGRAM_ALREADY_EXISTS
+    );
 };
 
 /**
@@ -222,11 +216,8 @@ programController.put(
   passport.authenticate('jwt', { session: false }),
   validateUpdateDegreeProgramByParam,
   async (req, res) => {
-    // Validate the string inputs (school, major, catalogYear)
-    let errors = validationResult(req);
-
-    // Validate the object inputs (generalEducation, majorRequirements, otherRequirements)
-    let objStructureErrors = { errors: [] };
+    const errors = validationResult(req);
+    const objStructureErrors = { errors: [] };
     validateObjStructure(
       req.body.generalEducation,
       objStructureErrors.errors,
@@ -249,11 +240,9 @@ programController.put(
     }
 
     try {
-      await updatebyParameters(res, req.body);
-    } catch (databaseError) {
-      // return code 500 in the case of database error
-      logger.info(databaseError);
-      return res.status(500).json({ error: SERVER_ERROR });
+      await updateByParameters(res, req.body);
+    } catch (e) {
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -267,7 +256,7 @@ programController.put(
 const updateById = async (res, params) => {
   const { id, school, major, catalogYear } = params;
 
-  let projectionObj = {
+  const projectionObj = {
     _id: false,
     generalEducation: false,
     majorRequirements: false,
@@ -277,23 +266,23 @@ const updateById = async (res, params) => {
   const degreeProgramToEdit = await Program.findOne({ _id: id }, projectionObj);
   const willDuplicate = await Program.findOne(
     {
-      school: school ? school : degreeProgramToEdit.school,
-      major: major ? major : degreeProgramToEdit.major,
-      catalogYear: catalogYear ? catalogYear : degreeProgramToEdit.catalogYear,
+      school: school || degreeProgramToEdit.school,
+      major: major || degreeProgramToEdit.major,
+      catalogYear: catalogYear || degreeProgramToEdit.catalogYear,
     },
     { _id: true }
   );
 
   if (!willDuplicate) {
-    let newData = {};
-    for (const prop in params) {
+    const newData = {};
+    params.forEach(prop => {
       if (
         prop !== 'id' &&
         (prop === 'school' || prop === 'major' || prop === 'catalogYear')
       ) {
         newData[prop] = params[prop];
       }
-    }
+    });
 
     const writeResult = await Program.updateOne(
       {
@@ -305,16 +294,11 @@ const updateById = async (res, params) => {
     );
 
     if (writeResult.nModified === 1 || writeResult.ok === 1) {
-      // Documents were successfully edited or no edits were required
       return res.status(200).json();
-    } else {
-      // No documents modified as no matches were found
-      return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
     }
-  } else {
-    // The resulting edit to the degree program will result in duplicate degree programs and must be rejected
-    return res.status(409).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
+    return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
   }
+  return res.status(409).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
 };
 
 /**
@@ -327,11 +311,8 @@ programController.put(
   passport.authenticate('jwt', { session: false }),
   validateUpdateDegreeProgramById,
   async (req, res) => {
-    // Validate the string inputs (school, major, catalogYear)
-    let errors = validationResult(req);
-
-    // Validate the object inputs (generalEducation, majorRequirements, otherRequirements)
-    let objStructureErrors = { errors: [] };
+    const errors = validationResult(req);
+    const objStructureErrors = { errors: [] };
     validateObjStructure(
       req.body.generalEducation,
       objStructureErrors.errors,
@@ -348,7 +329,6 @@ programController.put(
       true
     );
 
-    // Check if validators detected errors in input
     if (errors.isEmpty() === false || objStructureErrors.errors.length > 0) {
       return res.status(400).json({ errors, objStructureErrors });
     }
@@ -363,10 +343,8 @@ programController.put(
 
     try {
       await updateById(res, req.body);
-    } catch (databaseError) {
-      // Database error
-      logger.info(databaseError);
-      return res.status(500).json({ error: SERVER_ERROR });
+    } catch (e) {
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -383,7 +361,6 @@ programController.delete(
   async (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty() === false) {
-      // All or some inputs are invalid
       return res.status(400).json(errors);
     }
 
@@ -409,14 +386,11 @@ programController.delete(
       }
 
       if (deleteResult.deletedCount > 0) {
-        return res.status(200).json();
-      } else {
-        // Document to be deleted was not found in database
-        return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
+        return res.status(200).json(deleteResult);
       }
-    } catch (databaseError) {
-      logger.info(databaseError);
-      return res.status(500).json({ error: SERVER_ERROR });
+      return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
+    } catch (e) {
+      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );

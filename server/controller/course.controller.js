@@ -1,12 +1,15 @@
+/* eslint-disable no-underscore-dangle */
 import express from 'express';
-import { validationResult } from 'express-validator';
 import passport from 'passport';
 import { Course } from '../database/models';
+
 import {
   generateServerErrorCode,
   removeUndefinedObjectProps,
   isObjectEmpty,
+  validationHandler,
 } from '../store/utils';
+
 import {
   COURSE_EXISTS_ALREADY,
   COURSE_DOES_NOT_EXIST,
@@ -14,6 +17,7 @@ import {
   NO_DATA_TO_UPDATE,
   SCHOOL_DOES_NOT_EXIST,
 } from './constant';
+
 import {
   validateCourseCreation,
   validateSingleCourse,
@@ -22,28 +26,7 @@ import {
 } from './validation/course.validation';
 
 const courseController = express.Router();
-const ObjectId = require('mongoose').Types.ObjectId;
-
-/**
- * Creates a new Course with correct reference to ObjectId of prerequisites and corequisites
- * @param {} data
- * @returns {Course} Course
- */
-async function createCourse(data) {
-  try {
-    let course;
-    let prereqs = data.prerequisites;
-    let coreqs = data.corequisites;
-
-    data.prerequisites = await getAllCourseId(data.school, prereqs);
-    data.corequisites = await getAllCourseId(data.school, coreqs);
-
-    course = new Course(data);
-    return course.save();
-  } catch (e) {
-    console.log('createCourse() Error: ', e);
-  }
-}
+const { ObjectId } = require('mongoose').Types;
 
 /**
  * Loop though an array of Courses to get the ObjectId of each
@@ -51,63 +34,83 @@ async function createCourse(data) {
  * @param {[String]} codes
  * @returns {[ObjectId]} [ObjectId]
  */
-async function getAllCourseId(school, codes) {
+courseController.getAllCourseId = async (school, codes) => {
   try {
-    let coursesWithIds = [];
-    for (let code of codes) {
-      const objId = await getObjectId(school, code);
-      coursesWithIds.push(objId);
-    }
+    const coursesWithIds = [];
+    await codes.forEach(code => {
+      Course.findOne({ school, code }, async foundCourse => {
+        let id;
+        if (!foundCourse) {
+          const createdCourse = await courseController.createCourse({
+            school,
+            code,
+          });
+          id = new ObjectId(createdCourse._id);
+        } else id = new ObjectId(foundCourse._id);
+        coursesWithIds.push(id);
+      });
+    });
     return coursesWithIds;
   } catch (e) {
-    console.log('getAllCourseId() Error: ', e);
+    return e;
   }
-}
+};
 
 /**
- * Get the ObjectId of a course based on school (schl) and course code
- * Or initialize a new course and retrieve the ObjectId
- * @param {String} school
- * @param {String} code
- * @returns {ObjectId} ObjectId
- */
-async function getObjectId(school, code) {
-  try {
-    let course = await Course.findOne({
-      school,
-      code,
-    });
-    if (!course) {
-      const createdCourse = await createEmptyCourse(school, code);
-      return new ObjectId(createdCourse._id);
-    }
-    return new ObjectId(course._id);
-  } catch (e) {
-    console.log('getObjectId() Error: ', e);
-  }
-}
-
-/**
- * Initialiazes an empty course for future use
- * @param {String} schl
- * @param {String} courseCode
+ * Creates a new Course with correct reference to ObjectId of prerequisites and corequisites
+ * Option default = 'EMPTY' means to create a course with only required data: {school, code, title}
+ * Create a course with data that has specific prereq and coreq with option = 'NONE_EMPTY'. Ex: createCourse({school, code, title}, 'NONE_EMPTY')
+ * @param {courseInfo} data
  * @returns {Course} Course
  */
-async function createEmptyCourse(school, code) {
-  const data = {
-    school,
-    code,
-    title: ' ',
-    description: ' ',
-    prerequisites: [],
-    corequisites: [],
-    difficulty: 0,
-    impaction: 0,
-    termsOffered: ' ',
-  };
-  let newCourse = new Course(data);
-  return newCourse.save();
-}
+courseController.createCourse = async (data, option = 'EMPTY') => {
+  try {
+    let course = data;
+    if (option === 'EMPTY') {
+      course = {
+        school: data.school,
+        code: data.code,
+        title: data.title,
+      };
+    } else {
+      course.prerequisites = await courseController.getAllCourseId(
+        data.school,
+        data.prerequisites
+      );
+      course.corequisites = await courseController.getAllCourseId(
+        data.school,
+        data.corequisites
+      );
+    }
+
+    return new Course(course).save();
+  } catch (e) {
+    return e;
+  }
+};
+
+/**
+ * @param {Object} options
+ */
+courseController.getPopulatedCourse = (options, res) => {
+  try {
+    Course.find(options)
+      .populate('prerequisites corequisites')
+      .then(foundCourse => {
+        if (foundCourse) res.status(200).json(foundCourse);
+        else
+          generateServerErrorCode(
+            res,
+            403,
+            'school courses retrieval error',
+            SCHOOL_DOES_NOT_EXIST,
+            'school, code'
+          );
+      });
+  } catch (e) {
+    generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
+  }
+};
 
 /**
  * POST/
@@ -115,44 +118,30 @@ async function createEmptyCourse(school, code) {
  */
 courseController.post(
   '/',
-  passport.authenticate('jwt', {
-    session: false,
-  }),
+  passport.authenticate('jwt', { session: false }),
   validateCourseCreation,
-  async (req, res) => {
-    const errorsAfterValidation = validationResult(req);
-    if (!errorsAfterValidation.isEmpty()) {
-      res.status(400).json({
-        code: 400,
-        errors: errorsAfterValidation.mapped(),
-      });
-    } else {
+  (req, res) => {
+    validationHandler(req, res, () => {
       try {
         const { school, code } = req.body;
-
-        // Check if course already exists
-        const course = await Course.findOne({
-          school,
-          code,
+        Course.findOne({ school, code }, foundCourse => {
+          if (!foundCourse)
+            courseController
+              .createCourse({ school, code }, 'NONE_EMPTY')
+              .then(createdCourse => res.status(200).json(createdCourse));
+          else
+            generateServerErrorCode(
+              res,
+              403,
+              'course creation error',
+              COURSE_EXISTS_ALREADY,
+              'school, code'
+            );
         });
-
-        // Create a new course
-        if (!course) {
-          const createdCourse = await createCourse(req.body);
-          res.status(200).json(createdCourse);
-        } else {
-          generateServerErrorCode(
-            res,
-            403,
-            'course creation error',
-            COURSE_EXISTS_ALREADY,
-            'school, code'
-          );
-        }
       } catch (e) {
         generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       }
-    }
+    });
   }
 );
 
@@ -164,37 +153,11 @@ courseController.get(
   '/',
   passport.authenticate('jwt', { session: false }),
   validateCourseId,
-  async (req, res) => {
-    const errorsAfterValidation = validationResult(req);
-    if (!errorsAfterValidation.isEmpty()) {
-      res.status(400).json({
-        code: 400,
-        errors: errorsAfterValidation.mapped(),
-      });
-    } else {
-      try {
-        // Get course ObjectId from query
-        const courseId = req.query.courseId;
-
-        const fetchedCourse = await Course.findOne({
-          _id: courseId,
-        }).populate('prerequisites corequisites');
-
-        if (fetchedCourse) {
-          res.status(200).json(fetchedCourse);
-        } else {
-          generateServerErrorCode(
-            res,
-            403,
-            'course retrieval error',
-            COURSE_DOES_NOT_EXIST,
-            'courseId'
-          );
-        }
-      } catch (e) {
-        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-      }
-    }
+  (req, res) => {
+    validationHandler(req, res, () => {
+      const { _id } = req.query;
+      courseController.getPopulatedCourse({ _id }, res);
+    });
   }
 );
 
@@ -206,38 +169,13 @@ courseController.get(
   '/:school/:code',
   passport.authenticate('jwt', { session: false }),
   validateSingleCourse,
-  async (req, res) => {
-    const errorsAfterValidation = validationResult(req);
-    if (!errorsAfterValidation.isEmpty()) {
-      res.status(400).json({
-        code: 400,
-        errors: errorsAfterValidation.mapped(),
-      });
-    } else {
-      try {
-        const { school, code } = req.params;
+  (req, res) => {
+    validationHandler(req, res, () => {
+      const { code } = req.params;
+      const school = req.params.school.toUpperCase();
 
-        // Get course and populate the prerequisites and corequisities data using their _id
-        const course = await Course.findOne({
-          school,
-          code,
-        }).populate('prerequisites corequisites');
-
-        if (course) {
-          res.status(200).json(course);
-        } else {
-          generateServerErrorCode(
-            res,
-            403,
-            'course retrieval error',
-            COURSE_DOES_NOT_EXIST,
-            'school, code'
-          );
-        }
-      } catch (e) {
-        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-      }
-    }
+      courseController.getPopulatedCourse({ school, code }, res);
+    });
   }
 );
 
@@ -249,36 +187,13 @@ courseController.get(
   '/:school',
   passport.authenticate('jwt', { session: false }),
   validateSchoolCourses,
-  async (req, res) => {
-    const errorsAfterValidation = validationResult(req);
-    if (!errorsAfterValidation.isEmpty()) {
-      res.status(400).json({
-        code: 400,
-        errors: errorsAfterValidation.mapped(),
-      });
-    } else {
-      try {
-        // Get all courses with matching school name
-        // and populate the prerequisites and corequisities
-        const courses = await Course.find({
-          school: req.params.school,
-        }).populate('prerequisites corequisites');
-
-        if (courses) {
-          res.status(200).json(courses);
-        } else {
-          generateServerErrorCode(
-            res,
-            403,
-            'school courses retrieval error',
-            SCHOOL_DOES_NOT_EXIST,
-            'school'
-          );
-        }
-      } catch (e) {
-        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-      }
-    }
+  (req, res) => {
+    const school = req.params.school.toUpperCase();
+    validationHandler(
+      req,
+      res,
+      courseController.getPopulatedCourse({ school }, res)
+    );
   }
 );
 
@@ -290,53 +205,39 @@ courseController.put(
   '/',
   passport.authenticate('jwt', { session: false }),
   validateCourseId,
-  async (req, res) => {
-    const errorsAfterValidation = validationResult(req);
-    if (!errorsAfterValidation.isEmpty()) {
-      res.status(400).json({
-        code: 400,
-        errors: errorsAfterValidation.mapped(),
-      });
-    } else {
-      try {
-        // Get course ObjectId from query
-        const courseId = req.query.courseId;
+  (req, res) => {
+    validationHandler(req, res, async () => {
+      const { _id } = req.query;
+      const updateData = removeUndefinedObjectProps(req.body);
 
-        // Remove undefined properties
-        const updateData = removeUndefinedObjectProps(req.body);
-
-        // Check if there is data to update
-        if (isObjectEmpty(updateData)) {
-          return res.status(400).json({ error: NO_DATA_TO_UPDATE });
-        }
-
-        const updatedCourse = await Course.findByIdAndUpdate(
-          { _id: courseId },
+      if (isObjectEmpty(updateData))
+        res.status(400).json({ error: NO_DATA_TO_UPDATE });
+      else {
+        Course.findByIdAndUpdate(
+          { _id },
           updateData,
-          { useFindAndModify: false, new: true }
+          { useFindAndModify: false, new: true },
+          (err, updatedCourse) => {
+            if (err)
+              generateServerErrorCode(
+                res,
+                403,
+                'update course error',
+                COURSE_DOES_NOT_EXIST,
+                'course_id'
+              );
+            else res.status(200).json(updatedCourse);
+          }
         );
-
-        if (updatedCourse) {
-          res.status(200).json(updatedCourse);
-        } else {
-          generateServerErrorCode(
-            res,
-            403,
-            'update course error',
-            COURSE_DOES_NOT_EXIST,
-            'courseId'
-          );
-        }
-      } catch (e) {
-        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       }
-    }
+    });
   }
 );
 
 /**
  * DELETE/
  * Delete a course using ObjectId through query
+ * IMPORTANT: calling this might affect other courses, which include the deleted courses as a pre/corequisite.
  */
 courseController.delete(
   '/',
@@ -344,26 +245,19 @@ courseController.delete(
   validateCourseId,
   async (req, res) => {
     try {
-      // Get course ObjectId from query
-      const courseId = req.query.courseId;
+      const { _id } = req.query;
 
-      const deletedCourse = await Course.findByIdAndDelete({
-        _id: courseId,
+      await Course.findByIdAndDelete({ _id }, (err, result) => {
+        if (err)
+          generateServerErrorCode(
+            res,
+            403,
+            'delete course error',
+            COURSE_DOES_NOT_EXIST,
+            'courseId'
+          );
+        else res.status(200).json({ message: 'deleted a course', result });
       });
-
-      if (deletedCourse) {
-        return res
-          .status(200)
-          .json({ message: 'deleted a course', deletedCourse });
-      } else {
-        generateServerErrorCode(
-          res,
-          403,
-          'delete course error',
-          COURSE_DOES_NOT_EXIST,
-          'courseId'
-        );
-      }
     } catch (e) {
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
@@ -372,17 +266,16 @@ courseController.delete(
 
 /**
  * DELETE/
- * Delete everything!
+ * IMPORTANT: Only call this one With ENV=dev
+ * Delete all courses
  */
 courseController.delete(
   '/all',
   passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    Course.deleteMany({}, function(err, result) {
-      if (err) {
-        return res.status(500).json({ err });
-      }
-      return res.status(200).json({ message: 'deleted all courses' });
+  (req, res) => {
+    Course.deleteMany({}, (err, result) => {
+      if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+      else res.status(200).json({ message: `deleted all courses ${result}` });
     });
   }
 );

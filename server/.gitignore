@@ -62,3 +62,8 @@ typings/
 
 
 package-lock.json
+
+# Scan Gcloud OCR || Multer File Upload. Never upload `uploads files to git` || test.pdf
+./uploads/
+./cloud-ocr-key.json
+./Scanning/test
