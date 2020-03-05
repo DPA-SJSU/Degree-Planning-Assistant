@@ -1,0 +1,21 @@
+<div class="modalW" *ngIf="isOpen">
+  <div class="modalW-content">
+    <div class="modalW-header">
+      <span class="close" (click)="closeModal()">
+        &times;
+      </span>
+      <h2>{{ title }}</h2>
+      <mat-form-field>
+        <mat-label>Input Data</mat-label>
+        <input matInput [(ngModel)]="modalData" />
+      </mat-form-field>
+    </div>
+    <div class="modalW-body">
+      <ng-content></ng-content>
+    </div>
+    <div class="modalW-footer">
+      <button class="cancel-button" (click)="closeModal()">Cancel</button>
+      <button (click)="sendInputData()">Submit</button>
+    </div>
+  </div>
+</div>

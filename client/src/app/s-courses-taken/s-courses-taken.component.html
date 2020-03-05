@@ -4,35 +4,49 @@
     class="card-section"
   >
     <mat-expansion-panel-header>
-      <mat-panel-title>
+      <mat-panel-title class="big-header">
         <p class="section-header">Courses Taken</p>
       </mat-panel-title>
     </mat-expansion-panel-header>
     <div class="flex-column align-items-start">
       <mat-chip-list>
-        <mat-chip *ngFor="let course of userProfile?.coursesTaken" class="chip">
+        <mat-chip
+          *ngFor="let course of userProfile?.coursesTaken"
+          [matMenuTriggerFor]="menu"
+          class="chip"
+        >
           <span *ngIf="course?.code" class="body1 chip-clr">{{
-            course.code
+            course.code | titlecase
           }}</span>
+          <mat-menu #menu="matMenu" style="padding: 0px;">
+            <app-popup
+              [title]="course.school + ' ' + course.code"
+              [subtitle]="course.title"
+              contentTitle="Description"
+            >
+              <p *ngIf="course?.description">
+                {{ course.description }}
+              </p>
+            </app-popup>
+          </mat-menu>
         </mat-chip>
       </mat-chip-list>
-      <div class="add-courses-btn" (click)="showPopup = true">
-        +
-      </div>
     </div>
+    <p>
+      <button class="add-courses-btn" (click)="showModal = true">+</button>
+      <app-modal
+        [isOpen]="showModal"
+        title="Test modal"
+        (onClose)="modalStatus($event)"
+        (onInput)="getModalData($event)"
+      >
+        This is the content of the modal (thanks to transclusion aka content
+        projection)
+        <h3>Courses Taken:</h3>
+        <p *ngFor="let course of userProfile?.coursesTaken">
+          <span *ngIf="course?.code">{{ course.code }}</span>
+        </p>
+      </app-modal>
+    </p>
   </mat-expansion-panel>
 </div>
-
-<app-popup
-  [isOpen]="showPopup"
-  title="Test pop-up"
-  (onClose)="popupStatus($event)"
-  (onInput)="getPopupData($event)"
->
-  This is the content of the pop-up (thanks to transclusion aka content
-  projection)
-  <h3>Courses Taken:</h3>
-  <p *ngFor="let course of userProfile?.coursesTaken">
-    <span *ngIf="course?.code">{{ course.code }}</span>
-  </p>
-</app-popup>

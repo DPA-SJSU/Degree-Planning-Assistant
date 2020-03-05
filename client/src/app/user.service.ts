@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { CourseData } from "./course.service";
 
 export interface UserData {
   name?: string;
@@ -22,6 +21,18 @@ export interface UserProfile {
   major?: string;
   minor?: string;
   catalogYear?: number;
+}
+
+export interface CourseData {
+  school: string;
+  code: string;
+  title: string;
+  description: string;
+  prerequisites: [CourseData];
+  corequisites: [CourseData];
+  difficulty?: number;
+  impaction?: number;
+  termsOffered: string;
 }
 
 @Injectable({

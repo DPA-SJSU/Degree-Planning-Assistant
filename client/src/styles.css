@@ -171,8 +171,18 @@ button:disabled {
   color: #707070;
 }
 
-/* Component CSS */
-app-landing {
+/* Small dropdown description card */
+.mini-card {
+  margin-top: -8px;
+  margin-bottom: -8px;
+}
+
+.mini-card-content-title {
+  font-weight: 600;
+}
+
+.mini-card-description {
+  margin-top: 2px;
 }
 
 .body1 {
