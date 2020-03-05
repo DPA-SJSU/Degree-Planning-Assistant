@@ -193,7 +193,7 @@ semesterController.delete(
  */
 semesterController.delete(
   '/all',
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Semester.deleteMany({}, (err, result) => {
       if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);

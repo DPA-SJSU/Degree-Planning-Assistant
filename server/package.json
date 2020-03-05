@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "GOOGLE_APPLICATION_CREDENTIALS='/Users/cuongvqnguyen/Documents/project/dpa/server/store/Scanning/cloud-ocr-key.json' ENV=prod nodemon -r esm app.js",
-    "dev": "GOOGLE_APPLICATION_CREDENTIALS='/Users/cuongvqnguyen/Documents/project/dpa/server/store/Scanning/cloud-ocr-key.json' ENV=dev nodemon -r esm app.js",
+    "start": "ENV=prod nodemon -r esm app.js",
+    "dev": "ENV=dev nodemon -r esm app.js",
     "start-w": "set ENV=prod && nodemon -r esm app.js",
     "dev-w": "set ENV=dev && nodemon -r esm app.js"
   },

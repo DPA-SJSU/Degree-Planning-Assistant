@@ -51,7 +51,7 @@ const addCourseIdToNewList = async courses => {
 textScanController.post(
   '/',
   upload.single('pdf'),
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   (req, res) => {
     const { user } = req;
     const { option } = req.query;
