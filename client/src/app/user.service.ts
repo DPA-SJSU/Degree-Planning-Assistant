@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, Subject } from "rxjs";
 import { map } from "rxjs/operators";
 
 export interface UserData {
@@ -41,6 +41,7 @@ export interface CourseData {
 export class UserService {
   uri = "http://localhost:8080";
   tokenKey = "tokenKey";
+  private logger = new Subject<boolean>();
 
   constructor(private http: HttpClient) {}
 
@@ -60,6 +61,7 @@ export class UserService {
     return this.http.post(`${this.uri}/login`, user).pipe(
       map(userDetails => {
         localStorage.setItem(this.tokenKey, userDetails["token"]);
+        this.logger.next(true);
         return userDetails;
       })
     );
@@ -76,10 +78,11 @@ export class UserService {
    * For checking if someone is logged in
    */
   isLoggedIn(): boolean {
-    if (this.getCurrentStorageStatus() != null) {
-      return true;
-    }
-    return false;
+    return this.getCurrentStorageStatus() != null;
+  }
+
+  isLoggedInAsync(): Observable<boolean> {
+    return this.logger.asObservable();
   }
 
   /**
@@ -87,6 +90,7 @@ export class UserService {
    */
   logout() {
     localStorage.removeItem(this.tokenKey);
+    this.logger.next(false);
   }
 
   getHttpHeaders() {
