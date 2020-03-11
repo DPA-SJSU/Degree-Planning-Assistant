@@ -40,8 +40,23 @@ const userController = express.Router();
  */
 userController.createUser = (email, password) => {
   const data = {
-    email,
     hashedPassword: generateHashedPassword(password),
+    email,
+    avatarUrl: '',
+    avatarType: '',
+    firstName: '',
+    lastName: '',
+    bio: '',
+    isAdmin: false,
+    coursesTaken: [],
+    gradDate: {
+      year: undefined,
+      term: '',
+    },
+    major: '',
+    minor: '',
+    catalogYear: undefined,
+    degreePlanId: undefined,
   };
 
   return new User(data).save();
@@ -56,28 +71,40 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
     try {
       const { email, password } = req.body;
 
-      User.findOne({ email }).then(async foundUser => {
-        if (!foundUser) {
-          await userController.createUser(email, password);
-          // Sign token
-          const newUser = await User.findOne({ email });
-          const token = jwt.sign({ email }, config.passport.secret, {
-            expiresIn: 10000000,
-          });
+      /*
+      TODO: Once the Plan Schema has been added, Add this populate chain:
+      .populate({
+        path: "degreePlanId",
+        populate: {
+          path: "semesters",
+          model: "Semester"
+        }
+      })
+    */
+      User.findOne({ email })
+        .populate('coursesTaken')
+        .then(async foundUser => {
+          if (!foundUser) {
+            await userController.createUser(email, password);
+            // Sign token
+            const newUser = await User.findOne({ email });
+            const token = jwt.sign({ email }, config.passport.secret, {
+              expiresIn: 10000000,
+            });
 
-          const userToReturn = { ...newUser.toJSON(), ...{ token } };
+            const userToReturn = { ...newUser.toJSON(), ...{ token } };
 
-          delete userToReturn.hashedPassword;
-          res.status(200).json(userToReturn);
-        } else
-          generateServerErrorCode(
-            res,
-            403,
-            'register email error',
-            USER_EXISTS_ALREADY,
-            'email'
-          );
-      });
+            delete userToReturn.hashedPassword;
+            res.status(200).json(userToReturn);
+          } else
+            generateServerErrorCode(
+              res,
+              403,
+              'register email error',
+              USER_EXISTS_ALREADY,
+              'email'
+            );
+        });
     } catch (e) {
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
@@ -92,34 +119,46 @@ userController.post('/login', validateLoginUser, (req, res) => {
   validationHandler(req, res, async () => {
     try {
       const { email, password } = req.body;
-      User.findOne({ email }).then(user => {
-        if (user && user.email) {
-          const isPasswordMatched = user.comparePassword(password);
-          if (isPasswordMatched) {
-            // Sign token
-            const token = jwt.sign({ email }, config.passport.secret, {
-              expiresIn: 1000000,
-            });
-            const userToReturn = { ...user.toJSON(), ...{ token } };
-            delete userToReturn.hashedPassword;
-            res.status(200).json(userToReturn);
+      /*
+        TODO: Once the Plan Schema has been added, Add this populate chain to also populate degree plans:
+        .populate({
+          path: "degreePlanId",
+          populate: {
+            path: "semesters",
+            model: "Semester"
+          }
+        })
+      */
+      User.findOne({ email })
+        .populate('coursesTaken')
+        .then(user => {
+          if (user && user.email) {
+            const isPasswordMatched = user.comparePassword(password);
+            if (isPasswordMatched) {
+              // Sign token
+              const token = jwt.sign({ email }, config.passport.secret, {
+                expiresIn: 1000000,
+              });
+              const userToReturn = { ...user.toJSON(), ...{ token } };
+              delete userToReturn.hashedPassword;
+              res.status(200).json(userToReturn);
+            } else
+              generateServerErrorCode(
+                res,
+                403,
+                'login password error',
+                WRONG_PASSWORD,
+                'password'
+              );
           } else
             generateServerErrorCode(
               res,
-              403,
-              'login password error',
-              WRONG_PASSWORD,
-              'password'
+              404,
+              'login email error',
+              USER_DOES_NOT_EXIST,
+              'email'
             );
-        } else
-          generateServerErrorCode(
-            res,
-            404,
-            'login email error',
-            USER_DOES_NOT_EXIST,
-            'email'
-          );
-      });
+        });
     } catch (e) {
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
@@ -175,15 +214,15 @@ userController.put(
       } else
         try {
           const itemsToBeUpdated = {
-            ...(avatarUrl && { avatar_url: avatarUrl }),
-            ...(avatarType && { avatar_type: avatarType }),
-            ...(firstName && { first_name: firstName }),
-            ...(lastName && { last_name: lastName }),
+            ...(avatarUrl && { avatarUrl }),
+            ...(avatarType && { avatarType }),
+            ...(firstName && { firstName }),
+            ...(lastName && { lastName }),
             ...(bio && { bio }),
             ...(major && { major }),
             ...(minor && { minor }),
-            ...(catalogYear && { catalog_year: catalogYear }),
-            ...(gradDate && { grad_date: gradDate }),
+            ...(catalogYear && { catalogYear }),
+            ...(gradDate && { gradDate }),
           };
 
           User.updateOne(
@@ -291,6 +330,45 @@ userController.get(
         generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       }
     });
+  }
+);
+
+//  @route  GET /
+//  @desc   Fetches all of a user's data except their password
+//  @access Private
+userController.get(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    const userId = req.user._id;
+
+    /*
+      TODO: Once the Plan Schema has been added, Add this populate chain:
+      .populate({
+        path: "degreePlanId",
+        populate: {
+          path: "semesters",
+          model: "Semester"
+        }
+      })
+    */
+    User.findById(userId, { hashedPassword: false })
+      .populate('coursesTaken')
+      .then(user => {
+        if (user) {
+          res.status(200).json(user);
+        } else {
+          generateServerErrorCode(
+            res,
+            500,
+            'No such user',
+            USER_DOES_NOT_EXIST
+          );
+        }
+      })
+      .catch(error => {
+        generateServerErrorCode(res, 500, error, SOME_THING_WENT_WRONG);
+      });
   }
 );
 

@@ -109,16 +109,7 @@ export class UserService {
    * @param attribute (optional)
    */
   getProfile(attribute?: string) {
-    if (attribute) {
-      return this.http.get<UserProfile>(
-        `${this.uri}/profile/?` + attribute + "=true",
-        this.getHttpHeaders()
-      );
-    }
-    return this.http.get<UserProfile>(
-      `${this.uri}/profile/`,
-      this.getHttpHeaders()
-    );
+    return this.http.get<UserProfile>(`${this.uri}/`, this.getHttpHeaders());
   }
 
   /**
