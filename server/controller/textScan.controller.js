@@ -7,10 +7,11 @@ import passport from 'passport';
 
 import semesterController from './semester.controller';
 import courseController from './course.controller';
+import planController from './plan.controller';
 
 import CloudOcr from '../store/Scanning/cloudOCR';
 
-import { User, Course, Semester } from '../database/models';
+import { User, Course, Semester, Plan } from '../database/models';
 
 import { generateServerErrorCode } from '../store/utils';
 
@@ -20,55 +21,45 @@ const upload = multer({ dest: 'uploads/' });
 const textScanController = express.Router();
 
 /**
- * Find course ID of all courses and return a new course List that has course id
- * @param {[JSON Object]} courses
- * return {} newCourseList
- */
-const addCourseIdToNewList = async courses => {
-  const newCourseList = [];
-  for (const course of courses) {
-    const school = course.school.toUpperCase();
-    const { code } = course;
-    const title = course.title || ' ';
-    await Course.findOne({ school, code }).then(async foundCourse => {
-      if (!foundCourse) {
-        await courseController
-          .createCourse({ school, code, title })
-          .then(createdCourse => {
-            newCourseList.push(createdCourse._id);
-          });
-      } else newCourseList.push(foundCourse._id);
-    });
-  }
-
-  return newCourseList;
-};
-
-/**
  * POST/
  * Scan PDF File and input into Course & Semester Schema
  */
 textScanController.post(
   '/',
   upload.single('pdf'),
-  // passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
     const { user } = req;
     const { option } = req.query;
-    const fileName = req.file.path;
-    CloudOcr.scan(fileName, option)
+    const { path } = req.file;
+
+    CloudOcr.scan(path, option)
       .then(async scanResult => {
-        // 1. Create a semester, and add to the database
+        let coursesTaken = [];
+        const semesters = [];
+
         for (const semester of scanResult.semesterList) {
-          semester.courses = await addCourseIdToNewList(semester.courses);
-          await semesterController.createSemester(semester);
+          // 1. Create semesters
+          const newSemester = await semesterController.createSemester(semester);
+          coursesTaken = coursesTaken.concat(newSemester.courses);
+          semesters.push(newSemester._id);
         }
 
-        // Create a Degree Plan, and add Semester ID + userID
+        // 2. TO-DO: Add the remaining classes to the semester
 
-        res.status(200).json(scanResult);
+        // 3. Create a new DegreePlan to DB
+        const degreePlan = await new Plan({ semesters }).save();
+
+        // 4. Update User's DegreePlanId
+        await User.findByIdAndUpdate(user._id, {
+          coursesTaken,
+          degreePlanId: degreePlan._id,
+        });
+
+        return planController.getAllSemesterAndCourses(res, degreePlan._id);
       })
       .catch(e => {
+        console.log(e);
         generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       });
   }

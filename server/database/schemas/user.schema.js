@@ -23,7 +23,6 @@ const userSchema = new Schema({
       uppercase: true,
     },
   ],
-  grad_date: { year: { type: Number }, term: { type: String } },
 });
 
 /**

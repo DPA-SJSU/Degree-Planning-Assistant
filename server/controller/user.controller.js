@@ -4,9 +4,6 @@ import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 
-import { validationResult } from 'express-validator';
-
-import jwt from 'jsonwebtoken';
 import {
   validateRegisterUser,
   validateLoginUser,
@@ -73,17 +70,6 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
   validationHandler(req, res, async () => {
     try {
       const { email, password } = req.body;
-
-      /*
-      TODO: Once the Plan Schema has been added, Add this populate chain:
-      .populate({
-        path: "degreePlanId",
-        populate: {
-          path: "semesters",
-          model: "Semester"
-        }
-      })
-    */
       User.findOne({ email })
         .populate('coursesTaken')
         .then(async foundUser => {
@@ -122,17 +108,19 @@ userController.post('/login', validateLoginUser, (req, res) => {
   validationHandler(req, res, async () => {
     try {
       const { email, password } = req.body;
-      /*
-        TODO: Once the Plan Schema has been added, Add this populate chain to also populate degree plans:
-        .populate({
-          path: "degreePlanId",
-          populate: {
-            path: "semesters",
-            model: "Semester"
-          }
-        })
-      */
       User.findOne({ email })
+        .populate({
+          path: 'degreePlanId',
+          model: 'Plan',
+          populate: {
+            path: 'semesters',
+            model: 'Semester',
+            populate: {
+              path: 'courses',
+              model: 'Course',
+            },
+          },
+        })
         .populate('coursesTaken')
         .then(user => {
           if (user && user.email) {
@@ -144,6 +132,8 @@ userController.post('/login', validateLoginUser, (req, res) => {
               });
               const userToReturn = { ...user.toJSON(), ...{ token } };
               delete userToReturn.hashedPassword;
+              delete userToReturn.__v;
+
               res.status(200).json(userToReturn);
             } else
               generateServerErrorCode(
