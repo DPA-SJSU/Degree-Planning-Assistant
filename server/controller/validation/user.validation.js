@@ -26,12 +26,19 @@ import {
   ID_IS_INVALID,
   BOOLEAN_VALUES_ONLY,
   FIRST_NAME_IS_INVALID,
+  TOKEN_IS_EMPTY,
 } from '../constant';
 
 const checkIfLettersOnly = str => {
   const regExp = new RegExp(/^([a-z]|[A-Z]|\s)+$/, 'g');
   return regExp.test(str);
 };
+
+export const validationToken = [
+  check('token')
+    .exists()
+    .withMessage(TOKEN_IS_EMPTY),
+];
 
 // Check if the proper object structure for grad date was inputted
 export const checkIfCorrectGradDate = obj => {

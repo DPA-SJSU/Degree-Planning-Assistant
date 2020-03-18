@@ -13,6 +13,7 @@ import {
   semesterController,
   programController,
   textScanController,
+  planController,
 } from './controller';
 
 const app = express();
@@ -30,15 +31,21 @@ app.use('/course', courseController);
 app.use('/semester', semesterController);
 app.use('/program', programController);
 app.use('/scan', textScanController);
+app.use('/plan', planController);
 
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);
   mongoose
-    .connect(mongoDBUri, { useNewUrlParser: true, useUnifiedTopology: true })
+    .connect(mongoDBUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    })
     .then(() => {
-      logger.info(`Connected to mongoDB at ${mongoHostName}`);
+      logger.info(`Connected to MongoDB at ${mongoHostName}`);
     })
     .catch(() => {
       logger.info(`Failed to connect to MongoDB`);
     });
+  mongoose.set('debug', true);
 });

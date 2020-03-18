@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-underscore-dangle */
 import express from 'express';
 import passport from 'passport';
@@ -29,25 +31,56 @@ const courseController = express.Router();
 const { ObjectId } = require('mongoose').Types;
 
 /**
+ * ============================================
+ * Starting helper functions for courseController
+ * ============================================
+ */
+
+/**
+ * Find course ID and return a new course List that has course id
+ * Create new Course if it's not in db, else add to the list
+ * @param {[JSON Object]} courses
+ * return {} newCourseList
+ */
+courseController.createAndGetCourseId = async courses => {
+  const listOfCourseID = [];
+  for (const course of courses) {
+    const school = course.school.toUpperCase();
+    const { code } = course;
+    const title = course.title || ' ';
+
+    await Course.findOne({ school, code }).then(async foundCourse => {
+      if (!foundCourse) {
+        await courseController
+          .createCourse({ school, code, title })
+          .then(createdCourse => {
+            listOfCourseID.push(createdCourse._id);
+          });
+      } else listOfCourseID.push(foundCourse._id);
+    });
+  }
+
+  return listOfCourseID;
+};
+
+/**
  * Loop though an array of Courses to get the ObjectId of each
  * @param {String} school
- * @param {[String]} codes
+ * @param {[String]} codes Array of codes
  * @returns {[ObjectId]} [ObjectId]
  */
 courseController.getAllCourseId = async (school, codes) => {
   try {
     const coursesWithIds = [];
     await codes.forEach(code => {
-      Course.findOne({ school, code }, async foundCourse => {
-        let id;
+      Course.findOne({ school, code }).then(async foundCourse => {
         if (!foundCourse) {
-          const createdCourse = await courseController.createCourse({
-            school,
-            code,
-          });
-          id = new ObjectId(createdCourse._id);
-        } else id = new ObjectId(foundCourse._id);
-        coursesWithIds.push(id);
+          await courseController
+            .createCourse({ school, code })
+            .then(createdCourse => {
+              coursesWithIds.push(createdCourse._id);
+            });
+        } else coursesWithIds.push(foundCourse._id);
       });
     });
     return coursesWithIds;
@@ -111,6 +144,12 @@ courseController.getPopulatedCourse = (options, res) => {
     generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
   }
 };
+
+/**
+ * ============================================
+ * Starting APIs for Course
+ * ============================================
+ */
 
 /**
  * POST/

@@ -1,3 +1,6 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-underscore-dangle */
 import express from 'express';
 import passport from 'passport';
 import { Semester } from '../database/models';
@@ -20,6 +23,7 @@ import {
   validateCreateSemester,
   validateSemesterId,
 } from './validation/semester.validation';
+import courseController from './course.controller';
 
 const semesterController = express.Router();
 
@@ -43,10 +47,32 @@ semesterController.getSemesterWithPopulatedCourse = (option, res) => {
 
 /**
  * Create A new Semester
- * @param {Object} data
+ * @param {JSON Object} data
  */
-semesterController.createSemester = data => {
-  return new Semester(data).save();
+semesterController.createSemester = async data => {
+  const newData = data;
+
+  newData.courses = await courseController.createAndGetCourseId(data.courses);
+
+  // 2. TO-DO: Add Pre-req check for each semester before creating/update a plan
+
+  return new Semester(newData).save();
+};
+
+/**
+ * Add all semesters in db
+ * return a list of semesterIds
+ * @param {[JSON Object]} list of semesters with courses
+ */
+semesterController.createSemesterList = async semesters => {
+  const semesterIDs = [];
+
+  for (const semester of semesters) {
+    const newSemester = await semesterController.createSemester(semester);
+    semesterIDs.push(newSemester._id);
+  }
+
+  return semesterIDs;
 };
 
 /**
@@ -193,7 +219,7 @@ semesterController.delete(
  */
 semesterController.delete(
   '/all',
-  // passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Semester.deleteMany({}, (err, result) => {
       if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);

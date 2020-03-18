@@ -15,15 +15,15 @@ TranscriptMapping.takenCourseList = [];
 TranscriptMapping.semesterList = [];
 TranscriptMapping.otherInfo = [];
 
-const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
-const creditCondition = ['1.0', '2.0', '3.0'];
-const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
-
-let otherInfo;
-let currentSemester;
+let otherInfo = [];
+let currentSemester = -1;
 let startingTermFound = false;
 let count = 0;
 
+/**
+ * Add Course to the current Semester
+ * @param {Object} course
+ */
 const addCourseToSemester = course => {
   TranscriptMapping.takenCourseList.push(course);
   if (TranscriptMapping.semesterList[currentSemester])
@@ -43,8 +43,14 @@ const getCourseInfo = listOfWordText => {
   return { school, code, title, credit };
 };
 
-const programParser = async (listOfWordText, sentence) => {
-  console.log(listOfWordText);
+const programParser = async paragraph => {
+  const listOfWordText = [];
+  paragraph.words.forEach(word => {
+    const wordText = word.symbols.map(symbol => symbol.text).join('');
+    listOfWordText.push(wordText);
+  });
+
+  const sentence = listOfWordText.join(' ');
   switch (true) {
     default:
       break;
@@ -57,6 +63,11 @@ const programParser = async (listOfWordText, sentence) => {
  * @param {String} sentence       A whole sentence which is scanned by OCR
  */
 const transcriptParser = async paragraph => {
+  // Use for Transcript checking
+  const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
+  const creditCondition = ['1.0', '2.0', '3.0'];
+  const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
+
   const listOfWordText = [];
   paragraph.words.forEach(word => {
     const wordText = word.symbols.map(symbol => symbol.text).join('');
@@ -64,15 +75,23 @@ const transcriptParser = async paragraph => {
   });
 
   const sentence = listOfWordText.join(' ');
+  console.log(sentence);
+
   switch (true) {
+    // Check for AP Courses
     case listOfWordText.includes('AP'):
       TranscriptMapping.otherInfo.push(sentence);
       break;
+
+    // Check for Semester
     case listOfWordText.includes('SEMESTER') && listOfWordText.length === 3: {
+      // 0: Taken
+      // 1: In Progress
       const semester = {
         term: listOfWordText[0],
         year: parseInt(listOfWordText[2], 10),
         courses: [],
+        status: 0,
       };
 
       if (!startingTermFound) {
@@ -86,9 +105,13 @@ const transcriptParser = async paragraph => {
       currentSemester = TranscriptMapping.semesterList.length - 1;
       break;
     }
+
+    // Check for Major
     case listOfWordText.includes('MAJOR'):
       TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
       break;
+
+    // Check for Course using creditCondition List
     case (creditCondition.some(credit => listOfWordText.includes(credit)) &&
       listOfWordText[0].length <= 4) ||
       (listOfWordText.length === 2 &&
@@ -96,6 +119,8 @@ const transcriptParser = async paragraph => {
         !isNaN(listOfWordText[1])):
       await addCourseToSemester(getCourseInfo(listOfWordText));
       break;
+
+    // Check for WST Eligible
     case wstCondition.every(el => listOfWordText.includes(el)):
       if (listOfWordText[listOfWordText.indexOf(':') + 1] === 'ELIGIBLE') {
         otherInfo = `[WST]: Qualify for taking upper courses such as 100W Course`;
@@ -104,6 +129,12 @@ const transcriptParser = async paragraph => {
       }
       TranscriptMapping.otherInfo.push(otherInfo);
       break;
+
+    // Check for Semester Student is enrolling
+    case listOfWordText.includes('IN PROGRESS') ||
+      listOfWordText.includes('ENROLLED'):
+      TranscriptMapping.semesterList[currentSemester].status = 1;
+      break;
     default:
       break;
   }
@@ -111,7 +142,7 @@ const transcriptParser = async paragraph => {
 
 /**
  * Parse Transcript File to get course and semester and other info.
- * @param {Responses received from GCLOUD OCR} responses
+ * @param {Object} responses Responses received from GCLOUD OCR
  */
 const documentHandler = (responses, option) => {
   responses.forEach(response => {

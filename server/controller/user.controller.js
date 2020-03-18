@@ -11,6 +11,7 @@ import {
   validateFetchProfile,
   validateFetchCoursesTaken,
   checkIfCorrectGradDate,
+  validateToken,
 } from './validation/user.validation';
 
 import {
@@ -70,17 +71,6 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
   validationHandler(req, res, async () => {
     try {
       const { email, password } = req.body;
-
-      /*
-      TODO: Once the Plan Schema has been added, Add this populate chain:
-      .populate({
-        path: "degreePlanId",
-        populate: {
-          path: "semesters",
-          model: "Semester"
-        }
-      })
-    */
       User.findOne({ email })
         .populate('coursesTaken')
         .then(async foundUser => {
@@ -119,17 +109,19 @@ userController.post('/login', validateLoginUser, (req, res) => {
   validationHandler(req, res, async () => {
     try {
       const { email, password } = req.body;
-      /*
-        TODO: Once the Plan Schema has been added, Add this populate chain to also populate degree plans:
-        .populate({
-          path: "degreePlanId",
-          populate: {
-            path: "semesters",
-            model: "Semester"
-          }
-        })
-      */
       User.findOne({ email })
+        .populate({
+          path: 'degreePlanId',
+          model: 'Plan',
+          populate: {
+            path: 'semesters',
+            model: 'Semester',
+            populate: {
+              path: 'courses',
+              model: 'Course',
+            },
+          },
+        })
         .populate('coursesTaken')
         .then(user => {
           if (user && user.email) {
@@ -141,6 +133,8 @@ userController.post('/login', validateLoginUser, (req, res) => {
               });
               const userToReturn = { ...user.toJSON(), ...{ token } };
               delete userToReturn.hashedPassword;
+              delete userToReturn.__v;
+
               res.status(200).json(userToReturn);
             } else
               generateServerErrorCode(
@@ -333,43 +327,46 @@ userController.get(
   }
 );
 
-//  @route  GET /
-//  @desc   Fetches all of a user's data except their password
+//  @route  POST /
+//  @desc   Verfiy JWT & Fetches all of a user's data except their password
 //  @access Private
-userController.get(
-  '/',
-  passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    const userId = req.user._id;
-
-    /*
-      TODO: Once the Plan Schema has been added, Add this populate chain:
-      .populate({
-        path: "degreePlanId",
-        populate: {
-          path: "semesters",
-          model: "Semester"
-        }
-      })
-    */
-    User.findById(userId, { hashedPassword: false })
-      .populate('coursesTaken')
-      .then(user => {
-        if (user) {
-          res.status(200).json(user);
+userController.post('/identity', validateToken, async (req, res) => {
+  validationHandler(req, res, () => {
+    const { token } = req.body;
+    jwt.verify(token, config.passport.secret, async (err, decodedToken) => {
+      if (err) {
+        generateServerErrorCode(res, 500, SOME_THING_WENT_WRONG);
+      } else {
+        const { email } = decodedToken;
+        if (!email || email === '') {
+          generateServerErrorCode(res, 500, SOME_THING_WENT_WRONG);
         } else {
-          generateServerErrorCode(
-            res,
-            500,
-            'No such user',
-            USER_DOES_NOT_EXIST
-          );
+          User.findOne({ email }, { hashedPassword: 0 })
+            .lean()
+            .populate({
+              path: 'degreePlanId',
+              model: 'Plan',
+              populate: {
+                path: 'semesters',
+                model: 'Semester',
+                populate: {
+                  path: 'courses',
+                  model: 'Course',
+                },
+              },
+            })
+            .populate('coursesTaken')
+            .then(user => {
+              const userToReturn = { ...user, ...{ token } };
+              res.status(200).json(userToReturn);
+            })
+            .catch(() => {
+              generateServerErrorCode(res, 500, SOME_THING_WENT_WRONG);
+            });
         }
-      })
-      .catch(error => {
-        generateServerErrorCode(res, 500, error, SOME_THING_WENT_WRONG);
-      });
-  }
-);
+      }
+    });
+  });
+});
 
 export default userController;
