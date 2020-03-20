@@ -11,8 +11,8 @@
     >
       <div *ngIf="userLoggedIn; else showLogin">
         <mat-menu #appMenu="matMenu">
-          <a [routerLink]="['home']">
-            <button mat-menu-item>Home</button>
+          <a [routerLink]="['dashboard']">
+            <button mat-menu-item>Dashboard</button>
           </a>
           <button mat-menu-item (click)="logoutButton()">
             Logout

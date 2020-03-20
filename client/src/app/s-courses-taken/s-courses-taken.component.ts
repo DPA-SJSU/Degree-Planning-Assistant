@@ -11,8 +11,9 @@ export class SCoursesTakenComponent implements OnInit {
   profile: Observable<UserProfile>;
   showModal = false;
   modalData: string;
+
   constructor(private userService: UserService) {
-    this.profile = this.userService.getProfile("coursesTaken");
+    this.profile = this.userService.userData;
   }
 
   /**

@@ -10,8 +10,8 @@ import {
   validateEditProfile,
   validateFetchProfile,
   validateFetchCoursesTaken,
-  checkIfCorrectGradDate,
   validateToken,
+  checkIfCorrectGradDate,
 } from './validation/user.validation';
 
 import {

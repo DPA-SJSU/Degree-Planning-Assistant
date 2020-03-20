@@ -30,29 +30,21 @@ export class LoginComponent {
       return;
     }
 
+    // User credentials
     const user: UserData = {
       email: this.loginForm.value.email,
       password: this.loginForm.value.password
     };
 
-    const tokenResult = this.userService.login(user);
+    /**
+     * Upon completing backend API call, navigate the page to the dashboard
+     */
+    const completeCallback: () => void = () => {
+      this.router.navigate(["dashboard"]);
+    };
 
-    // retrieve token or handle server error
-    tokenResult.subscribe(
-      result => {
-        // HTTP result: config and data:
-        const config = { userToken: result["token"] };
-        return tokenResult;
-      },
-      err => {
-        // HTTP error
-        this.errorHandler.handleError(err);
-      },
-      () => {
-        // HTTP request completed
-        this.router.navigate(["home"]);
-      }
-    );
+    // Call login from userService; passing in the user credentials and the completeCallback function
+    this.userService.login(user, completeCallback);
   }
 
   /**

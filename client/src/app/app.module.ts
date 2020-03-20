@@ -26,6 +26,7 @@ import { FooterComponent } from "./footer/footer.component";
 import { SCoursesTakenComponent } from "./s-courses-taken/s-courses-taken.component";
 import { ModalComponent } from "./modal/modal.component";
 import { PopupComponent } from "./popup/popup.component";
+import { SDashboardComponent } from './s-dashboard/s-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { PopupComponent } from "./popup/popup.component";
     FooterComponent,
     SCoursesTakenComponent,
     ModalComponent,
-    PopupComponent
+    PopupComponent,
+    SDashboardComponent
   ],
   imports: [
     BrowserModule,

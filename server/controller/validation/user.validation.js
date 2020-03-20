@@ -34,7 +34,7 @@ const checkIfLettersOnly = str => {
   return regExp.test(str);
 };
 
-export const validationToken = [
+export const validateToken = [
   check('token')
     .exists()
     .withMessage(TOKEN_IS_EMPTY),

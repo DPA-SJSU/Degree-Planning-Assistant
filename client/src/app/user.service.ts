@@ -1,7 +1,11 @@
 import { Injectable } from "@angular/core";
+
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+
 import { Observable, Subject } from "rxjs";
 import { map } from "rxjs/operators";
+
+import { ErrorHandlerService } from "./error-handler.service";
 
 export interface UserData {
   name?: string;
@@ -10,17 +14,20 @@ export interface UserData {
 }
 
 export interface UserProfile {
-  firstName?: string;
-  lastName?: string;
-  bio?: string;
-  coursesTaken?: [];
+  firstName: string;
+  lastName: string;
+  bio: string;
+  coursesTaken: Array<Object>;
   gradDate?: {
     year?: number;
-    term?: string;
+    term: string;
   };
-  major?: string;
-  minor?: string;
+  major: string;
+  minor: string;
   catalogYear?: number;
+  avatarUrl: string;
+  avatarType: string;
+  isAdmin: boolean;
 }
 
 export interface CourseData {
@@ -42,8 +49,12 @@ export class UserService {
   uri = "http://localhost:8080";
   tokenKey = "tokenKey";
   private logger = new Subject<boolean>();
+  userData: Observable<UserProfile>;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private errorHandler: ErrorHandlerService
+  ) {}
 
   /**
    * Register a new user
@@ -55,16 +66,40 @@ export class UserService {
 
   /**
    * Login an existing user
-   * @param user
+   * @param user: The user's login credentials
+   * @param completeCallback: The callback function called for the LoginComponent upon completing the HTTP request
    */
-  login(user: UserData): Observable<any> {
-    return this.http.post(`${this.uri}/login`, user).pipe(
-      map(userDetails => {
-        localStorage.setItem(this.tokenKey, userDetails["token"]);
-        this.logger.next(true);
-        return userDetails;
-      })
-    );
+  login(user: UserData, completeCallback: () => void) {
+    /**
+     * Call back function called by map when piping the http response for login
+     * Stores the token into local storage and removes the token field in the object returned by the HTTP request
+     * @param userDetails
+     */
+    const mapCallback: (userDetails: Object) => UserProfile = userDetails => {
+      localStorage.setItem(this.tokenKey, userDetails["token"]);
+      this.logger.next(true);
+
+      let removedToken = <UserProfile>{};
+      for (const prop in userDetails) {
+        if (prop !== "token") {
+          removedToken[prop] = userDetails[prop];
+        }
+      }
+
+      return removedToken;
+    };
+
+    // Call Backend API for login then call the 'completeCallback' callback function passed by LoginComponent
+    // Alternatively, call errorhandler service in case of errors
+    this.http
+      .post(`${this.uri}/login`, user)
+      .pipe(map(mapCallback))
+      .subscribe({
+        error: errorResponse => {
+          this.errorHandler.handleError(errorResponse);
+        },
+        complete: completeCallback
+      });
   }
 
   /**
@@ -90,6 +125,7 @@ export class UserService {
    */
   logout() {
     localStorage.removeItem(this.tokenKey);
+    this.userData = undefined;
     this.logger.next(false);
   }
 
@@ -121,5 +157,24 @@ export class UserService {
       coursesTaken,
       this.getHttpHeaders()
     );
+  }
+
+  /**
+   *  Fetches the user's data and stores it into this.userData.
+   */
+  getUserData(): Boolean {
+    // Check if this.userData is empty. If it is, re-fetch the user's data. Otherwise, no need to fetch.
+    if (this.userData === undefined) {
+      const tokenObj: Object = {
+        token: localStorage.getItem(this.tokenKey)
+      };
+
+      this.userData = this.http.post<UserProfile>(
+        `${this.uri}/identity`,
+        tokenObj,
+        this.getHttpHeaders()
+      );
+    }
+    return true;
   }
 }
