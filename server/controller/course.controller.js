@@ -228,11 +228,9 @@ courseController.get(
   validateSchoolCourses,
   (req, res) => {
     const school = req.params.school.toUpperCase();
-    validationHandler(
-      req,
-      res,
-      courseController.getPopulatedCourse({ school }, res)
-    );
+    validationHandler(req, res, () => {
+      courseController.getPopulatedCourse({ school }, res);
+    });
   }
 );
 
