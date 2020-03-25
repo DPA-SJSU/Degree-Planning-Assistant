@@ -1,0 +1,246 @@
+:host {
+  width: 100%;
+}
+
+/* Custom classes */
+.displayProfileLine {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px #95a5a6;
+  border-style: none none dashed none;
+  padding-bottom: 4px;
+  flex-grow: 1;
+  flex-basis: 0;
+  width: 100%;
+}
+
+.editProfileLine {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.textFieldStyling {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex-grow: 3;
+  flex-basis: 0;
+  border-left: 1px solid #7f8c8d;
+}
+
+.bottomBtns {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.labelStyling {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  flex-grow: 2;
+  flex-basis: 0;
+}
+
+.profile-card-size {
+  width: 600px;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0px 4px 8px gray;
+  transition: height 1s;
+}
+
+.border-bot-gray-1 {
+  border: 1px #95a5a6;
+  border-style: none none dashed none;
+  padding-bottom: 4px;
+}
+
+.btn:hover {
+  border: 4px solid #bbd1d3;
+  color: #bbd1d3;
+}
+
+.btn:active {
+  color: #bbd1d3;
+}
+
+.btn {
+  border: 4px solid #7f8c8d;
+  color: #7f8c8d;
+  font-size: 20px;
+  padding: 8px;
+  border-radius: 25px;
+  outline: none;
+  cursor: pointer;
+  transition: color 0.25s, border 0.25s, background-color 0.25s;
+}
+
+.border-left {
+  border-left: 1px solid #7f8c8d;
+}
+
+.field60 {
+  width: 60%;
+}
+
+.field75 {
+  width: 75%;
+}
+
+.field80 {
+  width: 80%;
+}
+
+.field25 {
+  width: 25%;
+}
+
+.text-field {
+  font-size: 16px;
+  padding: 4px;
+  border: 1px solid #7f8c8d;
+  border-radius: 5px;
+}
+
+.text-area {
+  font-size: 12px;
+  padding: 4px;
+  border: 1px solid #7f8c8d;
+  border-radius: 5px;
+  resize: none;
+  height: auto;
+}
+
+.error {
+  color: #e74c3c !important;
+}
+
+.error-text-field {
+  border-color: #e74c3c !important;
+}
+
+/* Flexbox classes */
+.flex-1 {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.flex-2 {
+  flex-grow: 2;
+  flex-basis: 0;
+}
+
+.flex-3 {
+  flex-grow: 3;
+  flex-basis: 0;
+}
+
+.flex-4 {
+  flex-grow: 4;
+  flex-basis: 0;
+}
+
+.flex-5 {
+  flex-grow: 5;
+  flex-basis: 0;
+}
+
+.align-items-stretch {
+  align-items: stretch;
+}
+
+.align-self-center {
+  align-self: center;
+}
+
+/* Image Styling */
+.icons-16 {
+  height: 20px;
+  width: 20px;
+  object-fit: contain;
+}
+
+/* Sizing */
+.w80 {
+  width: 80%;
+}
+
+.w50 {
+  width: 50%;
+}
+
+.w33 {
+  width: 33%;
+}
+
+.h100 {
+  height: 100%;
+}
+
+/* Margins & Padding */
+.ml8 {
+  margin-left: 8px;
+}
+
+.mr8 {
+  margin-right: 8px;
+}
+
+.mb32 {
+  margin-bottom: 32px;
+}
+
+.pr8 {
+  padding-right: 8px;
+}
+
+.pl8 {
+  padding-left: 8px;
+}
+
+/* Font Sizing & Styling */
+
+/* Animations */
+.fadeOut {
+  animation: fadeOut;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+.fadeIn {
+  animation: fadeIn;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

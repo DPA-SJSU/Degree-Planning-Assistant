@@ -1,3 +1,7 @@
+:host {
+  width: 100%;
+}
+
 .add-courses-btn {
   font-weight: bold;
   font-size: 24px;

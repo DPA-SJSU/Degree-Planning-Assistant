@@ -14,10 +14,11 @@ export interface UserData {
 }
 
 export interface UserProfile {
+  email: string;
   firstName: string;
   lastName: string;
   bio: string;
-  coursesTaken: Array<Object>;
+  coursesTaken: Array<object>;
   gradDate?: {
     year?: number;
     term: string;
@@ -28,6 +29,7 @@ export interface UserProfile {
   avatarUrl: string;
   avatarType: string;
   isAdmin: boolean;
+  school: string;
 }
 
 export interface CourseData {
@@ -49,7 +51,7 @@ export class UserService {
   uri = "http://localhost:8080";
   tokenKey = "tokenKey";
   private logger = new Subject<boolean>();
-  userData: Observable<UserProfile>;
+  private userData: Observable<UserProfile>;
 
   constructor(
     private http: HttpClient,
@@ -75,16 +77,16 @@ export class UserService {
      * Stores the token into local storage and removes the token field in the object returned by the HTTP request
      * @param userDetails
      */
-    const mapCallback: (userDetails: Object) => UserProfile = userDetails => {
-      localStorage.setItem(this.tokenKey, userDetails["token"]);
+    const mapCallback = userDetails => {
+      localStorage.setItem(this.tokenKey, userDetails.token);
       this.logger.next(true);
 
-      let removedToken = <UserProfile>{};
-      for (const prop in userDetails) {
+      const removedToken = {} as UserProfile;
+      Object.keys(userDetails).forEach((prop, index) => {
         if (prop !== "token") {
           removedToken[prop] = userDetails[prop];
         }
-      }
+      });
 
       return removedToken;
     };
@@ -160,12 +162,12 @@ export class UserService {
   }
 
   /**
-   *  Fetches the user's data and stores it into this.userData.
+   *  Fetches the user's data using backendAPI then stores it in to this.userData
    */
-  getUserData(): Boolean {
-    // Check if this.userData is empty. If it is, re-fetch the user's data. Otherwise, no need to fetch.
-    if (this.userData === undefined) {
-      const tokenObj: Object = {
+  fetchUserData(update?: boolean): boolean {
+    // Check if this.userData is empty. If it is, re-fetch the user's data. Otherwise, no need to fetch
+    if (this.userData === undefined || update) {
+      const tokenObj: object = {
         token: localStorage.getItem(this.tokenKey)
       };
 
@@ -176,5 +178,24 @@ export class UserService {
       );
     }
     return true;
+  }
+
+  /**
+   * Edit the user's profile
+   * @param profileChanges
+   */
+  editProfile(profileChanges: object) {
+    return this.http.put(
+      `${this.uri}/profile`,
+      profileChanges,
+      this.getHttpHeaders()
+    );
+  }
+
+  /**
+   * Getter method for userData
+   */
+  getUserData() {
+    return this.userData;
   }
 }

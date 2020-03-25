@@ -1,0 +1,21 @@
+<div
+  *ngIf="profile | async as userProfile"
+  class="flex-column align-items-center mp0"
+>
+  <img src="../../assets/profile-pic-92.png" class="profile-img-92 mb16" />
+  <p
+    *ngIf="userProfile.firstName && userProfile.lastName"
+    class="h5 neutral-gray-clr mp0"
+  >
+    {{ userProfile.firstName }} {{ userProfile.lastName }}
+  </p>
+  <p *ngIf="userProfile.school" class="body1 neutral-gray-clr mp0">
+    {{ userProfile.school }}
+  </p>
+  <p *ngIf="userProfile.major" class="body1 neutral-gray-clr mp0">
+    {{ userProfile.major }}
+  </p>
+  <a class="caption neutral-gray-clr mt4" (click)="onClickEditProfile()"
+    >Edit Profile</a
+  >
+</div>

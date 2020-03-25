@@ -1,0 +1,232 @@
+<div class="flex-column align-items-center">
+  <div *ngIf="profile | async as userProfile" class="card profile-card-size">
+    <div
+      *ngIf="editProfile == false"
+      id="displayProfile"
+      class="flex-column align-items-center fadeIn"
+    >
+      <img src="../../assets/profile-pic-92.png" class="profile-pic-92 mb16" />
+      <span
+        *ngIf="userProfile.firstName && userProfile.lastName"
+        class="h5 neutral-gray-clr mb32"
+        >{{ userProfile.firstName }} {{ userProfile.lastName }}</span
+      >
+      <div class="flex-column align-items-center w80 mb32">
+        <div class="flex-row align-items-center">
+          <img src="../../assets/bio_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr">Bio</span>
+        </div>
+        <span class="body1 italic" [innerText]="userProfile.bio"> </span>
+      </div>
+      <div class="displayProfileLine mb32">
+        <div class="flex-row align-items-center">
+          <img src="../../assets/email_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr">Email</span>
+        </div>
+        <span *ngIf="userProfile.email" class="h6">{{
+          userProfile.email
+        }}</span>
+      </div>
+      <div class="displayProfileLine mb32">
+        <div class="flex-row align-items-center">
+          <img src="../../assets/school_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr">School</span>
+        </div>
+        <span *ngIf="userProfile.school" class="h6">{{
+          userProfile.school
+        }}</span>
+      </div>
+      <div class="displayProfileLine mb8">
+        <div class="flex-row align-items-center">
+          <img src="../../assets/major_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr">Major</span>
+        </div>
+        <span *ngIf="userProfile.major" class="h6">{{
+          userProfile.major
+        }}</span>
+      </div>
+      <div class="displayProfileLine mb8">
+        <div class="flex-row align-items-center">
+          <img src="../../assets/major_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr">Minor</span>
+        </div>
+        <span *ngIf="userProfile.minor" class="h6">{{
+          userProfile.minor
+        }}</span>
+      </div>
+      <div class="displayProfileLine mb32">
+        <div class="flex-row align-items-center">
+          <img src="../../assets/degree_program.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr">Catalog Year</span>
+        </div>
+        <span *ngIf="userProfile.catalogYear" class="h6">{{
+          userProfile.catalogYear
+        }}</span>
+      </div>
+      <div class="displayProfileLine mb32">
+        <div class="flex-row align-items-center">
+          <img src="../../assets/grad_date_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr">Expected Graduation Date</span>
+        </div>
+        <span
+          *ngIf="userProfile.gradDate.term && userProfile.gradDate.year"
+          class="h6"
+          >{{ userProfile.gradDate.term }} {{ userProfile.gradDate.year }}</span
+        >
+      </div>
+      <div class="bottomBtns">
+        <div class="back btn" (click)="onClickBack()">Back</div>
+        <div class="btn" (click)="switchEditMode()">
+          Edit profile
+        </div>
+      </div>
+    </div>
+    <form
+      *ngIf="this.editProfile"
+      class="flex-column align-items-start fadeIn"
+      [formGroup]="editProfileForm"
+      id="editProfileForm"
+    >
+      <span class="h6 neutral-gray-clr">Editing Profile...</span>
+      <img
+        src="../../assets/profile-pic-92.png"
+        class="profile-pic-92 align-self-center mb16"
+      />
+      <div class="editProfileLine mb8">
+        <div class="flex-row justify-content-end flex-2">
+          <span class="h6 neutral-gray-clr mr8">First Name</span>
+        </div>
+        <div class="textFieldStyling">
+          <input
+            type="text"
+            class="text-field field60 ml8"
+            formControlName="firstNameField"
+            matInput
+            id="firstNameField"
+          />
+          <span id="firstNameFieldError" class="caption ml8 error"></span>
+        </div>
+      </div>
+      <div class="editProfileLine mb32">
+        <div class="flex-row justify-content-end flex-2">
+          <span class="h6 neutral-gray-clr mr8">Last Name</span>
+        </div>
+        <div class="textFieldStyling">
+          <input
+            type="text"
+            class="text-field field60 ml8"
+            formControlName="lastNameField"
+            id="lastNameField"
+          />
+          <span id="lastNameFieldError" class="caption ml8 error"></span>
+        </div>
+      </div>
+      <div class="editProfileLine mb32">
+        <div class="labelStyling">
+          <img src="../../assets/email_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">Email</span>
+        </div>
+        <div class="textFieldStyling">
+          <input
+            type="text"
+            class="text-field field80 ml8"
+            formControlName="emailField"
+            id="emailField"
+          />
+          <span id="emailFieldError" class="caption ml8 error"></span>
+        </div>
+      </div>
+      <div class="editProfileLine mb32">
+        <div class="labelStyling">
+          <img src="../../assets/school_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">School</span>
+        </div>
+        <div class="textFieldStyling">
+          <span class="body1 ml8">San Jose State University</span>
+        </div>
+      </div>
+      <div class="editProfileLine mb32">
+        <div class="labelStyling">
+          <img src="../../assets/bio_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">Bio</span>
+        </div>
+        <div class="textFieldStyling">
+          <textarea
+            class="text-area field80 ml8"
+            rows="4"
+            formControlName="bioField"
+            id="bioField"
+          ></textarea>
+          <span id="bioFieldError" class="caption ml8 error"></span>
+        </div>
+      </div>
+      <div class="editProfileLine mb8">
+        <div class="labelStyling">
+          <img src="../../assets/major_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">Major</span>
+        </div>
+        <div class="textFieldStyling">
+          <span class="body1 ml8">Software Engineering</span>
+        </div>
+      </div>
+      <div class="editProfileLine mb8">
+        <div class="labelStyling">
+          <img src="../../assets/major_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">Minor</span>
+        </div>
+        <div class="textFieldStyling">
+          <span class="body1 ml8">---</span>
+        </div>
+      </div>
+      <div class="editProfileLine mb32">
+        <div class="labelStyling">
+          <img src="../../assets/degree_program.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">Catalog Year</span>
+        </div>
+        <div class="textFieldStyling">
+          <input
+            type="text"
+            class="text-field field25 ml8"
+            formControlName="catalogYearField"
+            id="catalogYearField"
+          />
+          <span id="catalogYearFieldError" class="caption ml8 error"></span>
+        </div>
+      </div>
+      <div class="editProfileLine mb8">
+        <div class="labelStyling">
+          <img src="../../assets/grad_date_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">Graduation Term</span>
+        </div>
+        <div class="textFieldStyling">
+          <input
+            type="text"
+            class="text-field field25 ml8"
+            formControlName="gradTermField"
+            id="gradTermField"
+          />
+          <span id="gradTermFieldError" class="caption ml8 error"></span>
+        </div>
+      </div>
+      <div class="editProfileLine mb32">
+        <div class="labelStyling">
+          <img src="../../assets/grad_date_16.png" class="icons-16 mr8" />
+          <span class="h6 neutral-gray-clr mr8">Graduation Year</span>
+        </div>
+        <div class="textFieldStyling">
+          <input
+            type="text"
+            class="text-field field25 ml8"
+            formControlName="gradYearField"
+            id="gradYearField"
+          />
+          <span id="gradYearFieldError" class="caption ml8 error"></span>
+        </div>
+      </div>
+      <div class="bottomBtns">
+        <div class="back btn" (click)="switchEditMode()">Cancel</div>
+        <div class="back btn" (click)="onEditProfile()">Save changes</div>
+      </div>
+    </form>
+  </div>
+</div>

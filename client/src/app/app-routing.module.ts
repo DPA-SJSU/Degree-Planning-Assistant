@@ -5,6 +5,8 @@ import { LoginComponent } from "./login/login.component";
 import { LandingComponent } from "./landing/landing.component";
 import { AuthGuard } from "./auth.guard";
 import { SDashboardComponent } from "./s-dashboard/s-dashboard.component";
+import { SCoursesTakenComponent } from "./s-courses-taken/s-courses-taken.component";
+import { SProfileComponent } from "./s-profile/s-profile.component";
 
 const routes: Routes = [
   { path: "", component: LandingComponent },
@@ -13,6 +15,11 @@ const routes: Routes = [
   {
     path: "dashboard",
     component: SDashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: "profile",
+    component: SProfileComponent,
     canActivate: [AuthGuard]
   }
 ];

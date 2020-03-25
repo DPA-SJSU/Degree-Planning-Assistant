@@ -13,7 +13,7 @@ export class SCoursesTakenComponent implements OnInit {
   modalData: string;
 
   constructor(private userService: UserService) {
-    this.profile = this.userService.userData;
+    this.profile = this.userService.getUserData();
   }
 
   /**

@@ -96,27 +96,6 @@ export const validateLoginUser = [
 ];
 
 export const validateEditProfile = [
-  // Note that the INTENTION of the HTTP req/res that we're using this validator for requires the user's ID
-  // and AT LEAST ONE data to be changed. The one data to be changed can be ANY of the other values
-  // of a USER document (check schema). In order to allow the client to choose which data they want to change,
-  // We make the other values OPTIONAL in this validator array. However, in the HTTP req/res itself, we will
-  // check if the client had included at least ONE data to be changed.
-  param('userId') // The only input this validator array requires
-    .exists()
-    .withMessage(USER_ID_IS_REQUIRED)
-    .bail()
-    .escape()
-    .ltrim()
-    .rtrim()
-    .not()
-    .isEmpty()
-    .withMessage(USER_ID_IS_EMPTY)
-    .bail()
-    .isHexadecimal()
-    .withMessage(USER_ID_IS_INVALID)
-    .bail()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(USER_ID_IS_INVALID),
   body('avatarUrl') // Optional
     .if(body('avatarUrl').exists()) // IF the client included avatar_url, then validate it
     .not()
@@ -175,10 +154,6 @@ export const validateEditProfile = [
     }),
   body('bio') // Optional
     .if(body('bio').exists()) // IF the client included bio, then validate it
-    .not()
-    .isEmpty()
-    .withMessage(BIO_IS_EMPTY)
-    .bail()
     .escape()
     .ltrim()
     .rtrim()
@@ -207,13 +182,7 @@ export const validateEditProfile = [
     .bail()
     .escape()
     .ltrim()
-    .rtrim()
-    .custom(value => {
-      if (checkIfLettersOnly(value) === true) {
-        return Promise.resolve();
-      }
-      return Promise.reject(MINOR_IS_INVALID);
-    }),
+    .rtrim(),
   body('catalogYear') // Optional
     .if(body('catalogYear').exists()) // IF the client included catalog_year, then validate it
     .not()

@@ -29,12 +29,10 @@ export class ErrorHandlerService {
     const errObj = err.error.errors;
     let errorMessage = "";
 
-    for (const prop in errObj) {
-      if (errObj.hasOwnProperty(prop)) {
-        const propMsg = errObj[prop].msg;
-        errorMessage += this.findErrorType(propMsg);
-      }
-    }
+    Object.keys(errObj).forEach((prop, index) => {
+      const propMsg = errObj[prop].msg;
+      errorMessage += this.findErrorType(propMsg);
+    });
 
     window.alert(errorMessage);
     return throwError(errorMessage);
@@ -51,7 +49,7 @@ export class ErrorHandlerService {
 
     switch (errMsg) {
       case USER_NAME_IS_EMPTY:
-        resultString += "No username was entered./n";
+        resultString += "No username was entered.\n";
         break;
       case ROLE_IS_EMPTY:
         resultString += "A role has not been assigned to this User.";
@@ -79,16 +77,16 @@ export class ErrorHandlerService {
         break;
       // user trying to access restricted feature
       case TOKEN_IS_EMPTY:
-        resultString = "Trying to access a restricted feature./n";
+        resultString = "Trying to access a restricted feature.\n";
         break;
       case NAME_IS_INVALID:
         resultString += "Name is invalid";
         break;
       case SOME_THING_WENT_WRONG:
-        resultString = "Something went wrong./n";
+        resultString = "Something went wrong.\n";
         break;
       default:
-        resultString = "Something went wrong./n";
+        resultString = "Something went wrong.\n";
         break;
     }
     return resultString;

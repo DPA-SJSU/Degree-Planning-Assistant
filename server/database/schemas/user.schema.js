@@ -11,6 +11,7 @@ const userSchema = new Schema({
   bio: { type: String },
   isAdmin: { type: Boolean, isRequired: true },
   gradDate: { year: { type: Number }, term: { type: String } },
+  school: { type: String },
   major: { type: String },
   minor: { type: String },
   catalogYear: { type: Number },

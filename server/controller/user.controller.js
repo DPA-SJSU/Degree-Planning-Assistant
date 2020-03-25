@@ -47,6 +47,7 @@ userController.createUser = (email, password) => {
     avatarType: '',
     firstName: '',
     lastName: '',
+    school: '',
     bio: '',
     isAdmin: false,
     coursesTaken: [],
@@ -174,6 +175,7 @@ userController.put(
         avatarType,
         firstName,
         lastName,
+        school,
         bio,
         major,
         minor,
@@ -186,6 +188,7 @@ userController.put(
         !avatarType &&
         !firstName &&
         !lastName &&
+        !school &&
         !bio &&
         !major &&
         !minor &&
@@ -212,6 +215,7 @@ userController.put(
             ...(avatarType && { avatarType }),
             ...(firstName && { firstName }),
             ...(lastName && { lastName }),
+            ...(school && { school }),
             ...(bio && { bio }),
             ...(major && { major }),
             ...(minor && { minor }),
