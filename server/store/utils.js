@@ -18,7 +18,6 @@ export function generateServerErrorCode(
 
   return res.status(code).json({
     code,
-    fullError,
     errors,
   });
 }
@@ -33,6 +32,18 @@ export function validationHandler(req, res, next) {
   }
 
   return next();
+}
+
+export function checkAllowedKeys(allowedKeys, keys) {
+  if ((allowedKeys && allowedKeys.length > 0) || (keys && keys.length > 0)) {
+    for (let i = 0; i < keys.length; i += 1) {
+      if (!allowedKeys.includes(keys[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
 /**

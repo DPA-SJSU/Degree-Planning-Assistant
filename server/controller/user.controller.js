@@ -43,22 +43,7 @@ userController.createUser = (email, password) => {
   const data = {
     hashedPassword: generateHashedPassword(password),
     email,
-    avatarUrl: '',
-    avatarType: '',
-    firstName: '',
-    lastName: '',
-    school: '',
-    bio: '',
     isAdmin: false,
-    coursesTaken: [],
-    gradDate: {
-      year: undefined,
-      term: '',
-    },
-    major: '',
-    minor: '',
-    catalogYear: undefined,
-    degreePlanId: undefined,
   };
 
   return new User(data).save();
@@ -112,7 +97,7 @@ userController.post('/login', validateLoginUser, (req, res) => {
       const { email, password } = req.body;
       User.findOne({ email })
         .populate({
-          path: 'degreePlanId',
+          path: 'degreePlan',
           model: 'Plan',
           populate: {
             path: 'semesters',
@@ -348,7 +333,7 @@ userController.post('/identity', validateToken, async (req, res) => {
           User.findOne({ email }, { hashedPassword: 0 })
             .lean()
             .populate({
-              path: 'degreePlanId',
+              path: 'degreePlan',
               model: 'Plan',
               populate: {
                 path: 'semesters',

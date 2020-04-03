@@ -41,24 +41,7 @@ planController.errorHandler = (req, res, errors) => {
   }
 };
 
-/**
- * Get all semesters and courses for each semester given a specific Degree Plan ID
- */
-planController.getAllSemesterAndCourses = (res, id) => {
-  Plan.findById(id)
-    .populate({
-      path: 'semesters',
-      populate: {
-        path: 'courses',
-        model: 'Course',
-      },
-    })
-    .exec((err, foundPlan) => {
-      if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-      else if (foundPlan) res.status(200).json(foundPlan);
-      else generateServerErrorCode(res, 500, err, PLAN_NOT_FOUND);
-    });
-};
+planController.getRemainingCourse = course => {};
 
 /**
  * ============================================
@@ -77,62 +60,64 @@ planController.post(
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const { user } = req;
-    try {
-      let { degreePlanId } = req.query;
+    let { degreePlan } = req.query;
 
-      if (req.query.year === 1) {
-        // TO-DO: If Freshman, generate all fixed plans
-      } else {
-        const semesters = await semesterController.createSemesterList(
-          req.body.semesters
-        );
-
-        // Create/ Update a plan
-        if (!degreePlanId) {
-          const newPlan = await new Plan({ semesters }).save();
-          degreePlanId = newPlan._id;
-        }
-
-        await Plan.findByIdAndUpdate(
-          { _id: degreePlanId },
-          { semesters },
-          {
-            upsert: true,
-            new: true,
-            runValidators: true,
-            setDefaultsOnInsert: true,
-          },
-          (planErr, _) => {
-            if (planErr)
-              generateServerErrorCode(res, 500, planErr, FAILED_TO_CREATE_PLAN);
-            else
-              User.findByIdAndUpdate(
-                user._id,
-                {
-                  degreePlanId,
-                },
-                { new: true },
-                (err, updatedUser) => {
-                  if (err)
-                    generateServerErrorCode(
-                      res,
-                      500,
-                      err,
-                      FAILED_TO_UPDATE_USER
-                    );
-                  else {
-                    const userToReturn = { ...updatedUser.toJSON() };
-                    delete userToReturn.hashedPassword;
-                    delete userToReturn.__v;
-                    res.status(200).json(userToReturn);
-                  }
-                }
-              );
+    if (req.query.year === 1) {
+      // TO-DO: If Freshman, generate all fixed plans
+    } else {
+      semesterController
+        .createSemesterList(req.body.semesters)
+        .then(semesters => {
+          if (!degreePlan) {
+            Plan.create({ semesters }, (err, newPlan) => {
+              degreePlan = newPlan._id;
+            });
           }
+
+          Plan.findOneAndUpdate(
+            { _id: degreePlan },
+            { semesters },
+            {
+              upsert: true,
+              new: true,
+              runValidators: true,
+              setDefaultsOnInsert: true,
+            },
+            (planErr, _) => {
+              if (planErr)
+                generateServerErrorCode(
+                  res,
+                  500,
+                  planErr,
+                  FAILED_TO_CREATE_PLAN
+                );
+              else
+                User.findByIdAndUpdate(
+                  user._id,
+                  { degreePlan },
+                  { new: true },
+                  (err, updatedUser) => {
+                    if (err)
+                      generateServerErrorCode(
+                        res,
+                        500,
+                        err,
+                        FAILED_TO_UPDATE_USER
+                      );
+                    else {
+                      const userToReturn = { ...updatedUser.toJSON() };
+                      delete userToReturn.hashedPassword;
+                      delete userToReturn.__v;
+                      res.status(200).json(userToReturn);
+                    }
+                  }
+                );
+            }
+          );
+        })
+        .catch(e =>
+          generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG)
         );
-      }
-    } catch (e) {
-      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
 );
@@ -147,7 +132,17 @@ planController.get(
   passport.authenticate('jwt', { session: false }),
   (req, res) => {
     const { _id } = req.query;
-    planController.getAllSemesterAndCourses(res, _id);
+
+    Plan.findById(_id)
+      .populate({
+        path: 'semesters',
+        populate: { path: 'courses', model: 'Course' },
+      })
+      .then((err, foundPlan) => {
+        if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+        else if (foundPlan) res.status(200).json(foundPlan);
+        else generateServerErrorCode(res, 500, err, PLAN_NOT_FOUND);
+      });
   }
 );
 
@@ -162,7 +157,7 @@ planController.delete(
   (req, res) => {
     try {
       const { planId } = req.query;
-      User.findByIdAndUpdate(req.user._id, { degreePlanId: null });
+      User.findByIdAndUpdate(req.user._id, { degreePlan: null });
       Plan.findByIdAndDelete(planId);
     } catch (e) {
       generateServerErrorCode(res, 500, 'server', SOME_THING_WENT_WRONG);

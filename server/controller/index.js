@@ -4,6 +4,7 @@ import semesterController from './semester.controller';
 import programController from './program.controller';
 import textScanController from './textScan.controller';
 import planController from './plan.controller';
+import requirementController from './requirement.controller';
 
 export {
   userController,
@@ -12,4 +13,5 @@ export {
   programController,
   textScanController,
   planController,
+  requirementController,
 };

@@ -30,14 +30,11 @@ import mongoose, { Schema } from 'mongoose';
 const programSchema = new mongoose.Schema({
   school: { type: String, required: true },
   major: { type: String, required: true },
-  catalogYear: { type: Number, required: true },
-  // General education requirements A - E
-  // Note that this will require strong validation in the HTTP request to our backend server since it is of type Mixed.
-  generalEducation: { type: Schema.Types.Mixed, required: true },
-  // Requirements for the major
-  majorRequirements: { type: Schema.Types.Mixed, required: true },
-  // University requirements such as 'American Institutions'
-  otherRequirements: { type: Schema.Types.Mixed, required: true },
+  catalogYear: { type: String, required: true },
+  requirements: [{ type: Schema.Types.ObjectId, ref: 'Requirement' }],
+  //   generalEducation: { type: Schema.Types.Mixed },
+  //   majorRequirements: { type: Schema.Types.Mixed },
+  //   otherRequirements: { type: Schema.Types.Mixed },
 });
 
 export default programSchema;

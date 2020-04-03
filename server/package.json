@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "ENV=prod nodemon -r esm app.js",
-    "dev": "ENV=dev nodemon -r esm app.js",
+    "start": "source .env && ENV=prod nodemon -r esm app.js",
+    "dev": "source .env && ENV=dev nodemon -r esm app.js",
     "start-w": "set ENV=prod && nodemon -r esm app.js",
-    "dev-w": "set ENV=dev && nodemon -r esm app.js"
+    "dev-w": "set ENV=dev && nodemon -r esm app.js",
+    "mongo": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/test'  --username calvin"
   },
   "dependencies": {
     "@google-cloud/storage": "^4.3.1",
@@ -22,6 +23,7 @@
     "express-validator": "^6.2.0",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.15",
     "mongoose": "^5.7.13",
     "morgan": "~1.9.1",
     "multer": "^1.4.2",

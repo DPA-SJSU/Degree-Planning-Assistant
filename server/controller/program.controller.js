@@ -24,9 +24,28 @@ import {
   SOME_THING_WENT_WRONG,
 } from './constant';
 
-import { Program } from '../database/models';
+import { Program, Course } from '../database/models';
 
 const programController = express.Router();
+
+/**
+ * Used when scan Transcript
+ * Get the remaining courses and a Map { "Area #": [courses] }
+ * @param {List} coursesTaken
+ * @param {Object} program
+ * @returns {Object} result
+ */
+programController.getRemainingCourses = async (coursesTaken, program) => {
+  const result = {};
+  coursesTaken.forEach(courseId => {
+    Course.findById(courseId).select('area');
+  });
+
+  // Check GE
+  // Check MajorRequirements
+
+  return result;
+};
 
 /**
  * @route   POST /program/
@@ -36,40 +55,39 @@ const programController = express.Router();
 programController.post(
   '/',
   passport.authenticate('jwt', { session: false }),
-  validateCreateDegreeProgram,
+  // validateCreateDegreeProgram,
   async (req, res) => {
-    const errors = validationResult(req);
-    const { generalEducation, majorRequirements, otherRequirements } = req.body;
+    // const errors = validationResult(req);
+    const {
+      school,
+      major,
+      catalogYear,
+      generalEducation,
+      majorRequirements,
+      otherRequirements,
+    } = req.body;
 
-    const objStructureErrors = { errors: [] };
-    validateObjStructure(generalEducation, objStructureErrors.errors, false);
-    validateObjStructure(majorRequirements, objStructureErrors.errors, false);
-    validateObjStructure(otherRequirements, objStructureErrors.errors, false);
+    console.log(req.body);
 
-    // Check if validators detected errors in input
-    if (errors.isEmpty() === false || objStructureErrors.errors.length > 0) {
-      return res.status(400).json({ errors, objStructureErrors });
-    }
+    // const objStructureErrors = { errors: [] };
+    // validateObjStructure(generalEducation, objStructureErrors.errors, false);
+    // validateObjStructure(majorRequirements, objStructureErrors.errors, false);
+    // validateObjStructure(otherRequirements, objStructureErrors.errors, false);
 
-    const { school, major, catalogYear } = req.body;
+    // if (errors.isEmpty() === false || objStructureErrors.errors.length > 0) {
+    //   return res.status(400).json({ errors, objStructureErrors });
+    // }
 
     try {
-      const data = {
-        school,
-        major,
-        catalogYear,
-        generalEducation,
-        majorRequirements,
-        otherRequirements,
-      };
-
       Program.findOne(
         { school, major, catalogYear },
-        async existingDegreeProgram => {
+        async (err, existingDegreeProgram) => {
           if (existingDegreeProgram)
-            res.status(403).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
+            return res
+              .status(403)
+              .json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
 
-          const newDegreeProgram = new Program(data);
+          const newDegreeProgram = new Program(req.body);
           await newDegreeProgram.save();
 
           res.status(200).json(newDegreeProgram);

@@ -9,25 +9,30 @@ const client = new ImageAnnotatorClient();
 
 const CloudOCR = {};
 
-let DocumentMapping = new Map();
-const TranscriptMapping = new Map();
-TranscriptMapping.takenCourseList = [];
-TranscriptMapping.semesterList = [];
-TranscriptMapping.otherInfo = [];
+CloudOCR.TranscriptMapping = new Map();
 
-let otherInfo = [];
-let currentSemester = -1;
-let startingTermFound = false;
-let count = 0;
+CloudOCR.TranscriptMapping.takenCourseList = [];
+CloudOCR.TranscriptMapping.semesterList = [];
+CloudOCR.TranscriptMapping.otherInfo = [];
+CloudOCR.TranscriptMapping.currentSemester = -1;
+CloudOCR.TranscriptMapping.otherInfo = [];
+CloudOCR.TranscriptMapping.startingTermFound = false;
+CloudOCR.TranscriptMapping.count = 0;
 
 /**
  * Add Course to the current Semester
  * @param {Object} course
  */
 const addCourseToSemester = course => {
-  TranscriptMapping.takenCourseList.push(course);
-  if (TranscriptMapping.semesterList[currentSemester])
-    TranscriptMapping.semesterList[currentSemester].courses.push(course);
+  CloudOCR.TranscriptMapping.takenCourseList.push(course);
+  if (
+    CloudOCR.TranscriptMapping.semesterList[
+      CloudOCR.TranscriptMapping.currentSemester
+    ]
+  )
+    CloudOCR.TranscriptMapping.semesterList[
+      CloudOCR.TranscriptMapping.currentSemester
+    ].courses.push(course);
 };
 
 /**
@@ -41,20 +46,6 @@ const getCourseInfo = listOfWordText => {
   const title = listOfWordText.slice(2, creditIndex).join(' ');
   const credit = listOfWordText[creditIndex];
   return { school, code, title, credit };
-};
-
-const programParser = async paragraph => {
-  const listOfWordText = [];
-  paragraph.words.forEach(word => {
-    const wordText = word.symbols.map(symbol => symbol.text).join('');
-    listOfWordText.push(wordText);
-  });
-
-  const sentence = listOfWordText.join(' ');
-  switch (true) {
-    default:
-      break;
-  }
 };
 
 /**
@@ -75,12 +66,11 @@ const transcriptParser = async paragraph => {
   });
 
   const sentence = listOfWordText.join(' ');
-  console.log(sentence);
 
   switch (true) {
     // Check for AP Courses
     case listOfWordText.includes('AP'):
-      TranscriptMapping.otherInfo.push(sentence);
+      CloudOCR.TranscriptMapping.otherInfo.push(sentence);
       break;
 
     // Check for Semester
@@ -94,21 +84,25 @@ const transcriptParser = async paragraph => {
         status: 0,
       };
 
-      if (!startingTermFound) {
-        TranscriptMapping.startingSem = semester;
-        startingTermFound = true;
+      if (!CloudOCR.TranscriptMapping.startingTermFound) {
+        CloudOCR.TranscriptMapping.startingSem = semester;
+        CloudOCR.TranscriptMapping.startingTermFound = true;
       } else {
-        semester.year = TranscriptMapping.startingSem.year + count;
-        if (semesterSeason.indexOf(listOfWordText[0]) === 2) count += 1;
+        semester.year =
+          CloudOCR.TranscriptMapping.startingSem.year +
+          CloudOCR.TranscriptMapping.count;
+        if (semesterSeason.indexOf(listOfWordText[0]) === 2)
+          CloudOCR.TranscriptMapping.count += 1;
       }
-      TranscriptMapping.semesterList.push(semester);
-      currentSemester = TranscriptMapping.semesterList.length - 1;
+      CloudOCR.TranscriptMapping.semesterList.push(semester);
+      CloudOCR.TranscriptMapping.currentSemester =
+        CloudOCR.TranscriptMapping.semesterList.length - 1;
       break;
     }
 
     // Check for Major
     case listOfWordText.includes('MAJOR'):
-      TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
+      CloudOCR.TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
       break;
 
     // Check for Course using creditCondition List
@@ -123,17 +117,22 @@ const transcriptParser = async paragraph => {
     // Check for WST Eligible
     case wstCondition.every(el => listOfWordText.includes(el)):
       if (listOfWordText[listOfWordText.indexOf(':') + 1] === 'ELIGIBLE') {
-        otherInfo = `[WST]: Qualify for taking upper courses such as 100W Course`;
+        CloudOCR.TranscriptMapping.otherInfo.push(
+          `[WST]: Qualify for taking upper courses such as 100W Course`
+        );
       } else {
-        otherInfo = `[WST]: NOT Qualify for taking upper courses such as 100W Course`;
+        CloudOCR.TranscriptMapping.otherInfo.push(
+          `[WST]: NOT Qualify for taking upper courses such as 100W Course`
+        );
       }
-      TranscriptMapping.otherInfo.push(otherInfo);
       break;
 
     // Check for Semester Student is enrolling
     case listOfWordText.includes('IN PROGRESS') ||
       listOfWordText.includes('ENROLLED'):
-      TranscriptMapping.semesterList[currentSemester].status = 1;
+      CloudOCR.TranscriptMapping.semesterList[
+        CloudOCR.TranscriptMapping.currentSemester
+      ].status = 1;
       break;
     default:
       break;
@@ -154,7 +153,6 @@ const documentHandler = (responses, option) => {
               transcriptParser(paragraph);
               break;
             case 'program':
-              programParser(paragraph);
               break;
             default:
               break;
@@ -163,13 +161,23 @@ const documentHandler = (responses, option) => {
       });
     });
   });
-  return TranscriptMapping;
+  return CloudOCR.TranscriptMapping;
 };
 
 /**
  * Main function that will be called by textScannerController
  */
 CloudOCR.scan = async (fileName, option) => {
+  CloudOCR.TranscriptMapping = new Map();
+
+  CloudOCR.TranscriptMapping.takenCourseList = [];
+  CloudOCR.TranscriptMapping.semesterList = [];
+  CloudOCR.TranscriptMapping.otherInfo = [];
+  CloudOCR.TranscriptMapping.currentSemester = -1;
+  CloudOCR.TranscriptMapping.otherInfo = [];
+  CloudOCR.TranscriptMapping.startingTermFound = false;
+  CloudOCR.TranscriptMapping.count = 0;
+
   const inputConfig = {
     mimeType: 'application/pdf',
     content: await readFileAsync(fileName),
@@ -192,6 +200,7 @@ CloudOCR.scan = async (fileName, option) => {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
     const result = await documentHandler(responses, option);
+
     return result;
   } catch (e) {
     return e;
