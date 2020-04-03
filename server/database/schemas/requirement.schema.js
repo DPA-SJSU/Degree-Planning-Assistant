@@ -12,6 +12,7 @@ const requirementSchema = new mongoose.Schema({
   major: { type: String },
   requiredCredit: { type: Number },
   courses: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
+  catalogYear: { type: String, required: true },
 });
 
 export default requirementSchema;

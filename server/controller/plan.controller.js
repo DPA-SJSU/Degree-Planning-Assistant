@@ -41,7 +41,11 @@ planController.errorHandler = (req, res, errors) => {
   }
 };
 
-planController.getRemainingCourse = course => {};
+planController.getRemainingCourse = courses => {};
+
+planController.generateSemesterBasedOn = courses => {};
+
+planController.preReqCheck = semesters => {};
 
 /**
  * ============================================

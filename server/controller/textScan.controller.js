@@ -6,7 +6,7 @@ import express from 'express';
 import multer from 'multer';
 import passport from 'passport';
 
-import CloudOcr from '../Scanning/cloudOCR';
+import CloudOcr from '../store/Scanning/cloudOCR';
 
 import semesterController from './semester.controller';
 import courseController from './course.controller';
@@ -73,6 +73,7 @@ textScanController.post(
     const { path } = req.file;
 
     CloudOcr.scan(path, option).then(async scanResult => {
+      // console.log(scanResult);
       const { takenCourseList, semesterList } = scanResult;
 
       // 1. Create Course + Semesters
@@ -91,13 +92,13 @@ textScanController.post(
         }
       );
 
-      // const randomSemesterList = await planController.generateRandomSemesters(
-      //   remainingCourses
-      // );
-      // semesterController.push(randomSemesterList);
+      const randomSemesterList = await planController.generateSemesters(
+        remainingCourses
+      );
+      semesters.push(randomSemesterList);
 
       // 3. Create a new DegreePlan
-      return new Plan({ semesters })
+      await new Plan({ semesters })
         .save()
         .then(newPlan => {
           User.findByIdAndUpdate(

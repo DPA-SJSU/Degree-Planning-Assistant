@@ -10,7 +10,6 @@ const client = new ImageAnnotatorClient();
 const CloudOCR = {};
 
 CloudOCR.TranscriptMapping = new Map();
-
 CloudOCR.TranscriptMapping.takenCourseList = [];
 CloudOCR.TranscriptMapping.semesterList = [];
 CloudOCR.TranscriptMapping.otherInfo = [];
@@ -48,21 +47,12 @@ const getCourseInfo = listOfWordText => {
   return { school, code, title, credit };
 };
 
-const programParser = async (listOfWordText, sentence) => {
-  console.log(listOfWordText);
-  switch (true) {
-    default:
-      break;
-  }
-};
-
 /**
  * Checking case and Map the info to the right type
  * @param {Array} listOfWordText  A list of words in a sentence
  * @param {String} sentence       A whole sentence which is scanned by OCR
  */
 const transcriptParser = async paragraph => {
-  // Use for Transcript checking
   const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
   const creditCondition = ['1.0', '2.0', '3.0'];
   const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
