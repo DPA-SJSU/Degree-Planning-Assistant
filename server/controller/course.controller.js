@@ -39,15 +39,14 @@ courseController.createOrGetAllCourseId = courseList => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const coursesWithIds = [];
-    const { codes, school, type } = courseList;
+    const { codes, school, type, area } = courseList;
 
     const createOrGetOneCourse = codes.map(code => {
-      // console.log('[getAllCourseId]');
-      // console.log(code);
       return courseController.createOrGetOneCourse({
         school,
         type,
         code,
+        area,
         title: code.title || ' ',
       });
     });
@@ -67,7 +66,7 @@ courseController.createOrGetOneCourse = async (data, option = 'EMPTY') => {
   return new Promise((resolve, reject) => {
     let course = data;
 
-    const { school = 'SJSU', code, type } = course;
+    const { school = 'SJSU', code, type, area } = course;
 
     const splitCourseString = code.split(' ');
     const department = splitCourseString[0];
@@ -77,6 +76,14 @@ courseController.createOrGetOneCourse = async (data, option = 'EMPTY') => {
       .then(async foundCourse => {
         if (foundCourse) return resolve(foundCourse);
 
+        console.log(
+          'course not found',
+          school,
+          department,
+          courseCode,
+          type,
+          area
+        );
         if (option === 'EMPTY')
           course = {
             ...data,

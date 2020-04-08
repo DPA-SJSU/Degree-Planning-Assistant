@@ -3,7 +3,7 @@ import express from 'express';
 import passport from 'passport';
 import { validationResult } from 'express-validator';
 
-import { Plan, User } from '../database/models';
+import { Plan, User, Semester, Requirement, Course } from '../database/models';
 
 import { validateSemesters } from './validation/plan.validation';
 
@@ -41,11 +41,38 @@ planController.errorHandler = (req, res, errors) => {
   }
 };
 
-planController.getRemainingCourse = courses => {};
+planController.getRemainingRequirement = (courses, requirementOption) => {
+  // Find requirements based on requirementOption
+  //
+  const coursesTaken = courses;
 
-planController.generateSemesterBasedOn = courses => {};
+  // return new Promise((resolve, reject) => {
+  //   Requirement.find({ ...requirementOption, type: })
+  //     .lean()
+  //     .exec()
+  //     .then(foundRequirement => {
+  //       coursesTaken.forEach(course => {
+  //         if (foundRequirement.courses.includes(course)) {
+  //         }
+  //       });
 
-planController.preReqCheck = semesters => {};
+  //       console.log(foundRequirement);
+  //       resolve(courses);
+  //     });
+  // });
+};
+
+planController.generateSemesterBasedOn = courses => {
+  return new Promise((resolve, reject) => {
+    resolve(courses);
+  });
+};
+
+planController.preReqCheck = semesters => {
+  return new Promise((resolve, reject) => {
+    resolve(semesters);
+  });
+};
 
 /**
  * ============================================
@@ -184,5 +211,33 @@ planController.delete(
     });
   }
 );
+
+/**
+ * DELETE/
+ * delete all the degree Plan
+ * IMPORTANT: Call this ONLY when mongodb is used as localhost
+ */
+planController.delete('/reset', (req, res) => {
+  Plan.deleteMany({}, (err, result) => {
+    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+    // res.status(200).json(result);
+  });
+
+  Semester.deleteMany({}, (err, result) => {
+    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+    // else res.status(200).json(result);
+  });
+
+  Course.deleteMany({}, (err, result) => {
+    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+    // else res.status(200).json(result);
+  });
+
+  Requirement.deleteMany({}, (err, result) => {
+    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+    // else res.status(200).json(result);
+  });
+  res.status(200).json();
+});
 
 export default planController;

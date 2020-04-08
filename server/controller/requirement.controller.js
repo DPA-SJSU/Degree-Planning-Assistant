@@ -143,20 +143,17 @@ requirementController.post('/all', (req, res) => {
   req.body.forEach(requirement => {
     const { school, type, area, courses } = requirement;
     courseController
-      .createOrGetAllCourseId({ ...req.body, codes: courses })
+      .createOrGetAllCourseId({ ...requirement, codes: courses })
       .then(coursesId => {
         Requirement.findOneAndUpdate(
           { school, type, area },
-          { ...req.body, courses: coursesId },
+          { ...requirement, courses: coursesId },
           { new: true, upsert: true },
           (err, newRequirement) => {
             if (err)
               generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
           }
         );
-      })
-      .catch(e => {
-        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
       });
   });
 

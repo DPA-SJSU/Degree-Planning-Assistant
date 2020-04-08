@@ -17,6 +17,8 @@ CloudOCR.TranscriptMapping.currentSemester = -1;
 CloudOCR.TranscriptMapping.otherInfo = [];
 CloudOCR.TranscriptMapping.startingTermFound = false;
 CloudOCR.TranscriptMapping.count = 0;
+CloudOCR.TranscriptMapping.school = 'SJSU';
+CloudOCR.TranscriptMapping.catalogYear = '18-19';
 
 /**
  * Add Course to the current Semester

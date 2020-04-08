@@ -26,7 +26,7 @@ const courseSchema = new Schema({
     },
   ],
   area: { type: String },
-  requirementType: { type: Number },
+  type: { type: Number },
   difficulty: { type: Number, default: 0 },
   impaction: { type: Number, default: 0 },
   termsOffered: { type: String },

@@ -24,8 +24,6 @@ const textScanController = express.Router();
 
 const createOrGetAllCourseId = courseObjList => {
   return new Promise(async resolve => {
-    const coursesWithIds = [];
-
     const createOrGetOneCourse = courseObjList.map(course => {
       return courseController.createOrGetOneCourse({
         ...course,
@@ -33,29 +31,19 @@ const createOrGetAllCourseId = courseObjList => {
         title: course.title || ' ',
       });
     });
-
-    const results = await Promise.all(createOrGetOneCourse);
-    results.forEach(course => coursesWithIds.push(course._id));
-    resolve(coursesWithIds);
+    resolve(Promise.all(createOrGetOneCourse));
   });
 };
 
 const createSemesterList = semesterList => {
   return new Promise(async resolve => {
-    const semesterWithIds = [];
     const createOrGetOneSemester = semesterList.map(semester => {
       return semesterController.createOneSemester({
         ...semester,
         courses: semester.courses.map(course => course.code),
       });
     });
-
-    const results = await Promise.all(createOrGetOneSemester);
-    results.forEach(semester => {
-      if (semester._id) semesterWithIds.push(semester._id);
-    });
-
-    resolve(semesterWithIds);
+    resolve(Promise.all(createOrGetOneSemester));
   });
 };
 
@@ -73,8 +61,14 @@ textScanController.post(
     const { path } = req.file;
 
     CloudOcr.scan(path, option).then(async scanResult => {
-      // console.log(scanResult);
-      const { takenCourseList, semesterList } = scanResult;
+      const {
+        takenCourseList,
+        semesterList,
+        school,
+        major,
+        catalogYear,
+        addedInfo,
+      } = scanResult;
 
       // 1. Create Course + Semesters
       const [coursesTaken, semesters] = await Promise.all([
@@ -83,14 +77,23 @@ textScanController.post(
       ]);
 
       // 2. Generate semesters left
-      const remainingCourses = await planController.getRemainingCourses(
+      // CS 146 CS 149 = 6 credit
+      // 99 credits for major requirement
+      // const credit = requirementCredit - 6 = 93 credits
+      // Return a list of 93/3 = 31 courses
+      const remainingCourses = await planController.getRemainingRequirement(
         coursesTaken,
-        {
-          school: scanResult.school,
-          major: scanResult.major,
-          catalogYear: scanResult.catalogYear,
-        }
+        { school, major, catalogYear }
       );
+
+      // Generate Semester Fal 2020: 12 credits
+      // Spring 2021: 12 Credits
+      // This part is really hard. There're many cases
+      // Return a list of 31 courses of major requirement
+      // CLient: student can see remaining courses => input that manually into the semester on client
+
+      // Semester => Click "update the degree plan"
+      // Server => call check Pre-req
 
       const randomSemesterList = await planController.generateSemesters(
         remainingCourses
@@ -98,13 +101,17 @@ textScanController.post(
       semesters.push(randomSemesterList);
 
       // 3. Create a new DegreePlan
-      await new Plan({ semesters })
+      return new Plan({
+        semesters: semesters
+          .filter(semester => semester._id)
+          .map(semester => semester._id),
+      })
         .save()
         .then(newPlan => {
           User.findByIdAndUpdate(
             user._id,
             {
-              coursesTaken,
+              coursesTaken: coursesTaken.map(course => course._id),
               degreePlan: newPlan._id,
             },
             { new: true }
@@ -129,6 +136,7 @@ textScanController.post(
             });
         })
         .catch(e => {
+          console.log(e);
           generateServerErrorCode(res, 500, e, PLAN_NOT_FOUND, 'Plan');
         });
     });
