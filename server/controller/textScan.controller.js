@@ -61,6 +61,7 @@ textScanController.post(
     const { path } = req.file;
 
     CloudOcr.scan(path, option).then(async scanResult => {
+      // console.log(scanResult.takenCourseList);
       const {
         takenCourseList,
         semesterList,
@@ -75,16 +76,17 @@ textScanController.post(
         createOrGetAllCourseId(takenCourseList),
         createSemesterList(semesterList),
       ]);
+      // console.log(coursesTaken, semesterList);
 
       // 2. Generate semesters left
       // CS 146 CS 149 = 6 credit
       // 99 credits for major requirement
       // const credit = requirementCredit - 6 = 93 credits
       // Return a list of 93/3 = 31 courses
-      const remainingCourses = await planController.getRemainingRequirement(
-        coursesTaken,
-        { school, major, catalogYear }
-      );
+      // const remainingCourses = await planController.getRemainingRequirement(
+      //   coursesTaken,
+      //   { school, major, catalogYear }
+      // );
 
       // Generate Semester Fal 2020: 12 credits
       // Spring 2021: 12 Credits
@@ -95,10 +97,10 @@ textScanController.post(
       // Semester => Click "update the degree plan"
       // Server => call check Pre-req
 
-      const randomSemesterList = await planController.generateSemesters(
-        remainingCourses
-      );
-      semesters.push(randomSemesterList);
+      // const randomSemesterList = await planController.generateSemesters(
+      //   remainingCourses
+      // );
+      // semesters.push(randomSemesterList);
 
       // 3. Create a new DegreePlan
       return new Plan({

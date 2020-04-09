@@ -1,6 +1,9 @@
+/* eslint-disable no-restricted-syntax */
 import fs from 'fs';
 import { promisify } from 'util';
 import gCloudVision from '@google-cloud/vision';
+import { Course } from '../../database/models';
+import courseController from '../../controller/course.controller';
 
 const { ImageAnnotatorClient } = gCloudVision.v1p4beta1;
 const readFileAsync = promisify(fs.readFile);
@@ -9,23 +12,27 @@ const client = new ImageAnnotatorClient();
 
 const CloudOCR = {};
 
-CloudOCR.TranscriptMapping = new Map();
-CloudOCR.TranscriptMapping.takenCourseList = [];
-CloudOCR.TranscriptMapping.semesterList = [];
-CloudOCR.TranscriptMapping.otherInfo = [];
-CloudOCR.TranscriptMapping.currentSemester = -1;
-CloudOCR.TranscriptMapping.otherInfo = [];
-CloudOCR.TranscriptMapping.startingTermFound = false;
-CloudOCR.TranscriptMapping.count = 0;
-CloudOCR.TranscriptMapping.school = 'SJSU';
-CloudOCR.TranscriptMapping.catalogYear = '18-19';
+const setupTranscriptMapping = () => {
+  CloudOCR.TranscriptMapping = new Map();
+  CloudOCR.TranscriptMapping.takenCourseList = [];
+  CloudOCR.TranscriptMapping.semesterList = [];
+  CloudOCR.TranscriptMapping.otherInfo = [];
+  CloudOCR.TranscriptMapping.currentSemester = -1;
+  CloudOCR.TranscriptMapping.otherInfo = [];
+  CloudOCR.TranscriptMapping.startingTermFound = false;
+  CloudOCR.TranscriptMapping.count = 0;
+  CloudOCR.TranscriptMapping.school = 'SJSU';
+  CloudOCR.TranscriptMapping.catalogYear = '18-19';
+};
 
 /**
  * Add Course to the current Semester
  * @param {Object} course
  */
 const addCourseToSemester = course => {
+  // console.log(`[ADD COURSE TO SEM]:`, course);
   CloudOCR.TranscriptMapping.takenCourseList.push(course);
+  // console.log('DONE 4');
   if (
     CloudOCR.TranscriptMapping.semesterList[
       CloudOCR.TranscriptMapping.currentSemester
@@ -66,6 +73,7 @@ const transcriptParser = async paragraph => {
   });
 
   const sentence = listOfWordText.join(' ');
+
   switch (true) {
     // Check for AP Courses
     case listOfWordText.includes('AP'):
@@ -104,13 +112,30 @@ const transcriptParser = async paragraph => {
       CloudOCR.TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
       break;
 
-    // Check for Course using creditCondition List
-    case (creditCondition.some(credit => listOfWordText.includes(credit)) &&
-      listOfWordText[0].length <= 4) ||
-      (listOfWordText.length === 2 &&
-        listOfWordText[0].length <= 4 &&
-        !isNaN(listOfWordText[1])):
-      await addCourseToSemester(getCourseInfo(listOfWordText));
+    // Check for Course
+    case creditCondition.some(credit => listOfWordText.includes(credit)) ||
+      (!isNaN(listOfWordText[1]) &&
+        semesterSeason.every(semester => !listOfWordText.includes(semester))):
+      await Course.findOne({
+        department: listOfWordText[0],
+        code: listOfWordText[1],
+      })
+        .then(foundCourse => {
+          if (foundCourse) {
+            const { school, department, code, title } = foundCourse;
+            addCourseToSemester({
+              school,
+              code: `${department} ${code}`,
+              title,
+            });
+          } else if (!foundCourse) {
+            addCourseToSemester(getCourseInfo(listOfWordText));
+          }
+        })
+        .catch(e => {
+          console.log(`Db error`, e);
+        });
+
       break;
 
     // Check for WST Eligible
@@ -142,24 +167,25 @@ const transcriptParser = async paragraph => {
  * Parse Transcript File to get course and semester and other info.
  * @param {Object} responses Responses received from GCLOUD OCR
  */
-const documentHandler = (responses, option) => {
-  responses.forEach(response => {
-    response.fullTextAnnotation.pages.forEach(page => {
-      page.blocks.forEach(block => {
-        block.paragraphs.forEach(paragraph => {
+const documentHandler = async (responses, option) => {
+  for (const response of responses) {
+    for (const page of response.fullTextAnnotation.pages) {
+      for (const block of page.blocks) {
+        for (const paragraph of block.paragraphs) {
           switch (option) {
             case 'transcript':
-              transcriptParser(paragraph);
+              await transcriptParser(paragraph);
+              // console.log('DONE 2');
               break;
             case 'program':
               break;
             default:
               break;
           }
-        });
-      });
-    });
-  });
+        }
+      }
+    }
+  }
   return CloudOCR.TranscriptMapping;
 };
 
@@ -167,15 +193,7 @@ const documentHandler = (responses, option) => {
  * Main function that will be called by textScannerController
  */
 CloudOCR.scan = async (fileName, option) => {
-  CloudOCR.TranscriptMapping = new Map();
-
-  CloudOCR.TranscriptMapping.takenCourseList = [];
-  CloudOCR.TranscriptMapping.semesterList = [];
-  CloudOCR.TranscriptMapping.otherInfo = [];
-  CloudOCR.TranscriptMapping.currentSemester = -1;
-  CloudOCR.TranscriptMapping.otherInfo = [];
-  CloudOCR.TranscriptMapping.startingTermFound = false;
-  CloudOCR.TranscriptMapping.count = 0;
+  setupTranscriptMapping();
 
   const inputConfig = {
     mimeType: 'application/pdf',
@@ -199,6 +217,7 @@ CloudOCR.scan = async (fileName, option) => {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
     const result = await documentHandler(responses, option);
+    console.log('DONE 1');
     return result;
   } catch (e) {
     return e;
