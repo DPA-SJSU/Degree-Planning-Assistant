@@ -30,9 +30,7 @@ const setupTranscriptMapping = () => {
  * @param {Object} course
  */
 const addCourseToSemester = course => {
-  // console.log(`[ADD COURSE TO SEM]:`, course);
   CloudOCR.TranscriptMapping.takenCourseList.push(course);
-  // console.log('DONE 4');
   if (
     CloudOCR.TranscriptMapping.semesterList[
       CloudOCR.TranscriptMapping.currentSemester
@@ -216,6 +214,7 @@ CloudOCR.scan = async (fileName, option) => {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
     const result = await documentHandler(responses, option);
+
     return result;
   } catch (e) {
     return e;

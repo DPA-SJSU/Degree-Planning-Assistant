@@ -44,6 +44,15 @@ userController.createUser = (email, password) => {
     hashedPassword: generateHashedPassword(password),
     email,
     isAdmin: false,
+    avatarType: '',
+    firstName: '',
+    lastName: '',
+    school: '',
+    bio: '',
+    gradDate: '',
+    major: '',
+    minor: '',
+    catalogYear: '',
   };
 
   return new User(data).save();
