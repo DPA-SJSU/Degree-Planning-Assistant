@@ -1,6 +1,9 @@
+/* eslint-disable no-restricted-syntax */
 import fs from 'fs';
 import { promisify } from 'util';
 import gCloudVision from '@google-cloud/vision';
+import { Course } from '../../database/models';
+import courseController from '../../controller/course.controller';
 
 const { ImageAnnotatorClient } = gCloudVision.v1p4beta1;
 const readFileAsync = promisify(fs.readFile);
@@ -9,25 +12,35 @@ const client = new ImageAnnotatorClient();
 
 const CloudOCR = {};
 
-let DocumentMapping = new Map();
-const TranscriptMapping = new Map();
-TranscriptMapping.takenCourseList = [];
-TranscriptMapping.semesterList = [];
-TranscriptMapping.otherInfo = [];
-
-let otherInfo = [];
-let currentSemester = -1;
-let startingTermFound = false;
-let count = 0;
+const setupTranscriptMapping = () => {
+  CloudOCR.TranscriptMapping = new Map();
+  CloudOCR.TranscriptMapping.takenCourseList = [];
+  CloudOCR.TranscriptMapping.semesterList = [];
+  CloudOCR.TranscriptMapping.otherInfo = [];
+  CloudOCR.TranscriptMapping.currentSemester = -1;
+  CloudOCR.TranscriptMapping.otherInfo = [];
+  CloudOCR.TranscriptMapping.startingTermFound = false;
+  CloudOCR.TranscriptMapping.count = 0;
+  CloudOCR.TranscriptMapping.school = 'SJSU';
+  CloudOCR.TranscriptMapping.catalogYear = '18-19';
+};
 
 /**
  * Add Course to the current Semester
  * @param {Object} course
  */
 const addCourseToSemester = course => {
-  TranscriptMapping.takenCourseList.push(course);
-  if (TranscriptMapping.semesterList[currentSemester])
-    TranscriptMapping.semesterList[currentSemester].courses.push(course);
+  // console.log(`[ADD COURSE TO SEM]:`, course);
+  CloudOCR.TranscriptMapping.takenCourseList.push(course);
+  // console.log('DONE 4');
+  if (
+    CloudOCR.TranscriptMapping.semesterList[
+      CloudOCR.TranscriptMapping.currentSemester
+    ]
+  )
+    CloudOCR.TranscriptMapping.semesterList[
+      CloudOCR.TranscriptMapping.currentSemester
+    ].courses.push(course);
 };
 
 /**
@@ -43,27 +56,12 @@ const getCourseInfo = listOfWordText => {
   return { school, code, title, credit };
 };
 
-const programParser = async paragraph => {
-  const listOfWordText = [];
-  paragraph.words.forEach(word => {
-    const wordText = word.symbols.map(symbol => symbol.text).join('');
-    listOfWordText.push(wordText);
-  });
-
-  const sentence = listOfWordText.join(' ');
-  switch (true) {
-    default:
-      break;
-  }
-};
-
 /**
  * Checking case and Map the info to the right type
  * @param {Array} listOfWordText  A list of words in a sentence
  * @param {String} sentence       A whole sentence which is scanned by OCR
  */
 const transcriptParser = async paragraph => {
-  // Use for Transcript checking
   const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
   const creditCondition = ['1.0', '2.0', '3.0'];
   const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
@@ -75,12 +73,11 @@ const transcriptParser = async paragraph => {
   });
 
   const sentence = listOfWordText.join(' ');
-  console.log(sentence);
 
   switch (true) {
     // Check for AP Courses
     case listOfWordText.includes('AP'):
-      TranscriptMapping.otherInfo.push(sentence);
+      CloudOCR.TranscriptMapping.otherInfo.push(sentence);
       break;
 
     // Check for Semester
@@ -94,46 +91,72 @@ const transcriptParser = async paragraph => {
         status: 0,
       };
 
-      if (!startingTermFound) {
-        TranscriptMapping.startingSem = semester;
-        startingTermFound = true;
+      if (!CloudOCR.TranscriptMapping.startingTermFound) {
+        CloudOCR.TranscriptMapping.startingSem = semester;
+        CloudOCR.TranscriptMapping.startingTermFound = true;
       } else {
-        semester.year = TranscriptMapping.startingSem.year + count;
-        if (semesterSeason.indexOf(listOfWordText[0]) === 2) count += 1;
+        semester.year =
+          CloudOCR.TranscriptMapping.startingSem.year +
+          CloudOCR.TranscriptMapping.count;
+        if (semesterSeason.indexOf(listOfWordText[0]) === 2)
+          CloudOCR.TranscriptMapping.count += 1;
       }
-      TranscriptMapping.semesterList.push(semester);
-      currentSemester = TranscriptMapping.semesterList.length - 1;
+      CloudOCR.TranscriptMapping.semesterList.push(semester);
+      CloudOCR.TranscriptMapping.currentSemester =
+        CloudOCR.TranscriptMapping.semesterList.length - 1;
       break;
     }
 
     // Check for Major
     case listOfWordText.includes('MAJOR'):
-      TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
+      CloudOCR.TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
       break;
 
-    // Check for Course using creditCondition List
-    case (creditCondition.some(credit => listOfWordText.includes(credit)) &&
-      listOfWordText[0].length <= 4) ||
-      (listOfWordText.length === 2 &&
-        listOfWordText[0].length <= 4 &&
-        !isNaN(listOfWordText[1])):
-      await addCourseToSemester(getCourseInfo(listOfWordText));
+    // Check for Course
+    case creditCondition.some(credit => listOfWordText.includes(credit)) ||
+      (!isNaN(listOfWordText[1]) &&
+        semesterSeason.every(semester => !listOfWordText.includes(semester))):
+      await Course.findOne({
+        department: listOfWordText[0],
+        code: listOfWordText[1],
+      })
+        .then(foundCourse => {
+          if (foundCourse) {
+            const { school, department, code, title } = foundCourse;
+            addCourseToSemester({
+              school,
+              code: `${department} ${code}`,
+              title,
+            });
+          } else if (!foundCourse) {
+            addCourseToSemester(getCourseInfo(listOfWordText));
+          }
+        })
+        .catch(e => {
+          console.log(`Db error`, e);
+        });
+
       break;
 
     // Check for WST Eligible
     case wstCondition.every(el => listOfWordText.includes(el)):
       if (listOfWordText[listOfWordText.indexOf(':') + 1] === 'ELIGIBLE') {
-        otherInfo = `[WST]: Qualify for taking upper courses such as 100W Course`;
+        CloudOCR.TranscriptMapping.otherInfo.push(
+          `[WST]: Qualify for taking upper courses such as 100W Course`
+        );
       } else {
-        otherInfo = `[WST]: NOT Qualify for taking upper courses such as 100W Course`;
+        CloudOCR.TranscriptMapping.otherInfo.push(
+          `[WST]: NOT Qualify for taking upper courses such as 100W Course`
+        );
       }
-      TranscriptMapping.otherInfo.push(otherInfo);
       break;
 
     // Check for Semester Student is enrolling
     case listOfWordText.includes('IN PROGRESS') ||
       listOfWordText.includes('ENROLLED'):
-      TranscriptMapping.semesterList[currentSemester].status = 1;
+      CloudOCR.TranscriptMapping.semesterList[
+        CloudOCR.TranscriptMapping.currentSemester
+      ].status = 1;
       break;
     default:
       break;
@@ -144,32 +167,33 @@ const transcriptParser = async paragraph => {
  * Parse Transcript File to get course and semester and other info.
  * @param {Object} responses Responses received from GCLOUD OCR
  */
-const documentHandler = (responses, option) => {
-  responses.forEach(response => {
-    response.fullTextAnnotation.pages.forEach(page => {
-      page.blocks.forEach(block => {
-        block.paragraphs.forEach(paragraph => {
+const documentHandler = async (responses, option) => {
+  for (const response of responses) {
+    for (const page of response.fullTextAnnotation.pages) {
+      for (const block of page.blocks) {
+        for (const paragraph of block.paragraphs) {
           switch (option) {
             case 'transcript':
-              transcriptParser(paragraph);
+              await transcriptParser(paragraph);
               break;
             case 'program':
-              programParser(paragraph);
               break;
             default:
               break;
           }
-        });
-      });
-    });
-  });
-  return TranscriptMapping;
+        }
+      }
+    }
+  }
+  return CloudOCR.TranscriptMapping;
 };
 
 /**
  * Main function that will be called by textScannerController
  */
 CloudOCR.scan = async (fileName, option) => {
+  setupTranscriptMapping();
+
   const inputConfig = {
     mimeType: 'application/pdf',
     content: await readFileAsync(fileName),

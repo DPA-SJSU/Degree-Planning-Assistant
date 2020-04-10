@@ -9,7 +9,7 @@ import {
   YEAR_CONTAINS_FORBIDDEN_CHARACTERS,
 } from '../constant';
 
-export const validateCreateSemester = [
+export const validateCreateOneSemester = [
   check('term')
     .exists()
     .withMessage(SEMESTER_TERM_IS_EMPTY),

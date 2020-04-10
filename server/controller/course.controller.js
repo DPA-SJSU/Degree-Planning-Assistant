@@ -18,6 +18,7 @@ import {
   SOME_THING_WENT_WRONG,
   NO_DATA_TO_UPDATE,
   SCHOOL_DOES_NOT_EXIST,
+  FAILED_TO_CREATE_COURSE,
 } from './constant';
 
 import {
@@ -28,59 +29,134 @@ import {
 } from './validation/course.validation';
 
 const courseController = express.Router();
-const { ObjectId } = require('mongoose').Types;
 
 /**
- * ============================================
- * Starting helper functions for courseController
- * ============================================
+ * Loop though an array of Courses to get the ObjectId of each
+ * @param {[String]} codes Array of codes
+ * @returns {ObjectId}
  */
+courseController.createOrGetAllCourseId = courseList => {
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
+    const coursesWithIds = [];
+    const { codes, school, type, area } = courseList;
 
-/**
- * Find course ID and return a new course List that has course id
- * Create new Course if it's not in db, else add to the list
- * @param {[JSON Object]} courses
- * return {} newCourseList
- */
-courseController.createAndGetCourseId = async courses => {
-  const listOfCourseID = [];
-  for (const course of courses) {
-    const school = course.school.toUpperCase();
-    const { code } = course;
-    const title = course.title || ' ';
-
-    await Course.findOne({ school, code }).then(async foundCourse => {
-      if (!foundCourse) {
-        await courseController
-          .createCourse({ school, code, title })
-          .then(createdCourse => {
-            listOfCourseID.push(createdCourse._id);
-          });
-      } else listOfCourseID.push(foundCourse._id);
+    const createOrGetOneCourse = codes.map(code => {
+      return courseController.createOrGetOneCourse({
+        school,
+        type,
+        code,
+        area,
+        title: code.title || ' ',
+      });
     });
-  }
 
-  return listOfCourseID;
+    const results = await Promise.all(createOrGetOneCourse);
+    results.forEach(course => coursesWithIds.push(course._id));
+    resolve(coursesWithIds);
+  });
 };
+
+/**
+ * Creates a new Course with correct reference to ObjectId of prerequisites and corequisites
+ * @param {courseInfo} data
+ * @returns {Course} Course
+ */
+courseController.createOrGetOneCourse = async (data, option = 'EMPTY') => {
+  return new Promise((resolve, reject) => {
+    let course = data;
+
+    const { school = 'SJSU', code, type, area } = course;
+
+    const splitCourseString = code.split(' ');
+    const department = splitCourseString[0];
+    const courseCode = splitCourseString[1].replace(/^0+/, '');
+
+    Course.findOne({ school, department, code: courseCode })
+      .then(async foundCourse => {
+        if (foundCourse) return resolve(foundCourse);
+
+        console.log(
+          'course not found',
+          school,
+          department,
+          courseCode,
+          type,
+          area
+        );
+        if (option === 'EMPTY')
+          course = {
+            ...data,
+            department,
+            code: courseCode,
+            requirementType: type,
+          };
+        else {
+          const tasks = [
+            courseController.createOrGetAllCourseId({
+              ...course,
+              codes: data.prerequisites,
+            }),
+            courseController.createOrGetAllCourseId({
+              ...course,
+              codes: data.corequisites,
+            }),
+          ];
+          const [preList, coList] = await Promise.all(tasks);
+          course.prerequisites = preList;
+          course.corequisites = coList;
+        }
+        return resolve(new Course(course).save());
+      })
+      .catch(e => reject(e));
+  });
+};
+
+/**
+ * @param {Object} options
+ */
+courseController.getPopulatedCourse = (options, res) => {
+  Course.find(options)
+    .populate('prerequisites corequisites')
+    .then(foundCourse => {
+      if (foundCourse) res.status(200).json(foundCourse);
+      else
+        generateServerErrorCode(
+          res,
+          403,
+          `school doesn't exist`,
+          SCHOOL_DOES_NOT_EXIST,
+          'school'
+        );
+    });
+};
+
+/**
+ * ============================================
+ * Starting APIs for Course
+ * ============================================
+ */
 
 /**
  * Loop though an array of Courses to get the ObjectId of each
  * @param {String} school
- * @param {[String]} codes Array of codes
+ * @param {[String]} codes
  * @returns {[ObjectId]} [ObjectId]
  */
 courseController.getAllCourseId = async (school, codes) => {
   try {
     const coursesWithIds = [];
     await codes.forEach(code => {
-      Course.findOne({ school, code }).then(async foundCourse => {
+      Course.findOne({ school, code }, async foundCourse => {
+        let id;
         if (!foundCourse) {
-          await courseController
-            .createCourse({ school, code })
-            .then(createdCourse => {
-              coursesWithIds.push(createdCourse._id);
-            });
-        } else coursesWithIds.push(foundCourse._id);
+          const createdCourse = await courseController.createCourse({
+            school,
+            code,
+          });
+          id = new ObjectId(createdCourse._id);
+        } else id = new ObjectId(foundCourse._id);
+        coursesWithIds.push(id);
       });
     });
     return coursesWithIds;
@@ -146,12 +222,6 @@ courseController.getPopulatedCourse = (options, res) => {
 };
 
 /**
- * ============================================
- * Starting APIs for Course
- * ============================================
- */
-
-/**
  * POST/
  * Create a new course, requires authentication of user
  */
@@ -161,25 +231,30 @@ courseController.post(
   validateCourseCreation,
   (req, res) => {
     validationHandler(req, res, () => {
-      try {
-        const { school, code } = req.body;
-        Course.findOne({ school, code }, foundCourse => {
-          if (!foundCourse)
-            courseController
-              .createCourse({ school, code }, 'NONE_EMPTY')
-              .then(createdCourse => res.status(200).json(createdCourse));
-          else
-            generateServerErrorCode(
-              res,
-              403,
-              'course creation error',
-              COURSE_EXISTS_ALREADY,
-              'school, code'
+      const { school, code } = req.body;
+      Course.findOne({ school, code }, foundCourse => {
+        if (!foundCourse)
+          courseController
+            .createOrGetOneCourse({ school, code }, 'NONE_EMPTY')
+            .then(createdCourse => res.status(200).json(createdCourse))
+            .catch(e =>
+              generateServerErrorCode(
+                res,
+                403,
+                e,
+                FAILED_TO_CREATE_COURSE,
+                'course'
+              )
             );
-        });
-      } catch (e) {
-        generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-      }
+        else
+          generateServerErrorCode(
+            res,
+            403,
+            'course creation error',
+            COURSE_EXISTS_ALREADY,
+            'course'
+          );
+      });
     });
   }
 );
@@ -228,11 +303,9 @@ courseController.get(
   validateSchoolCourses,
   (req, res) => {
     const school = req.params.school.toUpperCase();
-    validationHandler(
-      req,
-      res,
-      courseController.getPopulatedCourse({ school }, res)
-    );
+    validationHandler(req, res, () => {
+      courseController.getPopulatedCourse({ school }, res);
+    });
   }
 );
 
@@ -263,7 +336,7 @@ courseController.put(
                 403,
                 'update course error',
                 COURSE_DOES_NOT_EXIST,
-                'course_id'
+                'course'
               );
             else res.status(200).json(updatedCourse);
           }
@@ -293,7 +366,7 @@ courseController.delete(
             403,
             'delete course error',
             COURSE_DOES_NOT_EXIST,
-            'courseId'
+            'course'
           );
         else res.status(200).json({ message: 'deleted a course', result });
       });
@@ -314,7 +387,7 @@ courseController.delete(
   (req, res) => {
     Course.deleteMany({}, (err, result) => {
       if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-      else res.status(200).json({ message: `deleted all courses ${result}` });
+      else res.status(200).json(result);
     });
   }
 );

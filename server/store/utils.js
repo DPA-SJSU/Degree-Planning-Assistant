@@ -18,7 +18,6 @@ export function generateServerErrorCode(
 
   return res.status(code).json({
     code,
-    fullError,
     errors,
   });
 }
@@ -35,6 +34,18 @@ export function validationHandler(req, res, next) {
   return next();
 }
 
+export function checkAllowedKeys(allowedKeys, keys) {
+  if ((allowedKeys && allowedKeys.length > 0) || (keys && keys.length > 0)) {
+    for (let i = 0; i < keys.length; i += 1) {
+      if (!allowedKeys.includes(keys[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 /**
  * Removes the undefined properties of an object
  * Found: https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object/38340374#38340374
@@ -48,3 +59,10 @@ export function removeUndefinedObjectProps(obj) {
 export function isObjectEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
+
+export const groupBy = (xs, key) => {
+  return xs.reduce((rv, x) => {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};

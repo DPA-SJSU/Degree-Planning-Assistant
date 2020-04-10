@@ -24,9 +24,28 @@ import {
   SOME_THING_WENT_WRONG,
 } from './constant';
 
-import { Program } from '../database/models';
+import { Program, Course } from '../database/models';
 
 const programController = express.Router();
+
+/**
+ * Used when scan Transcript
+ * Get the remaining courses and a Map { "Area #": [courses] }
+ * @param {List} coursesTaken
+ * @param {Object} program
+ * @returns {Object} result
+ */
+programController.getRemainingCourses = async (coursesTaken, program) => {
+  const result = {};
+  coursesTaken.forEach(courseId => {
+    Course.findById(courseId).select('area');
+  });
+
+  // Check GE
+  // Check MajorRequirements
+
+  return result;
+};
 
 /**
  * @route   POST /program/
@@ -36,43 +55,39 @@ const programController = express.Router();
 programController.post(
   '/',
   passport.authenticate('jwt', { session: false }),
-  validateCreateDegreeProgram,
+  // validateCreateDegreeProgram,
   async (req, res) => {
-    // Validate the string inputs (school, major, catalogYear)
-    const errors = validationResult(req);
+    // const errors = validationResult(req);
+    const {
+      school,
+      major,
+      catalogYear,
+      generalEducation,
+      majorRequirements,
+      otherRequirements,
+    } = req.body;
 
-    // Validate the object inputs (general_education, major_requirements, other_requirements)
-    const { generalEducation, majorRequirements, otherRequirements } = req.body;
+    console.log(req.body);
 
-    const objStructureErrors = { errors: [] };
-    validateObjStructure(generalEducation, objStructureErrors.errors, false);
-    validateObjStructure(majorRequirements, objStructureErrors.errors, false);
-    validateObjStructure(otherRequirements, objStructureErrors.errors, false);
+    // const objStructureErrors = { errors: [] };
+    // validateObjStructure(generalEducation, objStructureErrors.errors, false);
+    // validateObjStructure(majorRequirements, objStructureErrors.errors, false);
+    // validateObjStructure(otherRequirements, objStructureErrors.errors, false);
 
-    // Check if validators detected errors in input
-    if (errors.isEmpty() === false || objStructureErrors.errors.length > 0) {
-      return res.status(400).json({ errors, objStructureErrors });
-    }
-
-    const { school, major, catalogYear } = req.body;
+    // if (errors.isEmpty() === false || objStructureErrors.errors.length > 0) {
+    //   return res.status(400).json({ errors, objStructureErrors });
+    // }
 
     try {
-      const data = {
-        school,
-        major,
-        catalogYear,
-        generalEducation,
-        majorRequirements,
-        otherRequirements,
-      };
-
       Program.findOne(
         { school, major, catalogYear },
         async existingDegreeProgram => {
           if (existingDegreeProgram)
-            res.status(403).json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
+            return res
+              .status(403)
+              .json({ error: DEGREE_PROGRAM_ALREADY_EXISTS });
 
-          const newDegreeProgram = new Program(data);
+          const newDegreeProgram = new Program(req.body);
           await newDegreeProgram.save();
 
           res.status(200).json(newDegreeProgram);
@@ -96,7 +111,6 @@ programController.get(
   async (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty() === false) {
-      // All or some inputs are invalid
       return res.status(400).json(errors);
     }
     if (
@@ -105,7 +119,6 @@ programController.get(
       !req.query.major &&
       !req.query.catalogYear
     ) {
-      // Either the id or all three school, major, catalogYear fields are required
       return res
         .status(400)
         .json({ error: ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED });
@@ -126,10 +139,8 @@ programController.get(
       if (queryResult.length > 0) {
         return res.status(200).json(queryResult);
       }
-      // No degree program that contains the parameters have been found
       return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
     } catch (e) {
-      // Database error
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   }
@@ -156,8 +167,6 @@ const updateByParameters = async (res, params) => {
     otherRequirements,
   } = params;
 
-  // If the old and new inputs for school, major, catalogYear are the same, then no need to check if there will be duplications in the database
-  // Otherwise, check if the resulting degree program already exists in the database
   if (
     (newSchool && school !== newSchool) ||
     (newMajor && major !== newMajor) ||
@@ -234,7 +243,6 @@ programController.put(
       true
     );
 
-    // Check if validators detected errors in input
     if (errors.isEmpty() === false || objStructureErrors.errors.length > 0) {
       return res.status(400).json({ errors, objStructureErrors });
     }
@@ -335,9 +343,7 @@ programController.put(
 
     const { school, major, catalogYear } = req.body;
 
-    // Check if at least one field other than id has been entered. Otherwise there is nothing to update.
     if (!school && !major && !catalogYear) {
-      // Must choose a field to update
       return res.status(400).json();
     }
 
@@ -367,7 +373,6 @@ programController.delete(
     const { id, school, major, catalogYear } = req.body;
 
     if (!id && (!school || !major || !catalogYear)) {
-      // Either just the id or all three school, major, catalogYear fields are required
       return res
         .status(400)
         .json({ error: ID_OR_ALL_THREE_OTHER_PARAMETERS_IS_REQUIRED });
