@@ -15,7 +15,7 @@ import planController from './plan.controller';
 
 import { User, Course, Semester, Plan } from '../database/models';
 
-import { generateServerErrorCode } from '../store/utils';
+import { groupBy, generateServerErrorCode } from '../store/utils';
 
 import { SOME_THING_WENT_WRONG, PLAN_NOT_FOUND } from './constant';
 
@@ -83,10 +83,10 @@ textScanController.post(
       // 99 credits for major requirement
       // const credit = requirementCredit - 6 = 93 credits
       // Return a list of 93/3 = 31 courses
-      // const remainingCourses = await planController.getRemainingRequirement(
-      //   coursesTaken,
-      //   { school, major, catalogYear }
-      // );
+      const remainingCourses = await planController.getRemainingRequirement(
+        coursesTaken,
+        { school, major: 'Software Engineering', catalogYear }
+      );
 
       // Generate Semester Fal 2020: 12 credits
       // Spring 2021: 12 Credits

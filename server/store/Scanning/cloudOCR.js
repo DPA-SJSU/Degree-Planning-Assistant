@@ -175,7 +175,6 @@ const documentHandler = async (responses, option) => {
           switch (option) {
             case 'transcript':
               await transcriptParser(paragraph);
-              // console.log('DONE 2');
               break;
             case 'program':
               break;
@@ -217,7 +216,6 @@ CloudOCR.scan = async (fileName, option) => {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
     const result = await documentHandler(responses, option);
-    console.log('DONE 1');
     return result;
   } catch (e) {
     return e;

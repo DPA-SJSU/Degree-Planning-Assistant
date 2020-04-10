@@ -15,7 +15,9 @@ import {
   PLAN_NOT_FOUND,
   FAILED_TO_UPDATE_USER,
 } from './constant';
-import { generateServerErrorCode } from '../store/utils';
+
+import { groupBy, generateServerErrorCode } from '../store/utils';
+
 import semesterController from './semester.controller';
 
 const planController = express.Router();
@@ -42,27 +44,29 @@ planController.errorHandler = (req, res, errors) => {
 };
 
 planController.getRemainingRequirement = (courses, requirementOption) => {
-  // Find requirements based on requirementOption
-  //
-  const coursesTaken = courses;
+  // 1. Group all courses based on their type, and area
+  // 2. Find Requirement that based on the found type and area.
+  // 3. if RequiredCredit reach 0, ignore that requirement
+  // Else return a list of courses in that requirement.
+  // 4. Find all other requirement that has different type or area. Retrieve the courses
 
-  // return new Promise((resolve, reject) => {
-  //   Requirement.find({ ...requirementOption, type: })
-  //     .lean()
-  //     .exec()
-  //     .then(foundRequirement => {
-  //       coursesTaken.forEach(course => {
-  //         if (foundRequirement.courses.includes(course)) {
-  //         }
-  //       });
+  return new Promise((resolve, reject) => {
+    const coursesTaken = courses;
+    // groupBy(coursesTaken, 'type')
+    console.log(courses);
 
-  //       console.log(foundRequirement);
-  //       resolve(courses);
-  //     });
-  // });
+    //   coursesTaken.forEach(course => {
+    //     Requirement.findOne({courses})
+    //   })
+    //   console.log(requirementOption);
+    //   Requirement.find({ requirementOption }, (err, foundRequirement) => {
+    //     console.log(foundRequirement);
+    //     resolve(courses);
+    //   });
+  });
 };
 
-planController.generateSemesterBasedOn = courses => {
+planController.generateSemesters = courses => {
   return new Promise((resolve, reject) => {
     resolve(courses);
   });

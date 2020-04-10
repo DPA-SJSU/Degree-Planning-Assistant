@@ -59,3 +59,10 @@ export function removeUndefinedObjectProps(obj) {
 export function isObjectEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
+
+export const groupBy = (xs, key) => {
+  return xs.reduce((rv, x) => {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
