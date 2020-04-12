@@ -1,6 +1,3 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-underscore-dangle */
 import express from 'express';
 import passport from 'passport';
 import { Semester } from '../database/models';
@@ -10,6 +7,8 @@ import {
   removeUndefinedObjectProps,
   isObjectEmpty,
   validationHandler,
+  createOneSemester,
+  getSemesterWithPopulatedCourse,
 } from '../store/utils';
 
 import {
@@ -23,79 +22,8 @@ import {
   validateCreateOneSemester,
   validateSemesterId,
 } from './validation/semester.validation';
-import courseController from './course.controller';
 
 const semesterController = express.Router();
-
-/**
- * Get all semester based on a specific condition and populate all courses within the semester.
- * @param {*} res
- * @param {Object} option Default = {} - get all semesters
- */
-semesterController.getSemesterWithPopulatedCourse = (option, res) => {
-  try {
-    Semester.find(option)
-      .populate('courses')
-      .then(fetchedSemester => res.status(200).json(fetchedSemester))
-      .catch(e => {
-        generateServerErrorCode(res, 403, e, SEMESTER_NOT_FOUND, 'semester');
-      });
-  } catch (e) {
-    generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-  }
-};
-
-/**
- * Create A new Semester
- * @param {JSON Object} data
- */
-semesterController.createOneSemester = async data => {
-  return new Promise((resolve, reject) => {
-    const newData = data;
-
-    courseController
-      .createOrGetAllCourseId({ codes: data.courses })
-      .then(courses => {
-        newData.courses = courses;
-        if (courses.length !== 0) {
-          Semester.findOne({
-            courses: { $in: newData.courses },
-          })
-            .then(foundSemester => {
-              if (!foundSemester) {
-                // TO-DO: Add Pre-req check for each semester before creating/update a plan
-                resolve(new Semester(newData).save());
-              } else resolve(foundSemester);
-            })
-            .catch(e => reject(e));
-        } else resolve(courses);
-      })
-      .catch(e => reject(e));
-  });
-};
-
-/**
- * Add all semesters in db
- * return a list of semesterIds
- * @param {[JSON Object]} list of semesters with courses
- */
-semesterController.createSemesterList = semesterList => {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise(async resolve => {
-    const semesterWithIds = [];
-    const createOrGetOneSemester = semesterList.map(semester => {
-      return semesterController.createOneSemester({
-        ...semester,
-        codes: semester.courses,
-      });
-    });
-
-    const results = await Promise.all(createOrGetOneSemester);
-    results.forEach(semester => semesterWithIds.push(semester._id));
-
-    resolve(semesterWithIds);
-  });
-};
 
 /**
  * POST/
@@ -112,9 +40,7 @@ semesterController.post(
         const semester = await Semester.findOne({ term, year, courses });
 
         if (!semester) {
-          const newSemester = await semesterController.createOneSemester(
-            req.body
-          );
+          const newSemester = await createOneSemester(req.body);
           res.status(200).json(newSemester);
         } else
           generateServerErrorCode(
@@ -142,7 +68,7 @@ semesterController.get(
   (req, res) => {
     validationHandler(req, res, () => {
       const { _id } = req.query;
-      semesterController.getSemesterWithPopulatedCourse({ _id }, res);
+      getSemesterWithPopulatedCourse({ _id }, res);
     });
   }
 );
@@ -152,9 +78,7 @@ semesterController.get(
  * Retrieve all the semester
  */
 semesterController.get('/all', (req, res) => {
-  validationHandler(req, res, () =>
-    semesterController.getSemesterWithPopulatedCourse({}, res)
-  );
+  validationHandler(req, res, () => getSemesterWithPopulatedCourse({}, res));
 });
 
 /**
