@@ -1,1 +1,13 @@
-<p>a-dashboard works!</p>
+<button (click)="createNewProgram()">create new program</button>
+<div *ngFor="let program of newProgram | async">
+  <p *ngIf="program.school">{{ program.school }}</p>
+  <p *ngIf="program.major">{{ program.major }}</p>
+  <p *ngIf="program.catalogYear">{{ program.catalogYear }}</p>
+</div>
+
+<button (click)="getNewProgram()">get a new program</button>
+<div *ngFor="let currentProgram of program | async">
+  <p *ngIf="currentProgram.school">{{ currentProgram.school }}</p>
+  <p *ngIf="currentProgram.major">{{ currentProgram.major }}</p>
+  <p *ngIf="currentProgram.catalogYear">{{ currentProgram.catalogYear }}</p>
+</div>
