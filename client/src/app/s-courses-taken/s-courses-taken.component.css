@@ -33,3 +33,17 @@
 .add-courses-btn:active {
   background-color: #48dbb2;
 }
+
+.search-input {
+  font-size: 18px;
+  padding: 10px;
+}
+
+/* Rest and Focus on a button */
+.rest {
+  border-radius: 20px;
+}
+
+.rest:focus {
+  outline: none;
+}

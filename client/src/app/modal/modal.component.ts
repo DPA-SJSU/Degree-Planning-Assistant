@@ -21,6 +21,9 @@ export class ModalComponent implements OnInit {
   onClose = new EventEmitter<boolean>();
 
   @Output()
+  onSubmit = new EventEmitter<boolean>();
+
+  @Output()
   onInput = new EventEmitter<any>();
 
   ngOnInit() {}
@@ -28,9 +31,10 @@ export class ModalComponent implements OnInit {
   /**
    * Send modal status of closed to parent component
    */
-  closeModal() {
+  submitModal(submitted: boolean) {
     this.isOpen = false;
     this.onClose.emit(this.isOpen);
+    this.onSubmit.emit(submitted);
   }
 
   /**

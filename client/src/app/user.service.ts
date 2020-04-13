@@ -2,10 +2,11 @@ import { Injectable } from "@angular/core";
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 
-import { Observable, Subject } from "rxjs";
-import { map } from "rxjs/operators";
+import { Observable, Subject, from, forkJoin } from "rxjs";
+import { map, switchMap, mergeMap } from "rxjs/operators";
 
 import { ErrorHandlerService } from "./error-handler.service";
+import { CourseData } from "./course.service";
 
 export interface UserData {
   name?: string;
@@ -18,7 +19,7 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   bio: string;
-  coursesTaken: Array<object>;
+  coursesTaken: CourseData[];
   gradDate?: {
     year?: number;
     term: string;
@@ -157,11 +158,21 @@ export class UserService {
   /**
    * Update courses taken
    */
-  addToCoursesTaken(coursesTaken: [CourseData]) {
-    return this.http.put(
-      `${this.uri}/coursesTaken/`,
-      coursesTaken,
-      this.getHttpHeaders()
+  addToCoursesTaken(coursesTaken: CourseData[]): Observable<any> {
+    const courseIds = [];
+    coursesTaken.forEach((course) => courseIds.push(course._id));
+
+    return this.userData.pipe(
+      map((user: UserProfile) =>
+        user.coursesTaken.forEach((course) => courseIds.push(course._id))
+      ),
+      switchMap((ids) =>
+        this.http.put(
+          `${this.uri}/coursesTaken`,
+          courseIds,
+          this.getHttpHeaders()
+        )
+      )
     );
   }
 
@@ -171,7 +182,7 @@ export class UserService {
   fetchUserData(update?: boolean): boolean {
     // Check if this.userData is empty. If it is, re-fetch the user's data. Otherwise, no need to fetch
     if (this.userData === undefined || update) {
-      const tokenObj: object = {
+      const tokenObj = {
         token: localStorage.getItem(this.tokenKey),
       };
 
@@ -200,6 +211,11 @@ export class UserService {
    * Getter method for userData
    */
   getUserData() {
+    return this.userData;
+  }
+
+  refreshAndGetUserData() {
+    this.fetchUserData(true);
     return this.userData;
   }
 

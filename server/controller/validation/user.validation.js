@@ -297,16 +297,3 @@ export const validateFetchProfile = [
     .bail()
     .toBoolean(),
 ];
-
-export const validateFetchCoursesTaken = [
-  query('_id')
-    .exists()
-    .withMessage(USER_ID_IS_EMPTY)
-    .not()
-    .isEmpty()
-    .isHexadecimal()
-    .withMessage(ID_IS_INVALID)
-    .bail()
-    .isLength({ min: 24, max: 24 })
-    .withMessage(ID_IS_INVALID),
-];

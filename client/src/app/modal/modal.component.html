@@ -1,7 +1,7 @@
 <div class="modalW" *ngIf="isOpen">
   <div class="modalW-content">
     <div class="modalW-header">
-      <span class="close" (click)="closeModal()">
+      <span class="close" (click)="submitModal(false)">
         &times;
       </span>
       <h2>{{ title }}</h2>
@@ -10,8 +10,8 @@
       <ng-content></ng-content>
     </div>
     <div class="modalW-footer">
-      <button class="cancel-button" (click)="closeModal()">Cancel</button>
-      <button (click)="sendInputData()">Submit</button>
+      <button class="cancel-button" (click)="submitModal(false)">Cancel</button>
+      <button (click)="submitModal(true)">Submit</button>
     </div>
   </div>
 </div>

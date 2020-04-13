@@ -17,8 +17,12 @@
           [matMenuTriggerFor]="menu"
           class="chip"
         >
-          <span *ngIf="course.department && course.code" class="body1 chip-clr">
-            {{ course.department }} {{ course.code }}
+          <span
+            *ngIf="course?.code && course.department"
+            class="body1 chip-clr"
+          >
+            {{ course.department | uppercase }}
+            {{ course.code }}
           </span>
           <mat-menu #menu="matMenu" style="padding: 0px;">
             <app-popup
@@ -36,22 +40,62 @@
         </mat-chip>
       </mat-chip-list>
     </div>
+
     <p>
       <button class="add-courses-btn" (click)="showModal = true">+</button>
       <app-modal
         [isOpen]="showModal"
-        title="Test modal"
-        (onClose)="modalStatus($event)"
+        title="Search & Add Courses"
+        (onClose)="modalClose($event)"
+        (onSubmit)="modalSubmission($event)"
         (onInput)="getModalData($event)"
       >
-        This is the content of the modal (thanks to transclusion aka content
-        projection)
-        <h3>Courses Taken:</h3>
-        <p *ngFor="let course of userProfile?.coursesTaken">
-          <span *ngIf="course.department && course.code">
-            {{ course.department }} {{ course.code }}
-          </span>
-        </p>
+        <div class="flex-row">
+          <div class="flex-column" style="flex: 1;">
+            <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+              <div style="text-align: center; margin-top: 10px;">
+                <input
+                  type="search"
+                  formControlName="searchTerm"
+                  class="search-input"
+                  placeholder="Search for classes"
+                />
+              </div>
+            </form>
+            <ul *ngIf="searchResults | async as results">
+              <li *ngFor="let result of results">
+                <button
+                  *ngIf="result.code && result.department"
+                  (click)="addToListOfCourses(result)"
+                  style="padding: 2px; margin: 2px;"
+                >
+                  {{ result.department | uppercase }}
+                  {{ result.code }}
+                </button>
+              </li>
+            </ul>
+          </div>
+          <mat-divider [vertical]="true"></mat-divider>
+          <div class="flex-column" style="flex: 3;">
+            <h3>Added Courses</h3>
+            <mat-chip-list *ngIf="listOfCourses">
+              <mat-chip
+                *ngFor="let item of listOfCourses"
+                [selectable]="selectable"
+                [removable]="removable"
+                (removed)="removeChipFromList(item)"
+              >
+                {{ item.department | uppercase }}
+                {{ item.code }}
+                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+              </mat-chip>
+            </mat-chip-list>
+          </div>
+        </div>
+        <p>Please check that the courses you've entered are correct.</p>
+        <!-- <p *ngFor="let course of allCourses | async">
+          <span *ngIf="course">{{ course.code }}</span>
+        </p> -->
       </app-modal>
     </p>
   </mat-expansion-panel>

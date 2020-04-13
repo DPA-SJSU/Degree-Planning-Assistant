@@ -18,6 +18,7 @@ import { MatExpansionModule } from "@angular/material/expansion";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSelectModule } from "@angular/material/select";
+import { MatDividerModule } from "@angular/material/divider";
 
 import { UserService } from "./user.service";
 import { PlanService } from "./plan.service";
@@ -72,6 +73,7 @@ import { SDegreePlanComponent } from "./s-degree-plan/s-degree-plan.component";
     MatChipsModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatDividerModule,
   ],
   entryComponents: [ModalComponent, PopupComponent],
   providers: [UserService, PlanService],

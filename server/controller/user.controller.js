@@ -9,7 +9,6 @@ import {
   validateLoginUser,
   validateEditProfile,
   validateFetchProfile,
-  validateFetchCoursesTaken,
   validateToken,
   checkIfCorrectGradDate,
 } from './validation/user.validation';
@@ -17,6 +16,8 @@ import {
 import {
   generateHashedPassword,
   generateServerErrorCode,
+  removeUndefinedObjectProps,
+  isObjectEmpty,
   validationHandler,
 } from '../store/utils';
 
@@ -30,6 +31,7 @@ import {
   PARAMETERS_REQUIRED,
   INVALID_GRAD_DATE,
   USER_NOT_FOUND,
+  NO_DATA_TO_UPDATE,
 } from './constant';
 
 import { User } from '../database/models';
@@ -241,25 +243,33 @@ userController.put(
 userController.put(
   '/coursesTaken',
   passport.authenticate('jwt', { session: false }),
-  validateFetchCoursesTaken,
-  async (req, res) => {
+  (req, res) => {
     validationHandler(req, res, async () => {
       try {
         const { user } = req;
-        const { coursesTaken } = req.body;
-        const updatedUser = await User.updateOne(
-          { _id: user._id },
-          coursesTaken
-        );
-        if (updatedUser.n > 0) {
-          res.status(200).json(updatedUser.n);
+        const newCoursesTaken = removeUndefinedObjectProps(req.body);
+
+        if (isObjectEmpty(newCoursesTaken)) {
+          res.status(400).json({ error: NO_DATA_TO_UPDATE });
         } else {
-          generateServerErrorCode(
-            res,
-            403,
-            'courses taken update error',
-            USER_NOT_FOUND,
-            'userId'
+          User.findByIdAndUpdate(
+            { _id: user._id },
+            { coursesTaken: newCoursesTaken },
+            { useFindAndModify: false, new: true },
+            (err, updatedCourses) => {
+              if (updatedCourses) {
+                console.log(updatedCourses);
+                res.status(200).json(updatedCourses);
+              } else {
+                generateServerErrorCode(
+                  res,
+                  403,
+                  'courses taken update error',
+                  USER_NOT_FOUND,
+                  'user._id'
+                );
+              }
+            }
           );
         }
       } catch (e) {
