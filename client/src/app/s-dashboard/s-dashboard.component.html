@@ -1,3 +1,4 @@
-<app-s-profile-dash></app-s-profile-dash>
+<app-s-profile-dash (profileUpdated)="updateProfile($event)">
+</app-s-profile-dash>
 <div class="mb16"></div>
-<app-s-courses-taken></app-s-courses-taken>
+<app-s-courses-taken [hasNewProfile]="profileEvent"></app-s-courses-taken>

@@ -214,7 +214,6 @@ CloudOCR.scan = async (fileName, option) => {
     const [resultFromOCR] = await client.batchAnnotateFiles(request);
     const { responses } = resultFromOCR.responses[0];
     const result = await documentHandler(responses, option);
-
     return result;
   } catch (e) {
     return e;

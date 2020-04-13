@@ -25,7 +25,7 @@ applyPassportStrategy(passport);
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 
 app.use('/', userController);
 app.use('/course', courseController);

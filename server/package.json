@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "source .env && ENV=prod nodemon -r esm app.js",
+    "start": "GOOGLE_APPLICATION_CREDENTIALS='/Users/elana/Documents/COLLEGE/SJSU/Senior Project/Degree-Planning-Assistant/server/store/Scanning/cloud-ocr-key.json' ENV=prod nodemon -r esm app.js",
     "dev": "source .env && ENV=dev nodemon -r esm app.js",
     "start-w": "set ENV=prod && nodemon -r esm app.js",
     "dev-w": "set ENV=dev && nodemon -r esm app.js",

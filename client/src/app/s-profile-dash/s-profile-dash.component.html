@@ -19,3 +19,20 @@
     >Edit Profile</a
   >
 </div>
+
+<div class="flex-column align-items-center mp0">
+  <form
+    [formGroup]="uploadForm"
+    enctype="multipart/form-data"
+    (ngSubmit)="uploadFile($event)"
+  >
+    <input
+      type="file"
+      accept="application/pdf"
+      name="file"
+      (change)="onFileSelect($event)"
+    />
+    <button type="submit">Upload</button>
+  </form>
+  <mat-spinner *ngIf="displayUploadSpinner"></mat-spinner>
+</div>

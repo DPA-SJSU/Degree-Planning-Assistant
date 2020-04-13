@@ -15,6 +15,7 @@ import { LayoutModule } from "@angular/cdk/layout";
 import { MatIconModule } from "@angular/material/icon";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatChipsModule } from "@angular/material/chips";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 import { AppComponent } from "./app.component";
 import { LandingComponent } from "./landing/landing.component";
@@ -43,7 +44,7 @@ import { SProfileComponent } from "./s-profile/s-profile.component";
     PopupComponent,
     SDashboardComponent,
     SProfileDashComponent,
-    SProfileComponent
+    SProfileComponent,
   ],
   imports: [
     BrowserModule,
@@ -62,10 +63,11 @@ import { SProfileComponent } from "./s-profile/s-profile.component";
     LayoutModule,
     MatIconModule,
     MatExpansionModule,
-    MatChipsModule
+    MatChipsModule,
+    MatProgressSpinnerModule,
   ],
   entryComponents: [ModalComponent, PopupComponent],
   providers: [UserService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {}

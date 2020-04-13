@@ -1,5 +1,6 @@
 <div class="flex-column align-items-center">
   <mat-expansion-panel
+    [expanded]="openPanel"
     *ngIf="profile | async as userProfile"
     class="card-section"
   >
@@ -15,12 +16,14 @@
           [matMenuTriggerFor]="menu"
           class="chip"
         >
-          <span *ngIf="course?.code" class="body1 chip-clr">{{
-            course.code | titlecase
-          }}</span>
+          <span *ngIf="course.department && course.code" class="body1 chip-clr">
+            {{ course.department }} {{ course.code }}
+          </span>
           <mat-menu #menu="matMenu" style="padding: 0px;">
             <app-popup
-              [title]="course.school + ' ' + course.code"
+              [title]="
+                course.school + ' ' + course.department + ' ' + course.code
+              "
               [subtitle]="course.title"
               contentTitle="Description"
             >
@@ -44,7 +47,9 @@
         projection)
         <h3>Courses Taken:</h3>
         <p *ngFor="let course of userProfile?.coursesTaken">
-          <span *ngIf="course?.code">{{ course.code }}</span>
+          <span *ngIf="course.department && course.code">
+            {{ course.department }} {{ course.code }}
+          </span>
         </p>
       </app-modal>
     </p>
