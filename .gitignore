@@ -1,9 +1,8 @@
-package-lock.json
+*/package-lock.json
 
 # Server Ignore
-server/uploads/
-server/store/Scanning/test
-server/store/Scanning/cloud-ocr-key.json
+*/uploads/
+*/cloud-ocr-key.json
 
 .DS_STORE
 

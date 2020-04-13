@@ -19,6 +19,7 @@ import {
   removeUndefinedObjectProps,
   isObjectEmpty,
   validationHandler,
+  createUser,
 } from '../store/utils';
 
 import { config } from '../store/config';
@@ -39,31 +40,6 @@ import { User } from '../database/models';
 const userController = express.Router();
 
 /**
- * Create a User with email, password, is_admin default = FALSE
- */
-userController.createUser = (email, password) => {
-  const data = {
-    hashedPassword: generateHashedPassword(password),
-    email,
-    isAdmin: false,
-    avatarType: '',
-    firstName: '',
-    lastName: '',
-    school: '',
-    bio: '',
-    gradDate: {
-      term: '',
-      year: '',
-    },
-    major: '',
-    minor: '',
-    catalogYear: '',
-  };
-
-  return new User(data).save();
-};
-
-/**
  * POST/
  * Register a user
  */
@@ -75,7 +51,7 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
         .populate('coursesTaken')
         .then(async foundUser => {
           if (!foundUser) {
-            await userController.createUser(email, password);
+            await createUser(email, password);
             // Sign token
             const newUser = await User.findOne({ email });
             const token = jwt.sign({ email }, config.passport.secret, {

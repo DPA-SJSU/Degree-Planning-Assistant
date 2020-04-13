@@ -230,6 +230,9 @@
     "catalogYear": "18-19"
   },
   {
+    "school": "SJSU",
+    "type": 0,
+    "requiredCredit": 3,
     "courses": [
       "ANTH 011",
       "CCS 030",
@@ -367,16 +370,6 @@
       "CMPE 148",
       "CMPE 165",
       "CMPE 172",
-      "SE 102",
-      "SE 120",
-      "SE 131",
-      "SE 133",
-      "SE 148",
-      "SE 165",
-      "SE 172",
-      "SE 146",
-      "SE 149",
-      "SE 166",
       "CMPE 187",
       "CMPE 195A",
       "CMPE 195B",

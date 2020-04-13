@@ -1,103 +1,24 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
 /* eslint-disable no-underscore-dangle */
 import express from 'express';
 import passport from 'passport';
-import lodash from 'lodash';
-import { check } from 'express-validator';
 
-import { Course, Requirement } from '../database/models';
+import { Requirement } from '../database/models';
+
 import {
   generateServerErrorCode,
   validationHandler,
-  checkAllowedKeys,
+  createOrGetAllCourse,
 } from '../store/utils';
 
 import {
-  SOME_THING_WENT_WRONG,
-  REQUIREMENT_EXISTS_ALREADY,
-  REQUIREMENT_TYPE_IS_INVALID,
-  REQUIREMENT_AREA_IS_INVALID,
-  KEY_IS_INVALID,
-  REQUIREMENT_NAME_IS_INVALID,
-  REQUIREMENT_SCHOOL_IS_INVALID,
-  REQUIREMENT_MAJOR_IS_INVALID,
-  REQUIREMENT_REQUIRED_CREDIT_IS_INVALID,
-  REQUIREMENT_COURSES_IS_INVALID,
+  FAILED_TO_CREATE_COURSE,
+  FAILED_TO_UPDATE_REQUIREMENT,
+  FAILED_TO_DELETE_REQUIREMENT,
 } from './constant';
-import courseController from './course.controller';
+
+import requirementValidate from './validation/requirement.validation';
 
 const requirementController = express.Router();
-
-const requirementValidate = [
-  check('body').custom((body, { req }) => {
-    const newRequirementInfo = req.body;
-    const newRequirementInfoKeys = Object.keys(newRequirementInfo);
-    const allowedKeys = [
-      'type',
-      'area',
-      'name',
-      'school',
-      'major',
-      'requiredCredit',
-      'courses',
-    ];
-    if (!checkAllowedKeys(allowedKeys, newRequirementInfoKeys)) {
-      throw new Error(KEY_IS_INVALID);
-    }
-
-    return Promise.resolve({ req });
-  }),
-
-  check('type').custom((type, { req }) => {
-    if (type && !lodash.isNumber(type)) {
-      throw new Error(REQUIREMENT_TYPE_IS_INVALID);
-    }
-    return Promise.resolve({ req });
-  }),
-  check('area').custom((area, { req }) => {
-    if (area && !lodash.isString(area)) {
-      throw new Error(REQUIREMENT_AREA_IS_INVALID);
-    }
-    return Promise.resolve({ req });
-  }),
-  check('name').custom((name, { req }) => {
-    if (name && !lodash.isString(name)) {
-      throw new Error(REQUIREMENT_NAME_IS_INVALID);
-    }
-    return Promise.resolve({ req });
-  }),
-  check('school').custom((school, { req }) => {
-    if (school && !lodash.isString(school)) {
-      throw new Error(REQUIREMENT_SCHOOL_IS_INVALID);
-    }
-    return Promise.resolve({ req });
-  }),
-  check('major').custom((major, { req }) => {
-    if (major && !lodash.isString(major)) {
-      throw new Error(REQUIREMENT_MAJOR_IS_INVALID);
-    }
-    return Promise.resolve({ req });
-  }),
-  check('requiredCredit').custom((requiredCredit, { req }) => {
-    if (requiredCredit && !lodash.isNumber(requiredCredit)) {
-      throw new Error(REQUIREMENT_REQUIRED_CREDIT_IS_INVALID);
-    }
-    return Promise.resolve({ req });
-  }),
-  check('courses').custom((courses, { req }) => {
-    if (courses && !lodash.isArray(courses)) {
-      throw new Error(REQUIREMENT_COURSES_IS_INVALID);
-    }
-    return Promise.resolve({ req });
-  }),
-];
-
-/**
- * ============================================
- * Starting APIs for Requirement
- * ============================================
- */
 
 /**
  * POST/
@@ -105,21 +26,25 @@ const requirementValidate = [
  */
 requirementController.post(
   '/',
-  // passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   requirementValidate,
   (req, res) => {
     validationHandler(req, res, () => {
       const { school, type, area, courses } = req.body;
-      courseController
-        .createOrGetAllCourseId({ ...req.body, codes: courses })
-        .then(coursesId => {
+      createOrGetAllCourse({ ...req.body, codes: courses })
+        .then(foundCourses => {
           Requirement.findOneAndUpdate(
             { school, type, area },
-            { ...req.body, courses: coursesId },
+            { ...req.body, courses: foundCourses.map(course => course._id) },
             { new: true, upsert: true },
             (err, newRequirement) => {
               if (err)
-                generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+                generateServerErrorCode(
+                  res,
+                  500,
+                  err,
+                  FAILED_TO_UPDATE_REQUIREMENT
+                );
               Requirement.findById(newRequirement._id)
                 .populate('courses')
                 .then(foundRequirement =>
@@ -129,7 +54,7 @@ requirementController.post(
           );
         })
         .catch(e =>
-          generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG)
+          generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_COURSE)
         );
     });
   }
@@ -142,24 +67,33 @@ requirementController.post(
 requirementController.post('/all', (req, res) => {
   req.body.forEach(requirement => {
     const { school, type, area, courses } = requirement;
-    courseController
-      .createOrGetAllCourseId({ ...requirement, codes: courses })
-      .then(coursesId => {
+    const courseObject = courses.map(course => {
+      return { code: course, school, type, area };
+    });
+    createOrGetAllCourse(courseObject)
+      .then(foundCourses => {
         Requirement.findOneAndUpdate(
           { school, type, area },
-          { ...requirement, courses: coursesId },
+          { ...requirement, courses: foundCourses.map(course => course._id) },
           { new: true, upsert: true },
           (err, newRequirement) => {
             if (err)
-              generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+              generateServerErrorCode(
+                res,
+                500,
+                err,
+                FAILED_TO_UPDATE_REQUIREMENT
+              );
           }
         );
-      });
+      })
+      .catch(e =>
+        generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_COURSE)
+      );
   });
-
-  res
-    .status(200)
-    .json('successful update all requirements for Software Engineering');
+  Requirement.find({}).then(result => {
+    res.status(200).json({ ...result });
+  });
 });
 
 /**
@@ -172,7 +106,8 @@ requirementController.delete(
   // passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Requirement.deleteMany({}, (err, result) => {
-      if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+      if (err)
+        generateServerErrorCode(res, 500, err, FAILED_TO_DELETE_REQUIREMENT);
       else res.status(200).json(result);
     });
   }

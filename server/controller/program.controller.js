@@ -29,25 +29,6 @@ import { Program, Course } from '../database/models';
 const programController = express.Router();
 
 /**
- * Used when scan Transcript
- * Get the remaining courses and a Map { "Area #": [courses] }
- * @param {List} coursesTaken
- * @param {Object} program
- * @returns {Object} result
- */
-programController.getRemainingCourses = async (coursesTaken, program) => {
-  const result = {};
-  coursesTaken.forEach(courseId => {
-    Course.findById(courseId).select('area');
-  });
-
-  // Check GE
-  // Check MajorRequirements
-
-  return result;
-};
-
-/**
  * @route   POST /program/
  * @desc    Creates a new degree program
  * @access  Private

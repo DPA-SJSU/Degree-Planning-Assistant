@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import express from 'express';
 import passport from 'passport';
-import { validationResult } from 'express-validator';
 
 import { Plan, User, Semester, Requirement, Course } from '../database/models';
 
@@ -16,17 +15,13 @@ import {
   FAILED_TO_UPDATE_USER,
 } from './constant';
 
-import { groupBy, generateServerErrorCode } from '../store/utils';
-
-import semesterController from './semester.controller';
+import {
+  generateServerErrorCode,
+  createSemesterList,
+  courseCheck,
+} from '../store/utils';
 
 const planController = express.Router();
-
-/**
- * ============================================
- * Starting helper functions for planController
- * ============================================
- */
 
 /**
  * Errors Handling to check
@@ -43,116 +38,56 @@ planController.errorHandler = (req, res, errors) => {
   }
 };
 
-planController.getRemainingRequirement = (courses, requirementOption) => {
-  // 1. Group all courses based on their type, and area
-  // 2. Find Requirement that based on the found type and area.
-  // 3. if RequiredCredit reach 0, ignore that requirement
-  // Else return a list of courses in that requirement.
-  // 4. Find all other requirement that has different type or area. Retrieve the courses
-
-  return new Promise((resolve, reject) => {
-    const coursesTaken = courses;
-    // groupBy(coursesTaken, 'type')
-    console.log(courses);
-
-    //   coursesTaken.forEach(course => {
-    //     Requirement.findOne({courses})
-    //   })
-    //   console.log(requirementOption);
-    //   Requirement.find({ requirementOption }, (err, foundRequirement) => {
-    //     console.log(foundRequirement);
-    //     resolve(courses);
-    //   });
-  });
-};
-
-planController.generateSemesters = courses => {
-  return new Promise((resolve, reject) => {
-    resolve(courses);
-  });
-};
-
-planController.preReqCheck = semesters => {
-  return new Promise((resolve, reject) => {
-    resolve(semesters);
-  });
-};
-
-/**
- * ============================================
- * Starting APIs for Plan
- * ============================================
- */
-
 /**
  * @route   POST /plan
- * @desc    Creates a new degree plan for the given user id
- * @desc    list of Semesters ID
+ * @desc    Creates/Update a degree plan
+ * @param   {userId} userID
  * @access  Private
  */
 planController.post(
-  '/',
+  '/:userId',
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const { user } = req;
-    let { degreePlan } = req.query;
+    const { userId } = req.params;
+    if (user._id == userId) {
+      if (req.query.year === 1) {
+        // TO-DO: If Freshman, generate all fixed plans
+      } else {
+        const semesters = await createSemesterList(req.body.semesters);
 
-    if (req.query.year === 1) {
-      // TO-DO: If Freshman, generate all fixed plans
-    } else {
-      semesterController
-        .createSemesterList(req.body.semesters)
-        .then(semesters => {
-          if (!degreePlan) {
-            Plan.create({ semesters }, (err, newPlan) => {
-              degreePlan = newPlan._id;
-            });
+        courseCheck(userId, semesters);
+
+        // const randomSemesterList = await generateSemesters(
+        //   remainingCourses
+        // );
+        // semesters.push(randomSemesterList);
+        Plan.findOneAndUpdate(
+          { user: user._id },
+          { semesters },
+          {
+            upsert: true,
+            new: true,
+            runValidators: true,
+            setDefaultsOnInsert: true,
           }
-
-          Plan.findOneAndUpdate(
-            { _id: degreePlan },
-            { semesters },
-            {
-              upsert: true,
-              new: true,
-              runValidators: true,
-              setDefaultsOnInsert: true,
-            },
-            (planErr, _) => {
-              if (planErr)
-                generateServerErrorCode(
-                  res,
-                  500,
-                  planErr,
-                  FAILED_TO_CREATE_PLAN
-                );
-              else
-                User.findByIdAndUpdate(
-                  user._id,
-                  { degreePlan },
-                  { new: true },
-                  (err, updatedUser) => {
-                    if (err)
-                      generateServerErrorCode(
-                        res,
-                        500,
-                        err,
-                        FAILED_TO_UPDATE_USER
-                      );
-                    else {
-                      const userToReturn = { ...updatedUser.toJSON() };
-                      delete userToReturn.hashedPassword;
-                      delete userToReturn.__v;
-                      res.status(200).json(userToReturn);
-                    }
-                  }
-                );
-            }
-          );
-        })
-        .catch(e =>
-          generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG)
-        );
+        )
+          .then(degreePlan => {
+            User.findByIdAndUpdate(user._id, { degreePlan }, { new: true })
+              .then(updatedUser => {
+                const userToReturn = { ...updatedUser.toJSON() };
+                delete userToReturn.hashedPassword;
+                delete userToReturn.__v;
+                res.status(200).json(userToReturn);
+              })
+              .catch(e => {
+                generateServerErrorCode(res, 500, e, FAILED_TO_UPDATE_USER);
+              });
+          })
+          .catch(e => {
+            generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_PLAN);
+          });
+      }
     }
   }
 );
@@ -222,25 +157,13 @@ planController.delete(
  * IMPORTANT: Call this ONLY when mongodb is used as localhost
  */
 planController.delete('/reset', (req, res) => {
-  Plan.deleteMany({}, (err, result) => {
-    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-    // res.status(200).json(result);
-  });
+  Plan.deleteMany({}, (err, result) => {});
 
-  Semester.deleteMany({}, (err, result) => {
-    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-    // else res.status(200).json(result);
-  });
+  Semester.deleteMany({}, (err, result) => {});
 
-  Course.deleteMany({}, (err, result) => {
-    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-    // else res.status(200).json(result);
-  });
+  Course.deleteMany({}, (err, result) => {});
 
-  Requirement.deleteMany({}, (err, result) => {
-    // if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-    // else res.status(200).json(result);
-  });
+  Requirement.deleteMany({}, (err, result) => {});
   res.status(200).json();
 });
 

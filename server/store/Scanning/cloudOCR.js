@@ -3,7 +3,6 @@ import fs from 'fs';
 import { promisify } from 'util';
 import gCloudVision from '@google-cloud/vision';
 import { Course } from '../../database/models';
-import courseController from '../../controller/course.controller';
 
 const { ImageAnnotatorClient } = gCloudVision.v1p4beta1;
 const readFileAsync = promisify(fs.readFile);
@@ -11,123 +10,135 @@ const readFileAsync = promisify(fs.readFile);
 const client = new ImageAnnotatorClient();
 
 const CloudOCR = {};
+const school = 'SJSU';
+const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
+const creditCondition = ['1.0', '2.0', '3.0'];
+const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
+const csCode = ['146', '149', '166', '154'];
+const semesterStatus = ['IN PROGRESS', 'ENROLLED'];
 
-const setupTranscriptMapping = () => {
-  CloudOCR.TranscriptMapping = new Map();
-  CloudOCR.TranscriptMapping.takenCourseList = [];
-  CloudOCR.TranscriptMapping.semesterList = [];
-  CloudOCR.TranscriptMapping.otherInfo = [];
-  CloudOCR.TranscriptMapping.currentSemester = -1;
-  CloudOCR.TranscriptMapping.otherInfo = [];
-  CloudOCR.TranscriptMapping.startingTermFound = false;
-  CloudOCR.TranscriptMapping.count = 0;
-  CloudOCR.TranscriptMapping.school = 'SJSU';
-  CloudOCR.TranscriptMapping.catalogYear = '18-19';
+let startingTermFound = false;
+let currentSemIndex = -1;
+let count = 0;
+let startingSem = {};
+
+const resetMap = () => {
+  this.startingTermFound = false;
+  this.currentSemIndex = -1;
+  this.count = 0;
+  this.startingSem = {};
+
+  return {
+    takenCourseList: [],
+    semesterList: [],
+    otherInfo: [],
+    major: '',
+  };
 };
+
+let TranscriptMap;
 
 /**
  * Add Course to the current Semester
  * @param {Object} course
  */
 const addCourseToSemester = course => {
-  CloudOCR.TranscriptMapping.takenCourseList.push(course);
   if (
-    CloudOCR.TranscriptMapping.semesterList[
-      CloudOCR.TranscriptMapping.currentSemester
-    ]
+    !TranscriptMap.takenCourseList.some(
+      e => e.code === course.code && e.department === course.department
+    )
   )
-    CloudOCR.TranscriptMapping.semesterList[
-      CloudOCR.TranscriptMapping.currentSemester
-    ].courses.push(course);
+    TranscriptMap.takenCourseList.push(course);
+  if (TranscriptMap.semesterList[currentSemIndex])
+    TranscriptMap.semesterList[currentSemIndex].courses.push(course);
 };
 
 /**
+ * UPDATE: Currently not in use. But please leave it there for future preferences.
  * Used in transcriptHandler() to get course info
- * @param {A String: contains all info of the course} listOfWordText
+ * @param {A String: contains all info of the course} words
  */
-const getCourseInfo = listOfWordText => {
-  const school = 'SJSU';
-  const code = `${listOfWordText[0]} ${listOfWordText[1]}`;
-  const creditIndex = listOfWordText.length - 5;
-  const title = listOfWordText.slice(2, creditIndex).join(' ');
-  const credit = listOfWordText[creditIndex];
+const getCourseInfo = words => {
+  const code = `${words[0]} ${words[1]}`;
+  const creditIndex = words.length - 5;
+  const title = words.slice(2, creditIndex).join(' ');
+  const credit = words[creditIndex];
   return { school, code, title, credit };
 };
 
 /**
  * Checking case and Map the info to the right type
- * @param {Array} listOfWordText  A list of words in a sentence
+ * @param {Array} words  A list of words in a sentence
  * @param {String} sentence       A whole sentence which is scanned by OCR
  */
 const transcriptParser = async paragraph => {
-  const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
-  const creditCondition = ['1.0', '2.0', '3.0'];
-  const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
+  const words = [];
+  paragraph.words.map(word =>
+    words.push(word.symbols.map(symbol => symbol.text).join(''))
+  );
 
-  const listOfWordText = [];
-  paragraph.words.forEach(word => {
-    const wordText = word.symbols.map(symbol => symbol.text).join('');
-    listOfWordText.push(wordText);
-  });
-
-  const sentence = listOfWordText.join(' ');
+  const sentence = words.join(' ');
 
   switch (true) {
-    // Check for AP Courses
-    case listOfWordText.includes('AP'):
-      CloudOCR.TranscriptMapping.otherInfo.push(sentence);
+    // Check for Enrolling Semester
+    case semesterStatus.some(status => sentence.includes(status)):
+      TranscriptMap.semesterList[currentSemIndex].status = 1;
       break;
 
-    // Check for Semester
-    case listOfWordText.includes('SEMESTER') && listOfWordText.length === 3: {
+    // GET AP COURSES
+    case words.includes('AP'):
+      TranscriptMap.otherInfo.push(sentence);
+      break;
+
+    // GET SEMESTER
+    case words.includes('SEMESTER') && words.length === 3: {
       // 0: Taken
       // 1: In Progress
       const semester = {
-        term: listOfWordText[0],
-        year: parseInt(listOfWordText[2], 10),
+        term: words[0],
+        year: parseInt(words[2], 10),
         courses: [],
         status: 0,
       };
 
-      if (!CloudOCR.TranscriptMapping.startingTermFound) {
-        CloudOCR.TranscriptMapping.startingSem = semester;
-        CloudOCR.TranscriptMapping.startingTermFound = true;
-      } else {
-        semester.year =
-          CloudOCR.TranscriptMapping.startingSem.year +
-          CloudOCR.TranscriptMapping.count;
-        if (semesterSeason.indexOf(listOfWordText[0]) === 2)
-          CloudOCR.TranscriptMapping.count += 1;
+      if (!startingTermFound) {
+        startingSem = semester;
+        startingTermFound = true;
       }
-      CloudOCR.TranscriptMapping.semesterList.push(semester);
-      CloudOCR.TranscriptMapping.currentSemester =
-        CloudOCR.TranscriptMapping.semesterList.length - 1;
+      semester.year = startingSem.year + count;
+      if (semesterSeason.indexOf(words[0]) === 2) count += 1;
+      TranscriptMap.semesterList.push(semester);
+      currentSemIndex = TranscriptMap.semesterList.length - 1;
       break;
     }
 
-    // Check for Major
-    case listOfWordText.includes('MAJOR'):
-      CloudOCR.TranscriptMapping.major = `${listOfWordText.slice(2).join(' ')}`;
+    // GET MAJOR
+    case words.includes('MAJOR'):
+      TranscriptMap.major = `${words.slice(2).join(' ')}`;
       break;
 
-    // Check for Course
-    case creditCondition.some(credit => listOfWordText.includes(credit)) ||
-      (!isNaN(listOfWordText[1]) &&
-        semesterSeason.every(semester => !listOfWordText.includes(semester))):
+    // GET COURSES
+    case creditCondition.some(
+      credit => words.includes(credit) && words[0].length <= 4
+    ) ||
+      (words[0].length <= 4 &&
+        semesterSeason.every(semester => !words.includes(semester))):
+      if (words[0] === 'SE') {
+        if (csCode.includes(words[1])) words[0] = 'CS';
+        else words[0] = 'CMPE';
+      }
       await Course.findOne({
-        department: listOfWordText[0],
-        code: listOfWordText[1],
+        department: words[0],
+        code: words[1],
       })
         .then(foundCourse => {
           if (foundCourse) {
-            const { school, department, code, title } = foundCourse;
+            const { department, code, title } = foundCourse;
             addCourseToSemester({
               school,
               code: `${department} ${code}`,
               title,
             });
-          } else if (!foundCourse) {
-            addCourseToSemester(getCourseInfo(listOfWordText));
           }
         })
         .catch(e => {
@@ -137,25 +148,18 @@ const transcriptParser = async paragraph => {
       break;
 
     // Check for WST Eligible
-    case wstCondition.every(el => listOfWordText.includes(el)):
-      if (listOfWordText[listOfWordText.indexOf(':') + 1] === 'ELIGIBLE') {
-        CloudOCR.TranscriptMapping.otherInfo.push(
+    case wstCondition.every(el => words.includes(el)):
+      if (words[words.indexOf(':') + 1] === 'ELIGIBLE') {
+        TranscriptMap.otherInfo.push(
           `[WST]: Qualify for taking upper courses such as 100W Course`
         );
       } else {
-        CloudOCR.TranscriptMapping.otherInfo.push(
+        TranscriptMap.otherInfo.push(
           `[WST]: NOT Qualify for taking upper courses such as 100W Course`
         );
       }
       break;
 
-    // Check for Semester Student is enrolling
-    case listOfWordText.includes('IN PROGRESS') ||
-      listOfWordText.includes('ENROLLED'):
-      CloudOCR.TranscriptMapping.semesterList[
-        CloudOCR.TranscriptMapping.currentSemester
-      ].status = 1;
-      break;
     default:
       break;
   }
@@ -183,15 +187,14 @@ const documentHandler = async (responses, option) => {
       }
     }
   }
-  return CloudOCR.TranscriptMapping;
+  return TranscriptMap;
 };
 
 /**
  * Main function that will be called by textScannerController
  */
 CloudOCR.scan = async (fileName, option) => {
-  setupTranscriptMapping();
-
+  TranscriptMap = resetMap();
   const inputConfig = {
     mimeType: 'application/pdf',
     content: await readFileAsync(fileName),
