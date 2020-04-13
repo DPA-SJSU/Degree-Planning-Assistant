@@ -1,5 +1,5 @@
-import { Component, OnInit, Input } from "@angular/core";
-import { UserService, UserProfile } from "../user.service";
+import { Component, OnInit } from "@angular/core";
+import { UserService, UserProfile } from "../../user.service";
 import { Observable } from "rxjs";
 import { CourseService, CourseData } from "../course.service";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
