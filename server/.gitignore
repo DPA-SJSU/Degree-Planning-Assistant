@@ -67,3 +67,6 @@ package-lock.json
 ./uploads/
 ./cloud-ocr-key.json
 ./Scanning/test
+
+# Windows Files
+env.bat

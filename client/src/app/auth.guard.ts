@@ -3,7 +3,7 @@ import {
   Router,
   CanActivate,
   ActivatedRouteSnapshot,
-  RouterStateSnapshot
+  RouterStateSnapshot,
 } from "@angular/router";
 import { UserService } from "./user.service";
 
@@ -19,6 +19,7 @@ export class AuthGuard implements CanActivate {
     window.alert(
       "You don't have permission to view this page. Please log in first."
     );
+    this.userService.logout();
     this.router.navigate(["/login"]);
     return false;
   }

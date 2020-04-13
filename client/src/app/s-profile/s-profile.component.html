@@ -69,7 +69,11 @@
           <span class="h6 neutral-gray-clr">Expected Graduation Date</span>
         </div>
         <span
-          *ngIf="userProfile.gradDate.term && userProfile.gradDate.year"
+          *ngIf="
+            userProfile.gradDate &&
+            userProfile.gradDate.term &&
+            userProfile.gradDate.year
+          "
           class="h6"
           >{{ userProfile.gradDate.term }} {{ userProfile.gradDate.year }}</span
         >

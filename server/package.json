@@ -5,8 +5,8 @@
   "scripts": {
     "start": "GOOGLE_APPLICATION_CREDENTIALS='/Users/elana/Documents/COLLEGE/SJSU/Senior Project/Degree-Planning-Assistant/server/store/Scanning/cloud-ocr-key.json' ENV=prod nodemon -r esm app.js",
     "dev": "source .env && ENV=dev nodemon -r esm app.js",
-    "start-w": "set ENV=prod && nodemon -r esm app.js",
-    "dev-w": "set ENV=dev && nodemon -r esm app.js",
+    "start-w": "SET ENV=prod && env && nodemon -r esm app.js",
+    "dev-w": "SET ENV=dev && env && nodemon -r esm app.js",
     "mongo": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/test'  --username calvin"
   },
   "dependencies": {

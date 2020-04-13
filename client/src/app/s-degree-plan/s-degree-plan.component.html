@@ -1,0 +1,156 @@
+<div class="flex-row justify-content-center align-items-center w100">
+  <mat-expansion-panel class="expansion-panel" [expanded]="true">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <!-- Expansion Panel Title -->
+        <span class="section-header">Degree Plan</span>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <!-- Expansion Panel Content -->
+    <div
+      *ngIf="yearArray | async as plan"
+      class="flex-column justify-content-center w100"
+    >
+      <!-- Year -->
+      <div *ngFor="let year of plan" class="year">
+        <div class="year-title">
+          <div class="year-hori-line"></div>
+          <span class="year-range"
+            >{{ year.beginning }} - {{ year.ending }}</span
+          >
+          <div class="year-hori-line"></div>
+        </div>
+        <div class="semester-cards-container">
+          <!-- Semester Cards -->
+          <div *ngFor="let semester of year.semesters" class="semester-card">
+            <div class="semester-card-term-and-status">
+              <span>{{ semester.term }} {{ semester.year }}</span>
+              <span *ngIf="semester.status === -1">Planned</span>
+              <span *ngIf="semester.status === 0">In-Progress</span>
+              <span *ngIf="semester.status === 1">Completed</span>
+            </div>
+            <!-- Course Rows -->
+            <!-- Fall 2017 -->
+            <div
+              *ngFor="let course of semester.courses"
+              class="semester-card-course"
+            >
+              <div class="semester-card-course-chip-and-difficulty">
+                <mat-chip [matMenuTriggerFor]="menu" class="chip mr8">
+                  {{ course.department }}{{ course.code }}
+                </mat-chip>
+                <mat-menu #menu="matMenu" style="padding: 0px;">
+                  <app-popup
+                    [title]="
+                      course.school + ' ' + course.department + course.code
+                    "
+                    [subtitle]="course.title"
+                    contentTitle="Description"
+                  >
+                    <p *ngIf="course?.description">
+                      {{ course.description }}
+                    </p>
+                  </app-popup>
+                </mat-menu>
+                <div
+                  *ngIf="course.difficulty == 1"
+                  class="statistic-chip-1 mr8"
+                >
+                  <img
+                    src="../../assets/difficulty-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ course.difficulty }}
+                </div>
+                <div
+                  *ngIf="course.difficulty == 2"
+                  class="statistic-chip-2 mr8"
+                >
+                  <img
+                    src="../../assets/difficulty-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ course.difficulty }}
+                </div>
+                <div
+                  *ngIf="course.difficulty == 3"
+                  class="statistic-chip-3 mr8"
+                >
+                  <img
+                    src="../../assets/difficulty-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ course.difficulty }}
+                </div>
+                <div *ngIf="course.impaction == 1" class="statistic-chip-1 mr8">
+                  <img
+                    src="../../assets/impaction-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ course.impaction }}
+                </div>
+                <div *ngIf="course.impaction == 2" class="statistic-chip-2 mr8">
+                  <img
+                    src="../../assets/impaction-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ course.impaction }}
+                </div>
+                <div *ngIf="course.impaction == 3" class="statistic-chip-3 mr8">
+                  <img
+                    src="../../assets/impaction-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ course.impaction }}
+                </div>
+              </div>
+              <span class="semester-card-course-units"
+                >{{ course.credit }} units</span
+              >
+            </div>
+            <!-- Sum of Courses Row -->
+            <div class="semester-card-total-difficulty-and-units">
+              <div class="semester-card-course-chip-and-difficulty">
+                <div
+                  *ngIf="semester.difficulty >= 1 && semester.difficulty < 2"
+                  class="statistic-chip-1"
+                >
+                  <img
+                    src="../../assets/difficulty-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ semester.difficulty }}
+                </div>
+                <div
+                  *ngIf="semester.difficulty >= 2 && semester.difficulty < 3"
+                  class="statistic-chip-2"
+                >
+                  <img
+                    src="../../assets/difficulty-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ semester.difficulty }}
+                </div>
+                <div *ngIf="semester.difficulty >= 3" class="statistic-chip-3">
+                  <img
+                    src="../../assets/difficulty-16.png"
+                    class="icon-16 mr8"
+                  />
+                  {{ semester.difficulty }}
+                </div>
+              </div>
+              <span class="semester-card-course-units"
+                >= {{ semester.units }} units</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="semester-card-course-chip-and-difficulty">
+        <div class="btn edit-plan-btn mt8" (click)="onClickEditPlan()">
+          Edit Plan
+        </div>
+      </div>
+    </div>
+  </mat-expansion-panel>
+</div>

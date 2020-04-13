@@ -34,14 +34,17 @@ export interface UserProfile {
 
 export interface CourseData {
   school: string;
-  code: string;
   department: string;
+  code: string;
   title: string;
   description: string;
   prerequisites: [CourseData];
   corequisites: [CourseData];
+  area: string;
+  type: number;
   difficulty?: number;
   impaction?: number;
+  credit: number;
   termsOffered: string;
 }
 
@@ -92,7 +95,7 @@ export class UserService {
       return removedToken;
     };
 
-    // Call Backend API for login then call the 'completeCallback' callback function passed by LoginComponent
+    // Call Backend API f login then call the 'completeCallback' callback function passed by LoginComponent
     // Alternatively, call errorhandler service in case of errors
     this.http
       .post(`${this.uri}/login`, user)

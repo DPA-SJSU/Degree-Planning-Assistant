@@ -1,6 +1,7 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 import { AppRoutingModule } from "./app-routing.module";
+
 import { HttpClientModule } from "@angular/common/http";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
@@ -16,12 +17,15 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSelectModule } from "@angular/material/select";
+
+import { UserService } from "./user.service";
+import { PlanService } from "./plan.service";
 
 import { AppComponent } from "./app.component";
 import { LandingComponent } from "./landing/landing.component";
 import { RegistrationComponent } from "./registration/registration.component";
 import { LoginComponent } from "./login/login.component";
-import { UserService } from "./user.service";
 import { NavbarComponent } from "./navbar/navbar.component";
 import { FooterComponent } from "./footer/footer.component";
 import { SCoursesTakenComponent } from "./s-courses-taken/s-courses-taken.component";
@@ -30,6 +34,7 @@ import { PopupComponent } from "./popup/popup.component";
 import { SDashboardComponent } from "./s-dashboard/s-dashboard.component";
 import { SProfileDashComponent } from "./s-profile-dash/s-profile-dash.component";
 import { SProfileComponent } from "./s-profile/s-profile.component";
+import { SDegreePlanComponent } from "./s-degree-plan/s-degree-plan.component";
 
 @NgModule({
   declarations: [
@@ -45,6 +50,7 @@ import { SProfileComponent } from "./s-profile/s-profile.component";
     SDashboardComponent,
     SProfileDashComponent,
     SProfileComponent,
+    SDegreePlanComponent,
   ],
   imports: [
     BrowserModule,
@@ -65,9 +71,10 @@ import { SProfileComponent } from "./s-profile/s-profile.component";
     MatExpansionModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
   ],
   entryComponents: [ModalComponent, PopupComponent],
-  providers: [UserService],
+  providers: [UserService, PlanService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -23,6 +23,7 @@ body {
   width: 100%;
   height: 100%;
   min-height: 84vh;
+  background-color: #dfe6e9;
 }
 
 #root-content {
@@ -136,6 +137,10 @@ button:disabled {
   justify-content: space-between;
 }
 
+.justify-content-space-around {
+  justify-content: space-around;
+}
+
 /* Centering */
 .center-everything {
   justify-content: center;
@@ -147,7 +152,7 @@ button:disabled {
 }
 
 .align-items-start {
-  align-items: start;
+  align-items: flex-start;
 }
 
 .text-align-center {
@@ -188,6 +193,22 @@ button:disabled {
   color: #707070;
 }
 
+.course-chip {
+  background-color: #ecf0f1;
+  border-radius: 25px;
+  color: #7f8c8d;
+  font-size: 14px;
+  padding: 4px 10px 4px 10px;
+  cursor: pointer;
+}
+
+.horizontal-line {
+  width: 90%;
+  border-bottom: 1px solid #95a5a6;
+  margin: auto;
+  padding: 0;
+}
+
 /* Small dropdown description card */
 .mini-card {
   margin-top: -8px;
@@ -202,19 +223,16 @@ button:disabled {
   margin-top: 2px;
 }
 
-.body1 {
-  font-size: 16px;
-}
-
 .chip-clr {
   color: #7f8c8d;
 }
 
-.horizontal-line {
-  width: 90%;
-  border-bottom: 1px solid #95a5a6;
-  margin: auto;
-  padding: 0;
+/* Image Styling */
+
+.profile-img-92 {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
 }
 
 /* Sizing */
@@ -224,6 +242,10 @@ button:disabled {
 
 .width100vw {
   width: 100vw;
+}
+
+.w80 {
+  width: 80%;
 }
 
 /* Margins and Paddings */
@@ -247,6 +269,18 @@ button:disabled {
   margin-top: 4px;
 }
 
+.mt8 {
+  margin-top: 8px;
+}
+
+.mr8 {
+  margin-right: 8px;
+}
+
+.p8 {
+  padding: 8px;
+}
+
 .pr8 {
   padding-right: 8px;
 }
@@ -265,20 +299,29 @@ button:disabled {
 }
 
 /* Font Size & Styling */
-.h5 {
-  font-size: 24px;
+
+.caption {
+  font-size: 12px;
 }
 
-.h6 {
-  font-size: 20px;
+.body2 {
+  font-size: 14px;
 }
 
 .body1 {
   font-size: 16px;
 }
 
-.caption {
-  font-size: 12px;
+.h6 {
+  font-size: 20px;
+}
+
+.h5 {
+  font-size: 24px;
+}
+
+.h4 {
+  font-size: 34px;
 }
 
 .big-header {
@@ -301,14 +344,27 @@ button:disabled {
   font-style: italic;
 }
 
-/* Image Styling */
-.profile-img-92 {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-}
-
 /* Utilities */
+
 .border {
   border: 1px solid black;
+}
+
+.btn {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #ecf0f1;
+  font-size: 16px;
+  transition: background-color 0.25s;
+}
+
+.btn.edit-plan-btn {
+  background-color: #2ecc71;
+  color: #ffffff;
+}
+
+.btn.edit-plan-btn:hover {
+  background-color: #27ae60;
+  color: #ffffff;
 }
