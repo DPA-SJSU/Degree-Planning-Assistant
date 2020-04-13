@@ -14,7 +14,7 @@ const school = 'SJSU';
 const semesterSeason = ['SPRING', 'SUMMER', 'FALL'];
 const creditCondition = ['1.0', '2.0', '3.0'];
 const wstCondition = ['WRITING', 'SKILLS', 'TEST'];
-const csCode = ['146', '149', '166'];
+const csCode = ['146', '149', '166', '154'];
 const semesterStatus = ['IN PROGRESS', 'ENROLLED'];
 
 let startingTermFound = false;
