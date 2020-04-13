@@ -29,7 +29,7 @@ import { RegistrationComponent } from "./registration/registration.component";
 import { LoginComponent } from "./login/login.component";
 import { NavbarComponent } from "./navbar/navbar.component";
 import { FooterComponent } from "./footer/footer.component";
-import { SCoursesTakenComponent } from "./s-courses-taken/s-courses-taken.component";
+import { SCoursesTakenComponent } from "./student/s-courses-taken/s-courses-taken.component";
 import { ModalComponent } from "./modal/modal.component";
 import { PopupComponent } from "./popup/popup.component";
 import { SDashboardComponent } from "./s-dashboard/s-dashboard.component";

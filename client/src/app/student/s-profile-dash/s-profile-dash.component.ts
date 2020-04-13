@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from "@angular/core";
-import { UserProfile, UserService } from "../user.service";
+import { UserProfile, UserService } from "../../user.service";
 import { Observable } from "rxjs";
 import { Router } from "@angular/router";
 import { FormBuilder } from "@angular/forms";
