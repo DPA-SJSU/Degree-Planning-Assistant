@@ -1,6 +1,7 @@
 import { check, query } from 'express-validator';
 import {
   COURSE_SCHOOL_IS_EMPTY,
+  COURSE_DEPARTMENT_IS_EMPTY,
   COURSE_CODE_IS_EMPTY,
   DOES_NOT_CONTAIN_A_DIGIT,
   COURSE_TITLE_IS_EMPTY,
@@ -56,4 +57,35 @@ export const validateCourseId = [
     .bail()
     .isLength({ min: 24, max: 24 })
     .withMessage(ID_IS_INVALID),
+];
+
+export const validateCourseQuery = [
+  query('_id')
+    .if(query('_id').exists())
+    .not()
+    .isEmpty()
+    .withMessage(COURSE_ID_IS_EMPTY)
+    .isHexadecimal()
+    .withMessage(ID_IS_INVALID)
+    .bail()
+    .isLength({ min: 24, max: 24 })
+    .withMessage(ID_IS_INVALID),
+  query('school')
+    .if(query('school').exists())
+    .not()
+    .isEmpty()
+    .withMessage(COURSE_SCHOOL_IS_EMPTY),
+  query('department')
+    .if(query('department').exists())
+    .not()
+    .isEmpty()
+    .withMessage(COURSE_DEPARTMENT_IS_EMPTY),
+  query('code')
+    .if(query('code').exists())
+    .not()
+    .isEmpty()
+    .withMessage(COURSE_CODE_IS_EMPTY)
+    .bail()
+    .isAlphanumeric()
+    .withMessage(DOES_NOT_CONTAIN_A_DIGIT),
 ];

@@ -39,7 +39,7 @@ export class CourseService {
       };
 
       this.allCourses = this.http.get<CourseData[]>(
-        `${this.uri}/course/` + school.toLowerCase(),
+        `${this.uri}/course?school=` + school.toUpperCase(),
         this.userService.getHttpHeaders()
       );
     }
