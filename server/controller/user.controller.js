@@ -234,7 +234,6 @@ userController.put(
             { useFindAndModify: false, new: true },
             (err, updatedCourses) => {
               if (updatedCourses) {
-                console.log(updatedCourses);
                 res.status(200).json(updatedCourses);
               } else {
                 generateServerErrorCode(

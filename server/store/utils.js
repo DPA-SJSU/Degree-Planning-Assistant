@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable no-underscore-dangle */
@@ -386,10 +387,24 @@ export const generateSemesters = courses => {
  * @returns [status, error]
  */
 export const courseCheck = (userId, semesters) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const result = [];
+    const coursesTaken = await User.findById(userId).select('coursesTaken');
 
-    const coursesTaken = User.findById(userId).then(foundUser => {});
+    // Check pre-req courses is in coursesTaken
+
+    // 1. Pre
+    semesters.map(semester => {
+      return {
+        id: semester._id,
+        status: semester.courses.map(course => {
+          let taken = false;
+          if (coursesTaken.includes(course._id)) taken = true;
+
+          return [`${course.department} ${course.code}`, taken];
+        }),
+      };
+    });
 
     resolve(result);
   });

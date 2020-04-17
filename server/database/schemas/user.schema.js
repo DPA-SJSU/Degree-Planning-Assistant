@@ -16,14 +16,7 @@ const userSchema = new Schema({
   minor: { type: String },
   catalogYear: { type: Number },
   degreePlan: { type: Schema.Types.ObjectId, ref: 'Plan' },
-  coursesTaken: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Course',
-      required: true,
-      uppercase: true,
-    },
-  ],
+  coursesTaken: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
 });
 
 /**
