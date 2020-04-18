@@ -23,6 +23,7 @@ import {
   validateCourseCreation,
   validateSingleCourse,
   validateSchoolCourses,
+  validateCourseQuery,
   validateCourseId,
 } from './validation/course.validation';
 
@@ -68,45 +69,19 @@ courseController.post(
 courseController.get(
   '/',
   passport.authenticate('jwt', { session: false }),
-  validateCourseId,
+  validateCourseQuery,
   (req, res) => {
     validationHandler(req, res, () => {
-      const { _id } = req.query;
-      getPopulatedCourse({ _id }, res);
-    });
-  }
-);
-
-/**
- * GET/
- * Get a course using school and code through params
- */
-courseController.get(
-  '/:school/:code',
-  passport.authenticate('jwt', { session: false }),
-  validateSingleCourse,
-  (req, res) => {
-    validationHandler(req, res, () => {
-      const { code } = req.params;
-      const school = req.params.school.toUpperCase();
-
-      getPopulatedCourse({ school, code }, res);
-    });
-  }
-);
-
-/**
- * GET/
- * Get all courses using school through params
- */
-courseController.get(
-  '/:school',
-  passport.authenticate('jwt', { session: false }),
-  validateSchoolCourses,
-  (req, res) => {
-    const school = req.params.school.toUpperCase();
-    validationHandler(req, res, () => {
-      getPopulatedCourse({ school }, res);
+      const { _id, school, department, code } = req.query;
+      getPopulatedCourse(
+        {
+          ...(_id && { _id }),
+          ...(school && { school: school.toUpperCase() }),
+          ...(department && { department: department.toUpperCase() }),
+          ...(code && { code }),
+        },
+        res
+      );
     });
   }
 );
