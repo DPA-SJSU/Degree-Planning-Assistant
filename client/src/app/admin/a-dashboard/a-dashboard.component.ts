@@ -17,8 +17,8 @@ export class ADashboardComponent implements OnInit {
   createNewProgram() {
     const program: ProgramData = {
       school: "SJSU",
-      major: "Chemical Engineering",
-      catalogYear: 2016,
+      major: "Bio Engineering",
+      catalogYear: 2020,
     };
     this.newProgram = this.programService.createProgram(program);
   }

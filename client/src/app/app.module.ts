@@ -32,12 +32,12 @@ import { FooterComponent } from "./footer/footer.component";
 import { SCoursesTakenComponent } from "./student/s-courses-taken/s-courses-taken.component";
 import { ModalComponent } from "./modal/modal.component";
 import { PopupComponent } from "./popup/popup.component";
-import { SDashboardComponent } from "./s-dashboard/s-dashboard.component";
-import { SProfileDashComponent } from "./s-profile-dash/s-profile-dash.component";
-import { SProfileComponent } from "./s-profile/s-profile.component";
-import { SDegreePlanComponent } from "./s-degree-plan/s-degree-plan.component";
 import { SDegreePlanEditorComponent } from "./s-degree-plan-editor/s-degree-plan-editor.component";
-import { ADashboardComponent } from "./a-dashboard/a-dashboard.component";
+import { SDashboardComponent } from "./student/s-dashboard/s-dashboard.component";
+import { SProfileDashComponent } from "./student/s-profile-dash/s-profile-dash.component";
+import { SProfileComponent } from "./student/s-profile/s-profile.component";
+import { SDegreePlanComponent } from "./student/s-degree-plan/s-degree-plan.component";
+import { ADashboardComponent } from "./admin/a-dashboard/a-dashboard.component";
 
 @NgModule({
   declarations: [

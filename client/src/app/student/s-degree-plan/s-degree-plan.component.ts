@@ -1,7 +1,8 @@
 import { Component, OnInit, ErrorHandler, Input } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
-import { PlanService, Year } from "../plan.service";
+import { UserService, UserProfile } from "../../user.service";
+import { PlanService, Year } from "../../plan.service";
 
 @Component({
   selector: "app-s-degree-plan",
