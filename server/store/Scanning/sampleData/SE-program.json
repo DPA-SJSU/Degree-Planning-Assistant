@@ -347,6 +347,7 @@
     "type": 1,
     "major": "Software Engineering",
     "requiredCredit": 99,
+    "area": "majorRequirement",
     "courses": [
       "BIOL 010",
       "ENGL 001B",
@@ -389,6 +390,7 @@
     "type": 2,
     "major": "Software Engineering",
     "requiredCredit": 6,
+    "area": "elective",
     "courses": [
       "CMPE 137",
       "CMPE 139",
