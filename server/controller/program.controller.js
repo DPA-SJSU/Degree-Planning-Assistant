@@ -92,7 +92,7 @@ programController.get(
   async (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty() === false) {
-      return res.status(400).json(errors);
+      generateServerErrorCode(res, 400, errors);
     }
     if (
       !req.query.id &&
@@ -100,14 +100,17 @@ programController.get(
       !req.query.major &&
       !req.query.catalogYear
     ) {
-      return res
-        .status(400)
-        .json({ error: ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED });
+      generateServerErrorCode(
+        res,
+        400,
+        e,
+        ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED
+      );
     }
 
     const formattedQuery = {};
 
-    req.query.forEach(key => {
+    Object.keys(req.query).forEach(key => {
       if (key === 'id') {
         formattedQuery._id = req.query.id;
       } else if (key === 'school' || key === 'major' || key === 'catalogYear') {
@@ -116,11 +119,18 @@ programController.get(
     });
 
     try {
-      const queryResult = await Program.find(formattedQuery);
+      const queryResult = await Program.find(formattedQuery).populate({
+        path: 'requirements',
+        model: 'Requirement',
+        populate: {
+          path: 'courses',
+          model: 'Course',
+        },
+      });
       if (queryResult.length > 0) {
         return res.status(200).json(queryResult);
       }
-      return res.status(404).json({ error: DEGREE_PROGRAM_NOT_FOUND });
+      generateServerErrorCode(res, 404, e, DEGREE_PROGRAM_NOT_FOUND);
     } catch (e) {
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
