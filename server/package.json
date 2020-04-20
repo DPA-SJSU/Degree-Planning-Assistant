@@ -4,10 +4,15 @@
   "private": true,
   "scripts": {
     "start": "ENV=prod node -r esm app.js",
-    "dev": "source .env && ENV=prod nodemon -r esm app.js",
+    "dev": "source .env && ENV=dev nodemon -r esm app.js",
     "start-w": "set ENV=prod && nodemon -r esm app.js",
     "dev-w": "set ENV=dev && nodemon -r esm app.js",
-    "mongo": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/test'  --username calvin"
+    "mongo:install": "brew update && brew tap mongodb/brew && brew install mongodb-community@4.2",
+    "mongo:atlas-shell": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/test' --username calvin",
+    "mongo:local-shell": "mongo 'mongodb://localhost/dpa:27017'",
+    "mongo:local": "brew services start mongodb-community",
+    "mongo:stop": "brew services stop mongodb-community",
+    "kill:server": "kill $(lsof -ti :8080)"
   },
   "dependencies": {
     "@google-cloud/storage": "^4.3.1",
