@@ -114,52 +114,70 @@ export const createUser = (email, password) => {
  */
 
 /**
+ * ============================================
+ * Course Helpers
+ * ============================================
+ */
+
+/**
  * Creates/Get get a course
  * @param {courseInfo} data
  * @returns {Course} Course
  */
-export const createOrGetOneCourse = async (data, option = 'EMPTY') => {
+export const createOrGetOneCourse = async data => {
   return new Promise((resolve, reject) => {
-    let course = data;
-
-    const { school = 'SJSU', code, type } = course;
+    const {
+      school = 'SJSU',
+      code,
+      type = -1,
+      prerequisites = [],
+      corequisites = [],
+      title = ' ',
+      credit = ' ',
+    } = data;
 
     const splitCourseString = code.split(' ');
     const department = splitCourseString[0];
     const courseCode = splitCourseString[1].replace(/^0+/, '');
 
-    Course.findOne({ school, department, code: courseCode })
+    Course.findOne({
+      school,
+      department,
+      code: courseCode,
+    })
       .then(async foundCourse => {
-        if (foundCourse) return resolve(foundCourse);
+        [data.prerequisites, data.corequisites] = await Promise.all([
+          createOrGetAllCourse(prerequisites),
+          createOrGetAllCourse(corequisites),
+        ]);
 
-        switch (option) {
-          case 'EMPTY':
-            course = {
-              ...data,
-              department,
-              code: courseCode,
-              type,
-            };
-            break;
-          default: {
-            const tasks = [
-              createOrGetAllCourse({
-                codes: data.prerequisites,
-              }),
-              createOrGetAllCourse({
-                codes: data.corequisites,
-              }),
-            ];
-            const [preList, coList] = await Promise.all(tasks);
-            course.prerequisites = preList;
-            course.corequisites = coList;
-            break;
-          }
+        if (foundCourse) {
+          if (type >= 0 && !foundCourse.type.includes(type))
+            foundCourse.type.push(type);
+          foundCourse.title = title || ' ';
+          foundCourse.credit = credit || ' ';
+          foundCourse.prerequisites =
+            data.prerequisites.length > 0 ? data.prerequisites : [];
+          foundCourse.corequisites =
+            data.corequisites.length > 0 ? data.corequisites : [];
+
+          return resolve(foundCourse.save());
         }
 
-        return resolve(new Course(course).save());
+        data = {
+          ...data,
+          department,
+          // prerequisites: data.prerequisites || [],
+          // corequisites: data.corequisites || [],
+          code: courseCode,
+          type: type >= 0 ? [type] : [],
+        };
+
+        return resolve(new Course(data).save());
       })
-      .catch(e => reject(e));
+      .catch(e => {
+        reject(e);
+      });
   });
 };
 
@@ -168,16 +186,19 @@ export const createOrGetOneCourse = async (data, option = 'EMPTY') => {
  * @param {[Object]} courses Array of codes
  */
 export const createOrGetAllCourse = courses => {
-  return new Promise(resolve => {
-    const tasks = courses.map(course => {
-      // console.log(`CreateorgetallCourse `, course);
-      return createOrGetOneCourse({
-        ...course,
-        code: course.code,
-        title: course.title || ' ',
+  return new Promise((resolve, reject) => {
+    try {
+      const tasks = courses.map(course => {
+        return createOrGetOneCourse({
+          ...course,
+          code: course.code,
+          title: course.title || ' ',
+        });
       });
-    });
-    resolve(Promise.all(tasks));
+      resolve(Promise.all(tasks));
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 
