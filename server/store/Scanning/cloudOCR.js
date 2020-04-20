@@ -3,6 +3,7 @@ import fs from 'fs';
 import { promisify } from 'util';
 import gCloudVision from '@google-cloud/vision';
 import { Course } from '../../database/models';
+import { createOrGetOneCourse } from '../utils';
 
 const { ImageAnnotatorClient } = gCloudVision.v1p4beta1;
 const readFileAsync = promisify(fs.readFile);
@@ -29,7 +30,6 @@ const resetMap = () => {
   this.startingSem = {};
 
   return {
-    takenCourseList: [],
     semesterList: [],
     otherInfo: [],
     major: '',
@@ -37,34 +37,6 @@ const resetMap = () => {
 };
 
 let TranscriptMap;
-
-/**
- * Add Course to the current Semester
- * @param {Object} course
- */
-const addCourseToSemester = course => {
-  if (
-    !TranscriptMap.takenCourseList.some(
-      e => e.code === course.code && e.department === course.department
-    )
-  )
-    TranscriptMap.takenCourseList.push(course);
-  if (TranscriptMap.semesterList[currentSemIndex])
-    TranscriptMap.semesterList[currentSemIndex].courses.push(course);
-};
-
-/**
- * UPDATE: Currently not in use. But please leave it there for future preferences.
- * Used in transcriptHandler() to get course info
- * @param {A String: contains all info of the course} words
- */
-const getCourseInfo = words => {
-  const code = `${words[0]} ${words[1]}`;
-  const creditIndex = words.length - 5;
-  const title = words.slice(2, creditIndex).join(' ');
-  const credit = words[creditIndex];
-  return { school, code, title, credit };
-};
 
 /**
  * Checking case and Map the info to the right type
@@ -121,28 +93,26 @@ const transcriptParser = async paragraph => {
     case creditCondition.some(
       credit => words.includes(credit) && words[0].length <= 4
     ) ||
-      (words[0].length <= 4 &&
+      ((await Course.findOne({ department: words[0] })) &&
+        words[1] &&
+        words[1].length <= 4 &&
         semesterSeason.every(semester => !words.includes(semester))):
       if (words[0] === 'SE') {
         if (csCode.includes(words[1])) words[0] = 'CS';
         else words[0] = 'CMPE';
       }
-      await Course.findOne({
-        department: words[0],
-        code: words[1],
+
+      await createOrGetOneCourse({
+        code: `${words[0]} ${words[1]}`,
+        // title: words.slice(2, words.length - 5).join(' '),
+        // credit: creditCondition.includes(words[words.length - 5]) ? words[words.length - 5] : ,
       })
-        .then(foundCourse => {
-          if (foundCourse) {
-            const { department, code, title } = foundCourse;
-            addCourseToSemester({
-              school,
-              code: `${department} ${code}`,
-              title,
-            });
-          }
+        .then(course => {
+          if (TranscriptMap.semesterList[currentSemIndex])
+            TranscriptMap.semesterList[currentSemIndex].courses.push(course);
         })
         .catch(e => {
-          console.log(`Db error`, e);
+          return e;
         });
 
       break;
@@ -159,7 +129,6 @@ const transcriptParser = async paragraph => {
         );
       }
       break;
-
     default:
       break;
   }
@@ -195,6 +164,7 @@ const documentHandler = async (responses, option) => {
  */
 CloudOCR.scan = async (fileName, option) => {
   TranscriptMap = resetMap();
+
   const inputConfig = {
     mimeType: 'application/pdf',
     content: await readFileAsync(fileName),
