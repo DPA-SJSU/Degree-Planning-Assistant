@@ -1,4 +1,4 @@
-runtime: nodejs
-env: flex
+runtime: nodejs10
+env: standard
 env_variables:
   GOOGLE_APPLICATION_CREDENTIALS: './cloud-ocr-key.json'
