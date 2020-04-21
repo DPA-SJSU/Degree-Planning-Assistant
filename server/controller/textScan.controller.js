@@ -5,7 +5,7 @@ import passport from 'passport';
 
 import CloudOcr from '../store/Scanning/cloudOCR';
 
-import { User, Plan } from '../database/models';
+import { User, Plan, Semester } from '../database/models';
 
 import {
   generateServerErrorCode,
@@ -14,7 +14,7 @@ import {
   getRemainingRequirement,
 } from '../store/utils';
 
-import { PLAN_NOT_FOUND } from './constant';
+import { PLAN_NOT_FOUND, FAILED_TO_UPDATE_USER } from './constant';
 
 // import response from '../store/Scanning/sampleData/scanResult';
 
@@ -36,18 +36,43 @@ textScanController.post(
 
     CloudOcr.scan(path, option).then(async scanResult => {
       // const scanResult = response;
-      const { takenCourseList, semesterList, major, addedInfo } = scanResult;
+      const { semesterList, major, addedInfo } = scanResult;
 
-      const coursesTaken = await createOrGetAllCourse(takenCourseList);
+      let semesters = await Promise.all(
+        semesterList.map(async semester => {
+          if (semester.courses.length > 0) {
+            return Semester.findOne({
+              courses: { $all: semester.courses.map(course => course._id) },
+            })
+              .then(foundSemester => {
+                if (!foundSemester) return new Semester(semester).save();
+                return foundSemester;
+              })
+              .catch(e => {
+                console.log(e);
+              });
+          }
+        })
+      );
 
-      const semesters = await createSemesterList(semesterList);
+      semesters = semesters.filter(
+        semester => semester && semester._id && semester.courses.length > 0
+      );
 
-      const remainingRequirement = await getRemainingRequirement(coursesTaken);
+      const coursesTaken = semesters
+        .map(semester => semester.courses.map(course => course._id))
+        .reduce((prev, current) => [...prev, ...current]);
+
+      // const remainingRequirement = await getRemainingRequirement(
+      //   semesterList
+      //     .map(semester => semester.courses)
+      //     .reduce((prev, current) => [...prev, ...current])
+      // );
 
       return new Plan({
-        semesters: semesters
-          .filter(semester => semester._id)
-          .map(semester => semester._id),
+        semesters: semesters.map(semester => semester._id),
+        // remainingRequirement,
+        user: user._id,
       })
         .save()
         .then(newPlan => {
@@ -56,7 +81,7 @@ textScanController.post(
             {
               coursesTaken: coursesTaken.map(course => course._id),
               degreePlan: newPlan._id,
-              user: user._id,
+              major,
             },
             { new: true }
           )
@@ -74,9 +99,17 @@ textScanController.post(
               },
             })
             .populate('coursesTaken')
-
             .then(updatedUser => {
-              res.status(200).json({ updatedUser, remainingRequirement });
+              res.status(200).json(updatedUser);
+            })
+            .catch(e => {
+              generateServerErrorCode(
+                res,
+                500,
+                e,
+                FAILED_TO_UPDATE_USER,
+                'Plan'
+              );
             });
         })
         .catch(e => {

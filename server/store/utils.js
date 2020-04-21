@@ -114,12 +114,6 @@ export const createUser = (email, password) => {
  */
 
 /**
- * ============================================
- * Course Helpers
- * ============================================
- */
-
-/**
  * Creates/Get get a course
  * @param {courseInfo} data
  * @returns {Course} Course
@@ -132,8 +126,8 @@ export const createOrGetOneCourse = async data => {
       type = -1,
       prerequisites = [],
       corequisites = [],
-      title = ' ',
-      credit = ' ',
+      // title = ' ',
+      // credit = ' ',
     } = data;
 
     const splitCourseString = code.split(' ');
@@ -154,12 +148,12 @@ export const createOrGetOneCourse = async data => {
         if (foundCourse) {
           if (type >= 0 && !foundCourse.type.includes(type))
             foundCourse.type.push(type);
-          foundCourse.title = title || ' ';
-          foundCourse.credit = credit || ' ';
-          foundCourse.prerequisites =
-            data.prerequisites.length > 0 ? data.prerequisites : [];
-          foundCourse.corequisites =
-            data.corequisites.length > 0 ? data.corequisites : [];
+          // foundCourse.title = title || ' ';
+          // foundCourse.credit = credit || ' ';
+          // foundCourse.prerequisites =
+          //   data.prerequisites.length > 0 ? data.prerequisites : [];
+          // foundCourse.corequisites =
+          //   data.corequisites.length > 0 ? data.corequisites : [];
 
           return resolve(foundCourse.save());
         }
@@ -265,13 +259,15 @@ export const createOneSemester = async data => {
             newData.courses = courses.map(course => course._id);
 
             Semester.findOne({
-              courses: { $in: newData.courses },
+              courses: { $all: newData.courses },
             })
               .then(foundSemester => {
                 if (!foundSemester) {
                   // TO-DO: Add Pre-req check
                   resolve(new Semester(newData).save());
-                } else resolve(foundSemester);
+                } else {
+                  resolve(foundSemester);
+                }
               })
               .catch(e => reject(e));
           } else resolve(courses);
@@ -306,27 +302,42 @@ export const createSemesterList = semesterList => {
  * @param {[Array]} courses: List of taken courses
  * @param {Object} requirementOption: Requirement that the student follows
  */
-export const getRemainingRequirement = (courses, requirementOption) => {
+export const getRemainingRequirement = courses => {
   return new Promise(async (resolve, reject) => {
-    const result = {};
-    const typeMapping = groupBy(courses, 'type');
-    const types = Object.keys(typeMapping).filter(type => type !== 'undefined');
-
+    const result = [];
+    const typeMap = groupBy(courses, 'type', 'area');
+    console.log(typeMap);
+    const types = [
+      ...new Set(
+        Object.keys(typeMap)
+          .filter(type => type)
+          .map(el => {
+            if (!isNaN(parseInt(el, 10))) return parseInt(el, 10);
+          })
+      ),
+    ];
     for (const type of types) {
-      Requirement.findOne({ type })
-        .populate('courses')
-        .then(foundRequirement => {
-          const { requiredCredit } = foundRequirement;
-          let coursesTaken = typeMapping[type];
-          const creditLeft = requiredCredit - coursesTaken.length * 3;
-          if (creditLeft > 0) {
-            coursesTaken = coursesTaken.map(course => course._id.toString());
+      // const type = type.slice;
+      // const area = ''
+      await Requirement.find({ type })
+        .then(foundRequirementList => {
+          foundRequirementList.forEach(requirement => {
+            const { requiredCredit } = requirement;
+            let coursesTaken = typeMap[type];
+            console.log(`Course taken in this type ${type}`, coursesTaken.area);
+            const creditLeft = requiredCredit - coursesTaken.length * 3;
+            if (creditLeft > 0) {
+              coursesTaken = coursesTaken.map(course => course._id.toString());
 
-            const remainingCourse = foundRequirement.courses.filter(
-              course => !coursesTaken.includes(ObjectID(course._id).toString())
-            );
-            result[type] = { remainingCourse, creditLeft };
-          }
+              const remainingCourse = requirement.courses.filter(
+                course =>
+                  !coursesTaken.includes(ObjectID(course._id).toString())
+              );
+
+              console.log(`remaining: `, remainingCourse, creditLeft, type);
+              result.push({ remainingCourse, creditLeft, type });
+            }
+          });
         })
         .catch(e => {
           reject(e);
@@ -334,13 +345,19 @@ export const getRemainingRequirement = (courses, requirementOption) => {
     }
 
     await Requirement.find(
-      { type: { $nin: ['1', '2'] } },
+      { type: { $nin: types } },
       (err, foundAllRequirement) => {
         if (err) reject(err);
-        const requirementMap = groupBy(foundAllRequirement, 'type');
-        Object.keys(requirementMap).forEach(type => {
-          result[type] = requirementMap[type];
-        });
+        if (foundAllRequirement.length > 0) {
+          const requirementMap = groupBy(foundAllRequirement, 'type')
+            .filter(type => type !== 'undefined')
+            .map(el => [el]);
+          const remainingType = Object.keys(requirementMap);
+
+          // for (const type of remainingType) {
+          //   result.push({type, requirementMap[type]});
+          // }
+        }
       }
     );
 
