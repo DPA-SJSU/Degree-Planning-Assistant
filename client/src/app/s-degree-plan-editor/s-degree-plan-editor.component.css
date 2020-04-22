@@ -1,0 +1,270 @@
+:host {
+  width: 100%;
+}
+
+/* Custom Classes */
+
+.outermost-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+}
+
+.editor-title {
+  color: #7f8c8d;
+  font-size: 20px;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
+.canvas-and-course-list-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.canvas {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+}
+
+.course-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
+  width: 25%;
+}
+
+.add-semester-card {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #7f8c8d;
+  border-radius: 8px;
+  width: 100%;
+  padding: 4px;
+  transition: width 1s;
+}
+
+.add-semester-font-clr {
+  color: #7f8c8d;
+}
+
+.add-year-card {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #7f8c8d;
+  border-radius: 8px;
+  width: 100%;
+  height: 128px;
+  padding: 8px;
+  transition: width 1s;
+}
+
+.plan-editor {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 80%;
+}
+
+.year {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.year-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.year-range {
+  font-size: 20px;
+  color: #707070;
+  font-weight: bold;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.year-hori-line {
+  border: 1px solid #7f8c8d;
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.semester-cards-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 8px;
+  width: 100%;
+}
+
+.semester-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 320px;
+  max-width: 25%;
+  flex-grow: 1;
+  flex-basis: 0;
+  border: 1px solid #ecf0f1;
+  border-radius: 8px;
+  box-shadow: 0px 3px 6px #ecf0f1;
+  padding: 16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  background-color: #ffffff;
+  transition: height 1s;
+}
+
+.semester-card-course {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  width: 100%;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.semester-card-course-empty {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  width: 100%;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.semester-card-term-and-status {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+  color: #7f8c8d;
+}
+
+.semester-card-term {
+  position: relative;
+}
+
+.semester-card-delete-btn {
+  width: 24px;
+  height: auto;
+  margin-top: 8px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.semester-card-course-chip-and-difficulty {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.semester-card-course-units {
+  font-size: 14px;
+  color: #707070;
+  font-weight: bold;
+}
+
+.semester-card-total-difficulty-and-units {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  width: 100%;
+  border-top: 1px solid #ecf0f1;
+}
+
+.statistic-chip-1 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #2ecc71;
+  padding: 4px 8px 4px 8px;
+  border-radius: 4px;
+}
+
+.statistic-chip-2 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #ffa250;
+  padding: 4px 8px 4px 8px;
+  border-radius: 4px;
+}
+
+.statistic-chip-3 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #ff7d6f;
+  padding: 4px 8px 4px 8px;
+  border-radius: 4px;
+}
+
+.chip {
+  font-size: 16px;
+  background-color: #ecf0f1;
+  color: #7f8c8d;
+  padding: 8px;
+}
