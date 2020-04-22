@@ -1,5 +1,5 @@
 import express from 'express';
-import logger from 'winston';
+import winston from 'winston';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import passport from 'passport';
@@ -20,12 +20,20 @@ import {
 const app = express();
 const { port, mongoDBUri, mongoHostName } = config.env;
 
+const logger = winston.createLogger({
+  transports: [new winston.transports.Console()],
+});
+
 // Apply strategy to passport
 applyPassportStrategy(passport);
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: '50mb' }));
+app.use((req, res, done) => {
+  logger.info(req.originalUrl);
+  done();
+});
 
 app.use('/', userController);
 app.use('/course', courseController);

@@ -22,12 +22,13 @@ let startingTermFound = false;
 let currentSemIndex = -1;
 let count = 0;
 let startingSem = {};
+let TranscriptMap;
 
 const resetMap = () => {
-  this.startingTermFound = false;
-  this.currentSemIndex = -1;
-  this.count = 0;
-  this.startingSem = {};
+  startingTermFound = false;
+  currentSemIndex = -1;
+  count = 0;
+  startingSem = {};
 
   return {
     semesterList: [],
@@ -35,8 +36,6 @@ const resetMap = () => {
     major: '',
   };
 };
-
-let TranscriptMap;
 
 /**
  * Checking case and Map the info to the right type
@@ -49,17 +48,23 @@ const transcriptParser = async paragraph => {
     words.push(word.symbols.map(symbol => symbol.text).join(''))
   );
 
-  const sentence = words.join(' ');
+  const removeCase = ['-', 'TOTAL', 'CUM', 'http', 'https'];
 
+  if (removeCase.some(el => words.includes(el))) return;
+
+  const sentence = words.join(' ');
   switch (true) {
     // Check for Enrolling Semester
-    case semesterStatus.some(status => sentence.includes(status)):
-      TranscriptMap.semesterList[currentSemIndex].status = 1;
+    case semesterStatus.some(status => sentence.includes(status)): {
+      const currentSem = TranscriptMap.semesterList[currentSemIndex];
+      currentSem.status = 1;
+      console.log(`[In Progress Sem]`, currentSem.term, currentSem.year);
       break;
-
+    }
     // GET AP COURSES
     case words.includes('AP'):
       TranscriptMap.otherInfo.push(sentence);
+      console.log(`[AP]`, sentence);
       break;
 
     // GET SEMESTER
@@ -72,21 +77,24 @@ const transcriptParser = async paragraph => {
         courses: [],
         status: 0,
       };
-
       if (!startingTermFound) {
         startingSem = semester;
         startingTermFound = true;
+        console.log(`[Starting sem]`, startingSem.term, startingSem.year);
       }
       semester.year = startingSem.year + count;
       if (semesterSeason.indexOf(words[0]) === 2) count += 1;
       TranscriptMap.semesterList.push(semester);
       currentSemIndex = TranscriptMap.semesterList.length - 1;
+
+      console.log(`[Enrolled Sem]`, semester.term, semester.year);
       break;
     }
 
     // GET MAJOR
     case words.includes('MAJOR'):
       TranscriptMap.major = `${words.slice(2).join(' ')}`;
+      console.log(`[Major] `, TranscriptMap.major);
       break;
 
     // GET COURSES
@@ -97,6 +105,7 @@ const transcriptParser = async paragraph => {
         words[1] &&
         words[1].length <= 4 &&
         semesterSeason.every(semester => !words.includes(semester))):
+      console.log(`[course]: `, words[0], words[1]);
       if (words[0] === 'SE') {
         if (csCode.includes(words[1])) words[0] = 'CS';
         else words[0] = 'CMPE';
@@ -104,8 +113,6 @@ const transcriptParser = async paragraph => {
 
       await createOrGetOneCourse({
         code: `${words[0]} ${words[1]}`,
-        // title: words.slice(2, words.length - 5).join(' '),
-        // credit: creditCondition.includes(words[words.length - 5]) ? words[words.length - 5] : ,
       })
         .then(course => {
           if (TranscriptMap.semesterList[currentSemIndex])
@@ -128,8 +135,10 @@ const transcriptParser = async paragraph => {
           `[WST]: NOT Qualify for taking upper courses such as 100W Course`
         );
       }
+      console.log(`[WST] `, sentence);
       break;
     default:
+      console.log(`[Others]`, sentence);
       break;
   }
 };
@@ -177,6 +186,7 @@ CloudOCR.scan = async (fileName, option) => {
       {
         inputConfig,
         features,
+        // max 5 pages
         // First page starts at 1, and not 0. Last page is -1.
         pages: [1, 2, 3, 4, -1],
       },

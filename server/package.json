@@ -8,9 +8,9 @@
     "start-w": "set ENV=prod && nodemon -r esm app.js",
     "dev-w": "set ENV=dev && nodemon -r esm app.js",
     "mongo:install": "brew update && brew tap mongodb/brew && brew install mongodb-community@4.2",
-    "mongo:atlas-shell": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/test' --username calvin",
-    "mongo:local-shell": "mongo 'mongodb://localhost/dpa:27017'",
-    "mongo:local": "brew services start mongodb-community",
+    "mongo:prod": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/test' --username calvin",
+    "mongo:dev": "mongo 'mongodb://localhost/dpa'",
+    "mongo:start": "brew services start mongodb-community",
     "mongo:stop": "brew services stop mongodb-community",
     "kill:server": "kill $(lsof -ti :8080)"
   },

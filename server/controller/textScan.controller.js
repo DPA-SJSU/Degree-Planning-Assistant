@@ -16,7 +16,7 @@ import {
 
 import { PLAN_NOT_FOUND, FAILED_TO_UPDATE_USER } from './constant';
 
-// import response from '../store/Scanning/sampleData/scanResult';
+import response from '../store/Scanning/sampleData/scanResult';
 
 const upload = multer({ dest: 'uploads/' });
 const textScanController = express.Router();
@@ -39,19 +39,23 @@ textScanController.post(
       const { semesterList, major, addedInfo } = scanResult;
 
       let semesters = await Promise.all(
-        semesterList.map(async semester => {
-          if (semester.courses.length > 0) {
+        semesterList.map(semester => {
+          return new Promise((resolve, reject) => {
             return Semester.findOne({
               courses: { $all: semester.courses.map(course => course._id) },
+              term: semester.term,
+              year: semester.year,
             })
               .then(foundSemester => {
-                if (!foundSemester) return new Semester(semester).save();
-                return foundSemester;
+                if (!foundSemester) {
+                  resolve(new Semester(semester).save());
+                }
+                return resolve(foundSemester);
               })
               .catch(e => {
-                console.log(e);
+                reject(e);
               });
-          }
+          });
         })
       );
 

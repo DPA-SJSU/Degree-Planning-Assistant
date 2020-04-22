@@ -316,10 +316,12 @@ export const getRemainingRequirement = courses => {
           })
       ),
     ];
-    for (const type of types) {
-      // const type = type.slice;
-      // const area = ''
-      await Requirement.find({ type })
+    for (const el of types) {
+      const splitString = el.split('-');
+      const type = splitString[0];
+      const area = splitString[1];
+      console.log(type, area);
+      await Requirement.find({ type, area })
         .then(foundRequirementList => {
           foundRequirementList.forEach(requirement => {
             const { requiredCredit } = requirement;

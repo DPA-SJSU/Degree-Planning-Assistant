@@ -1,3 +1,6 @@
 {
-    "extends": ["airbnb", "plugin:prettier/recommended"]
+  "extends": ["airbnb", "plugin:prettier/recommended"],
+  "rule": {
+    "no-console": "off"
   }
+}
