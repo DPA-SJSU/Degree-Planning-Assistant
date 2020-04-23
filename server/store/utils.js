@@ -7,7 +7,14 @@
 import sha256 from 'sha256';
 import { validationResult } from 'express-validator';
 import Mongoose from 'mongoose';
-import { User, Course, Semester, Plan, Requirement } from '../database/models';
+import {
+  User,
+  Course,
+  Semester,
+  Plan,
+  Requirement,
+  RemainingRequirement,
+} from '../database/models';
 
 import {
   SEMESTER_NOT_FOUND,
@@ -76,9 +83,9 @@ export const isObjectEmpty = obj => {
   return Object.keys(obj).length === 0;
 };
 
-export const groupBy = (xs, key) => {
+export const groupBy = (xs, key1, key2) => {
   return xs.reduce((rv, x) => {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
+    (rv[`${x[key1]}-${x[key2]}`] = rv[`${x[key1]}-${x[key2]}`] || []).push(x);
     return rv;
   }, {});
 };
@@ -303,42 +310,48 @@ export const createSemesterList = semesterList => {
  * @param {[Array]} courses: List of taken courses
  * @param {Object} requirementOption: Requirement that the student follows
  */
-export const getRemainingRequirement = courses => {
+export const getRemainingRequirement = (user, courses) => {
   return new Promise(async (resolve, reject) => {
     const result = [];
     const typeMap = groupBy(courses, 'type', 'area');
-    console.log(typeMap);
-    const types = [
-      ...new Set(
-        Object.keys(typeMap)
-          .filter(type => type)
-          .map(el => {
-            if (!isNaN(parseInt(el, 10))) return parseInt(el, 10);
-          })
-      ),
-    ];
+    const types = [...new Set(Object.keys(typeMap))];
+    const remainingArea = [];
+
     for (const el of types) {
       const splitString = el.split('-');
-      const type = splitString[0];
-      const area = splitString[1];
-      console.log(type, area);
-      await Requirement.find({ type, area })
+      const type = splitString[0].split(',') || [];
+      const area = splitString[1] === 'undefined' ? ' ' : splitString[1];
+      remainingArea.push(area);
+
+      await Requirement.find({ type: { $in: type }, area })
         .then(foundRequirementList => {
-          foundRequirementList.forEach(requirement => {
+          foundRequirementList.forEach(async requirement => {
             const { requiredCredit } = requirement;
-            let coursesTaken = typeMap[type];
-            console.log(`Course taken in this type ${type}`, coursesTaken.area);
+            let coursesTaken = typeMap[`${type}-${area}`];
             const creditLeft = requiredCredit - coursesTaken.length * 3;
+
+            console.log(
+              `[${coursesTaken.length} courses taken]`,
+              parseInt(type, 10),
+              area
+            );
             if (creditLeft > 0) {
-              coursesTaken = coursesTaken.map(course => course._id.toString());
+              coursesTaken = coursesTaken.map(course => String(course._id));
 
-              const remainingCourse = requirement.courses.filter(
-                course =>
-                  !coursesTaken.includes(ObjectID(course._id).toString())
-              );
+              const remainingCourse = requirement.courses
+                .map(course => String(course))
+                .filter(
+                  requirementCourse => !coursesTaken.includes(requirementCourse)
+                );
+              const remainingRequirement = await new RemainingRequirement({
+                courses: remainingCourse,
+                creditLeft,
+                type: parseInt(type, 10),
+                area,
+                user,
+              }).save();
 
-              console.log(`remaining: `, remainingCourse, creditLeft, type);
-              result.push({ remainingCourse, creditLeft, type });
+              result.push(remainingRequirement._id);
             }
           });
         })
@@ -347,24 +360,25 @@ export const getRemainingRequirement = courses => {
         });
     }
 
-    await Requirement.find(
-      { type: { $nin: types } },
-      (err, foundAllRequirement) => {
+    Requirement.find(
+      { area: { $nin: remainingArea } },
+      async (err, foundAllRequirement) => {
         if (err) reject(err);
-        if (foundAllRequirement.length > 0) {
-          const requirementMap = groupBy(foundAllRequirement, 'type')
-            .filter(type => type !== 'undefined')
-            .map(el => [el]);
-          const remainingType = Object.keys(requirementMap);
-
-          // for (const type of remainingType) {
-          //   result.push({type, requirementMap[type]});
-          // }
-        }
+        const tasks = foundAllRequirement.map(async requirement => {
+          const { courses, requiredCredit, type, area } = requirement;
+          const remainingRequirement = await new RemainingRequirement({
+            courses,
+            type,
+            area,
+            creditLeft: requiredCredit,
+            user,
+          }).save();
+          result.push(remainingRequirement._id);
+        });
+        await Promise.all(tasks);
+        return resolve(result);
       }
     );
-
-    return resolve(result);
   });
 };
 

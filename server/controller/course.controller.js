@@ -39,7 +39,7 @@ courseController.post(
   // passport.authenticate('jwt', { session: false }),
   // validateCourseCreation,
   (req, res) => {
-    validationHandler(req, res, async() => {
+    validationHandler(req, res, async () => {
       for (const course of req.body) {
         const { _id, fullCourseCode, prerequisites, corequisites } = course;
 
@@ -106,6 +106,21 @@ courseController.get(
     });
   }
 );
+
+/**
+ * GET/
+ * Get a course using ObjectId through query
+ */
+courseController.get('/list', (req, res) => {
+  req.body.forEach(course => {
+    Course.findOne({ _id: course })
+      .select('department code')
+      .then(foundCourse => {
+        console.log(foundCourse.department, foundCourse.code);
+      });
+  });
+  res.status(200).json();
+});
 
 /**
  * DELETE/

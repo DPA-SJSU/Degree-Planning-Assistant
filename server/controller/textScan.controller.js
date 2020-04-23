@@ -9,8 +9,6 @@ import { User, Plan, Semester } from '../database/models';
 
 import {
   generateServerErrorCode,
-  createOrGetAllCourse,
-  createSemesterList,
   getRemainingRequirement,
 } from '../store/utils';
 
@@ -37,6 +35,7 @@ textScanController.post(
     CloudOcr.scan(path, option).then(async scanResult => {
       // const scanResult = response;
       const { semesterList, major, addedInfo } = scanResult;
+      // res.status(200).json(scanResult);
 
       let semesters = await Promise.all(
         semesterList.map(semester => {
@@ -67,58 +66,69 @@ textScanController.post(
         .map(semester => semester.courses.map(course => course._id))
         .reduce((prev, current) => [...prev, ...current]);
 
-      // const remainingRequirement = await getRemainingRequirement(
-      //   semesterList
-      //     .map(semester => semester.courses)
-      //     .reduce((prev, current) => [...prev, ...current])
-      // );
-
-      return new Plan({
-        semesters: semesters.map(semester => semester._id),
-        // remainingRequirement,
-        user: user._id,
-      })
-        .save()
-        .then(newPlan => {
-          User.findByIdAndUpdate(
-            user._id,
-            {
-              coursesTaken: coursesTaken.map(course => course._id),
-              degreePlan: newPlan._id,
-              major,
-            },
-            { new: true }
-          )
-            .select('-hashedPassword -__v')
-            .populate({
-              path: 'degreePlan',
-              model: 'Plan',
-              populate: {
-                path: 'semesters',
-                model: 'Semester',
-                populate: {
-                  path: 'courses',
-                  model: 'Course',
-                },
-              },
-            })
-            .populate('coursesTaken')
-            .then(updatedUser => {
-              res.status(200).json(updatedUser);
-            })
-            .catch(e => {
-              generateServerErrorCode(
-                res,
-                500,
-                e,
-                FAILED_TO_UPDATE_USER,
-                'Plan'
-              );
-            });
+      getRemainingRequirement(
+        user._id,
+        semesterList
+          .map(semester => semester.courses)
+          .reduce((prev, current) => [...prev, ...current])
+      ).then(remainingRequirements => {
+        return new Plan({
+          semesters: semesters.map(semester => semester._id),
+          remainingRequirements,
+          user: user._id,
         })
-        .catch(e => {
-          generateServerErrorCode(res, 500, e, PLAN_NOT_FOUND, 'Plan');
-        });
+          .save()
+          .then(newPlan => {
+            User.findByIdAndUpdate(
+              user._id,
+              {
+                coursesTaken: coursesTaken.map(course => course._id),
+                degreePlan: newPlan._id,
+                major,
+              },
+              { new: true }
+            )
+              .select('-hashedPassword -__v')
+              .populate('coursesTaken')
+              .populate({
+                path: 'degreePlan',
+                model: 'Plan',
+                populate: [
+                  {
+                    path: 'semesters',
+                    model: 'Semester',
+                    populate: {
+                      path: 'courses',
+                      model: 'Course',
+                    },
+                  },
+                  {
+                    path: 'remainingRequirements',
+                    model: 'RemainingRequirement',
+                    populate: {
+                      path: 'courses',
+                      model: 'Course',
+                    },
+                  },
+                ],
+              })
+              .then(updatedUser => {
+                res.status(200).json(updatedUser);
+              })
+              .catch(e => {
+                generateServerErrorCode(
+                  res,
+                  500,
+                  e,
+                  FAILED_TO_UPDATE_USER,
+                  'Plan'
+                );
+              });
+          })
+          .catch(e => {
+            generateServerErrorCode(res, 500, e, PLAN_NOT_FOUND, 'Plan');
+          });
+      });
     });
   }
 );

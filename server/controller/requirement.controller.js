@@ -29,7 +29,7 @@ const requirementController = express.Router();
  */
 requirementController.post('/', async (req, res) => {
   for (const requirement of req.body) {
-    const { school, type, area, courses } = requirement;
+    const { school, type, area, courses, requiredCredit } = requirement;
     const courseObject = courses.map(course => {
       return { code: course, school, type, area };
     });
@@ -41,6 +41,7 @@ requirementController.post('/', async (req, res) => {
             school,
             type,
             area,
+            requiredCredit,
             courses: foundCourses.map(course => course._id),
           },
           { upsert: true },
