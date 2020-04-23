@@ -6,7 +6,7 @@ import { LoginComponent } from "./login/login.component";
 import { LandingComponent } from "./landing/landing.component";
 import { SDashboardComponent } from "./student/s-dashboard/s-dashboard.component";
 import { SProfileComponent } from "./student/s-profile/s-profile.component";
-import { SDegreePlanEditorComponent } from "./s-degree-plan-editor/s-degree-plan-editor.component";
+import { SDegreePlanEditorComponent } from "./student/s-degree-plan-editor/s-degree-plan-editor.component";
 import { ADashboardComponent } from "./admin/a-dashboard/a-dashboard.component";
 
 const routes: Routes = [
