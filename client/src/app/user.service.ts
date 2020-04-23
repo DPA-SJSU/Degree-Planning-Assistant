@@ -1,12 +1,9 @@
 import { Injectable } from "@angular/core";
-
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-
-import { Observable, Subject, from, forkJoin } from "rxjs";
-import { map, switchMap, mergeMap } from "rxjs/operators";
-
 import { ErrorHandlerService } from "./error-handler.service";
 import { CourseData } from "./course.service";
+import { Observable, Subject } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
 
 export interface UserData {
   name?: string;
@@ -31,22 +28,6 @@ export interface UserProfile {
   avatarType: string;
   isAdmin: boolean;
   school: string;
-}
-
-export interface CourseData {
-  school: string;
-  department: string;
-  code: string;
-  title: string;
-  description: string;
-  prerequisites: [CourseData];
-  corequisites: [CourseData];
-  area: string;
-  type: number;
-  difficulty?: number;
-  impaction?: number;
-  credit: number;
-  termsOffered: string;
 }
 
 @Injectable({

@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
-
-import { UserService, CourseData, UserProfile } from "./user.service";
-
+import { UserService, UserProfile } from "./user.service";
+import { CourseData } from "./course.service";
 import { map } from "rxjs/operators";
 import { Observable } from "rxjs";
 
