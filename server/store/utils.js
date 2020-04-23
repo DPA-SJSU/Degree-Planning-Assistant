@@ -76,9 +76,9 @@ export const isObjectEmpty = obj => {
   return Object.keys(obj).length === 0;
 };
 
-export const groupBy = (xs, key) => {
+export const groupBy = (xs, key1, key2) => {
   return xs.reduce((rv, x) => {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
+    (rv[`${x[key1]}-${x[key2]}`] = rv[`${x[key1]}-${x[key2]}`] || []).push(x);
     return rv;
   }, {});
 };
@@ -307,39 +307,22 @@ export const getRemainingRequirement = courses => {
   return new Promise(async (resolve, reject) => {
     const result = [];
     const typeMap = groupBy(courses, 'type', 'area');
-    console.log(typeMap);
-    const types = [
-      ...new Set(
-        Object.keys(typeMap)
-          .filter(type => type)
-          .map(el => {
-            if (!isNaN(parseInt(el, 10))) return parseInt(el, 10);
-          })
-      ),
-    ];
+    const types = [...new Set(Object.keys(typeMap))];
+    const remainingArea = [];
+
     for (const el of types) {
       const splitString = el.split('-');
-      const type = splitString[0];
-      const area = splitString[1];
-      console.log(type, area);
-      await Requirement.find({ type, area })
+      const type = splitString[0].split(',') || [];
+      const area = splitString[1] === 'undefined' ? ' ' : splitString[1];
+      remainingArea.push(area);
+
+      await Requirement.find({ type: { $in: type }, area })
         .then(foundRequirementList => {
-          foundRequirementList.forEach(requirement => {
+          foundRequirementList.forEach(async requirement => {
             const { requiredCredit } = requirement;
-            let coursesTaken = typeMap[type];
-            console.log(`Course taken in this type ${type}`, coursesTaken.area);
+            let coursesTaken = typeMap[`${type}-${area}`];
             const creditLeft = requiredCredit - coursesTaken.length * 3;
-            if (creditLeft > 0) {
-              coursesTaken = coursesTaken.map(course => course._id.toString());
-
-              const remainingCourse = requirement.courses.filter(
-                course =>
-                  !coursesTaken.includes(ObjectID(course._id).toString())
-              );
-
-              console.log(`remaining: `, remainingCourse, creditLeft, type);
-              result.push({ remainingCourse, creditLeft, type });
-            }
+            if (creditLeft > 0) result.push(requirement._id);
           });
         })
         .catch(e => {
@@ -347,24 +330,17 @@ export const getRemainingRequirement = courses => {
         });
     }
 
-    await Requirement.find(
-      { type: { $nin: types } },
-      (err, foundAllRequirement) => {
+    Requirement.find(
+      { area: { $nin: remainingArea } },
+      async (err, foundAllRequirement) => {
         if (err) reject(err);
-        if (foundAllRequirement.length > 0) {
-          const requirementMap = groupBy(foundAllRequirement, 'type')
-            .filter(type => type !== 'undefined')
-            .map(el => [el]);
-          const remainingType = Object.keys(requirementMap);
-
-          // for (const type of remainingType) {
-          //   result.push({type, requirementMap[type]});
-          // }
-        }
+        const tasks = foundAllRequirement.map(async requirement => {
+          result.push(requirement._id);
+        });
+        await Promise.all(tasks);
+        return resolve(result);
       }
     );
-
-    return resolve(result);
   });
 };
 
@@ -387,24 +363,10 @@ export const generateSemesters = courses => {
  * @returns [status, error]
  */
 export const courseCheck = (userId, semesters) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const result = [];
-    const coursesTaken = await User.findById(userId).select('coursesTaken');
 
-    // Check pre-req courses is in coursesTaken
-
-    // 1. Pre
-    semesters.map(semester => {
-      return {
-        id: semester._id,
-        status: semester.courses.map(course => {
-          let taken = false;
-          if (coursesTaken.includes(course._id)) taken = true;
-
-          return [`${course.department} ${course.code}`, taken];
-        }),
-      };
-    });
+    const coursesTaken = User.findById(userId).then(foundUser => {});
 
     resolve(result);
   });

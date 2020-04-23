@@ -39,7 +39,7 @@ courseController.post(
   // passport.authenticate('jwt', { session: false }),
   // validateCourseCreation,
   (req, res) => {
-    validationHandler(req, res, async() => {
+    validationHandler(req, res, async () => {
       for (const course of req.body) {
         const { _id, fullCourseCode, prerequisites, corequisites } = course;
 
