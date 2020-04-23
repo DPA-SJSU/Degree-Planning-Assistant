@@ -1,4 +1,4 @@
-const response = {
+{
   "semesterList": [
       {
           "term": "FALL",
@@ -506,6 +506,4 @@ const response = {
       "AP U . S . Government & Politics"
   ],
   "major": "BS Computer Engineering"
-};
-
-export default response;
+}

@@ -5,7 +5,7 @@ const planSchema = new Schema({
   program: { type: mongoose.Schema.Types.ObjectId, ref: 'Program' },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   remainingRequirements: [
-    { type: mongoose.Schema.Types.ObjectId, ref: 'RemainingRequirement' },
+    { type: mongoose.Schema.Types.ObjectId, ref: 'Requirement' },
   ],
 });
 

@@ -7,14 +7,7 @@
 import sha256 from 'sha256';
 import { validationResult } from 'express-validator';
 import Mongoose from 'mongoose';
-import {
-  User,
-  Course,
-  Semester,
-  Plan,
-  Requirement,
-  RemainingRequirement,
-} from '../database/models';
+import { User, Course, Semester, Plan, Requirement } from '../database/models';
 
 import {
   SEMESTER_NOT_FOUND,
@@ -310,7 +303,7 @@ export const createSemesterList = semesterList => {
  * @param {[Array]} courses: List of taken courses
  * @param {Object} requirementOption: Requirement that the student follows
  */
-export const getRemainingRequirement = (user, courses) => {
+export const getRemainingRequirement = courses => {
   return new Promise(async (resolve, reject) => {
     const result = [];
     const typeMap = groupBy(courses, 'type', 'area');
@@ -329,30 +322,7 @@ export const getRemainingRequirement = (user, courses) => {
             const { requiredCredit } = requirement;
             let coursesTaken = typeMap[`${type}-${area}`];
             const creditLeft = requiredCredit - coursesTaken.length * 3;
-
-            console.log(
-              `[${coursesTaken.length} courses taken]`,
-              parseInt(type, 10),
-              area
-            );
-            if (creditLeft > 0) {
-              coursesTaken = coursesTaken.map(course => String(course._id));
-
-              const remainingCourse = requirement.courses
-                .map(course => String(course))
-                .filter(
-                  requirementCourse => !coursesTaken.includes(requirementCourse)
-                );
-              const remainingRequirement = await new RemainingRequirement({
-                courses: remainingCourse,
-                creditLeft,
-                type: parseInt(type, 10),
-                area,
-                user,
-              }).save();
-
-              result.push(remainingRequirement._id);
-            }
+            if (creditLeft > 0) result.push(requirement._id);
           });
         })
         .catch(e => {
@@ -365,15 +335,7 @@ export const getRemainingRequirement = (user, courses) => {
       async (err, foundAllRequirement) => {
         if (err) reject(err);
         const tasks = foundAllRequirement.map(async requirement => {
-          const { courses, requiredCredit, type, area } = requirement;
-          const remainingRequirement = await new RemainingRequirement({
-            courses,
-            type,
-            area,
-            creditLeft: requiredCredit,
-            user,
-          }).save();
-          result.push(remainingRequirement._id);
+          result.push(requirement._id);
         });
         await Promise.all(tasks);
         return resolve(result);
@@ -401,24 +363,10 @@ export const generateSemesters = courses => {
  * @returns [status, error]
  */
 export const courseCheck = (userId, semesters) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const result = [];
-    const coursesTaken = await User.findById(userId).select('coursesTaken');
 
-    // Check pre-req courses is in coursesTaken
-
-    // 1. Pre
-    semesters.map(semester => {
-      return {
-        id: semester._id,
-        status: semester.courses.map(course => {
-          let taken = false;
-          if (coursesTaken.includes(course._id)) taken = true;
-
-          return [`${course.department} ${course.code}`, taken];
-        }),
-      };
-    });
+    const coursesTaken = User.findById(userId).then(foundUser => {});
 
     resolve(result);
   });

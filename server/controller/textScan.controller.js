@@ -35,7 +35,6 @@ textScanController.post(
     CloudOcr.scan(path, option).then(async scanResult => {
       // const scanResult = response;
       const { semesterList, major, addedInfo } = scanResult;
-      // res.status(200).json(scanResult);
 
       let semesters = await Promise.all(
         semesterList.map(semester => {
@@ -67,7 +66,6 @@ textScanController.post(
         .reduce((prev, current) => [...prev, ...current]);
 
       getRemainingRequirement(
-        user._id,
         semesterList
           .map(semester => semester.courses)
           .reduce((prev, current) => [...prev, ...current])
@@ -104,7 +102,7 @@ textScanController.post(
                   },
                   {
                     path: 'remainingRequirements',
-                    model: 'RemainingRequirement',
+                    model: 'Requirement',
                     populate: {
                       path: 'courses',
                       model: 'Course',

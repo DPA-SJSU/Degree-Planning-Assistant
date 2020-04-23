@@ -108,21 +108,6 @@ courseController.get(
 );
 
 /**
- * GET/
- * Get a course using ObjectId through query
- */
-courseController.get('/list', (req, res) => {
-  req.body.forEach(course => {
-    Course.findOne({ _id: course })
-      .select('department code')
-      .then(foundCourse => {
-        console.log(foundCourse.department, foundCourse.code);
-      });
-  });
-  res.status(200).json();
-});
-
-/**
  * DELETE/
  * Delete a course using ObjectId through query
  * IMPORTANT: calling this might affect other courses, which include the deleted courses as a pre/corequisite.
