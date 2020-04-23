@@ -12,7 +12,7 @@
       class="flex-column justify-content-center w100"
     >
       <!-- Year -->
-      <div *ngFor="let year of plan" class="year">
+      <div *ngFor="let year of plan.years" class="year">
         <div class="year-title">
           <div class="year-hori-line"></div>
           <span class="year-range"
@@ -30,7 +30,6 @@
               <span *ngIf="semester.status === 1">Completed</span>
             </div>
             <!-- Course Rows -->
-            <!-- Fall 2017 -->
             <div
               *ngFor="let course of semester.courses"
               class="semester-card-course"

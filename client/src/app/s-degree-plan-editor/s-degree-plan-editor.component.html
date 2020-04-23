@@ -3,7 +3,7 @@
     <span class="editor-title">Edit Your Degree Plan</span>
     <div class="canvas-and-course-list-container">
       <!-- Canvas -->
-      <div class="canvas">
+      <div *ngIf="plan" class="canvas">
         <div
           *ngFor="let year of plan.years; let yearIndex = index"
           class="year mb8"
@@ -38,7 +38,6 @@
                   </mat-form-field>
                 </div>
                 <!-- Course Rows -->
-                <!-- Fall 2017 -->
                 <div
                   *ngFor="
                     let course of semester.courses;
@@ -240,11 +239,26 @@
       </div>
       <!-- Course List -->
       <div class="course-list">
-        <span class="h6 bold neutral-gray-clr mb16">Courses</span>
-        <mat-chip-list *ngFor="let department of courseList" class="mb8">
-          <mat-chip *ngFor="let course of department.courses" class="chip"
-            >{{ course.department }}{{ course.code }}</mat-chip
+        <span class="h6 bold neutral-gray-clr mb16">Courses taken</span>
+        <mat-chip-list *ngIf="courseList" class="mb8">
+          <mat-chip
+            *ngFor="let course of courseList; index as i"
+            [matMenuTriggerFor]="menu"
+            class="chip"
           >
+            {{ course.department }}{{ course.code }}
+            <mat-menu #menu="matMenu" style="padding: 0px;">
+              <app-popup
+                [title]="course.school + ' ' + course.department + course.code"
+                [subtitle]="course.title"
+                contentTitle="Description"
+              >
+                <p *ngIf="course?.description">
+                  {{ course.description }}
+                </p>
+              </app-popup>
+            </mat-menu>
+          </mat-chip>
         </mat-chip-list>
       </div>
     </div>

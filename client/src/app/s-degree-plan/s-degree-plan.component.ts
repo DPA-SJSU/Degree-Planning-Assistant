@@ -21,12 +21,13 @@ export class SDegreePlanComponent implements OnInit {
     private planService: PlanService
   ) {
     this.yearArray = this.planService.formatPlan();
+    this.yearArray.subscribe((result) => console.log(result));
   }
 
   ngOnInit() {}
 
   onClickEditPlan() {
     // TODO: ADD ROUTE AFTER ADDING EDIT PLAN
-    // this.router.navigate(["plan-editor"]);
+    this.router.navigate(["plan-editor"]);
   }
 }

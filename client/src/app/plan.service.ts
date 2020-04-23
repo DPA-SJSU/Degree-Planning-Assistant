@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
 
-import { UserService, CourseData } from "./user.service";
+import { UserService, CourseData, UserProfile } from "./user.service";
 
 import { map } from "rxjs/operators";
+import { Observable } from "rxjs";
 
 export interface Year {
   beginning: number;
@@ -30,12 +31,17 @@ export class PlanService {
     spring: 4,
   };
 
-  constructor(private userService: UserService) {}
+  user: Observable<UserProfile>;
+
+  constructor(private userService: UserService) {
+    this.user = this.userService.getUserData();
+  }
 
   /**
-   * Formats the user's plan for rendering
+   * Formats the user's plan from their profile
+   * @returns Observable of an array of years in a degree plan
    */
-  formatPlan() {
+  formatPlan(): Observable<any[]> {
     const mapCallback = (userData) => {
       if (userData.degreePlan && userData.degreePlan.semesters.length > 0) {
         const yearArray = [];
@@ -85,12 +91,12 @@ export class PlanService {
           }
         });
 
-        return yearArray;
+        return JSON.parse(JSON.stringify({ years: yearArray }));
       }
       return [];
     };
 
-    return this.userService.getUserData().pipe(map(mapCallback));
+    return this.user.pipe(map(mapCallback));
   }
 
   /**

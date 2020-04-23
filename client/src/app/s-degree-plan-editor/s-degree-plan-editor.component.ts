@@ -1,4 +1,6 @@
 import { Component, OnInit } from "@angular/core";
+import { PlanService } from "../plan.service";
+import { UserService } from "../user.service";
 
 @Component({
   selector: "app-s-degree-plan-editor",
@@ -19,8 +21,31 @@ export class SDegreePlanEditorComponent implements OnInit {
    * (semester) isAddingSemester: Boolean, flag to check if user wants to add a semester
    */
 
-  constructor() {
-    /** Dummy data for plan used to demo markup */
+  constructor(
+    private planService: PlanService,
+    private userService: UserService
+  ) {
+    this.planService.formatPlan().subscribe((result) => {
+      this.plan = result;
+      this.plan.user = "";
+      this.plan.program = "";
+      this.plan.isAddingYear = false;
+      this.plan.years.forEach(
+        (semester) => (semester.isAddingSemester = false)
+      );
+      console.log("The plan: ", result);
+    });
+    this.userService.getUserData().subscribe((result) => {
+      console.log("course list: ", result.coursesTaken);
+      this.courseList = result.coursesTaken;
+      this.plan.user = result.firstName;
+    });
+
+    // this.setDummyData();
+  }
+
+  /** Dummy data for plan used to demo markup */
+  setDummyData() {
     this.plan = {
       user: "",
       program: "",
