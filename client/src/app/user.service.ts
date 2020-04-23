@@ -152,7 +152,13 @@ export class UserService {
    * @param attribute (optional)
    */
   getProfile(attribute?: string) {
-    return this.http.get<UserProfile>(`${this.uri}/`, this.getHttpHeaders());
+    return this.http
+      .get<UserProfile>(`${this.uri}/`, this.getHttpHeaders())
+      .subscribe({
+        error: (errorResponse) => {
+          this.errorHandler.handleError(errorResponse);
+        },
+      });
   }
 
   /**
@@ -191,6 +197,12 @@ export class UserService {
         tokenObj,
         this.getHttpHeaders()
       );
+
+      this.userData.subscribe({
+        error: (errorResponse) => {
+          this.errorHandler.handleError(errorResponse);
+        },
+      });
     }
     return true;
   }
@@ -200,11 +212,13 @@ export class UserService {
    * @param profileChanges
    */
   editProfile(profileChanges: object) {
-    return this.http.put(
-      `${this.uri}/profile`,
-      profileChanges,
-      this.getHttpHeaders()
-    );
+    return this.http
+      .put(`${this.uri}/profile`, profileChanges, this.getHttpHeaders())
+      .subscribe({
+        error: (errorResponse) => {
+          this.errorHandler.handleError(errorResponse);
+        },
+      });
   }
 
   /**
@@ -242,10 +256,16 @@ export class UserService {
     const formData = new FormData();
     formData.append("pdf", file);
 
-    return this.http.post(
-      `${this.uri}/scan?option=` + option,
-      formData,
-      this.getHttpHeadersFormData()
-    );
+    return this.http
+      .post(
+        `${this.uri}/scan?option=` + option,
+        formData,
+        this.getHttpHeadersFormData()
+      )
+      .subscribe({
+        error: (errorResponse) => {
+          this.errorHandler.handleError(errorResponse);
+        },
+      });
   }
 }
