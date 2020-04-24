@@ -10,7 +10,7 @@
         >
           <div class="year-title">
             <div class="year-hori-line"></div>
-            <span class="year-range"
+            <span *ngIf="year.beginning && year.ending" class="year-range"
               >{{ year.beginning }} - {{ year.ending }}</span
             >
             <div class="year-hori-line"></div>
@@ -27,7 +27,9 @@
               />
               <div class="semester-card">
                 <div class="semester-card-term-and-status">
-                  <span> {{ semester.term }} {{ semester.year }}</span>
+                  <span *ngIf="semester.term && semester.year">
+                    {{ semester.term | uppercase }} {{ semester.year }}</span
+                  >
                   <mat-form-field>
                     <mat-label>Status</mat-label>
                     <mat-select [(ngModel)]="semester.status">
@@ -47,7 +49,11 @@
                 >
                   <div class="semester-card-course-chip-and-difficulty">
                     <mat-chip-list class="mr8">
-                      <mat-chip [matMenuTriggerFor]="menu" class="chip">
+                      <mat-chip
+                        *ngIf="course.department && course.code"
+                        [matMenuTriggerFor]="menu"
+                        class="chip"
+                      >
                         {{ course.department }}{{ course.code }}
                       </mat-chip>
                     </mat-chip-list>
@@ -65,7 +71,7 @@
                       </app-popup>
                     </mat-menu>
                     <div
-                      *ngIf="course.difficulty == 1"
+                      *ngIf="course.difficulty && course.difficulty == 1"
                       class="statistic-chip-1 mr8"
                     >
                       <img
@@ -75,7 +81,7 @@
                       {{ course.difficulty }}
                     </div>
                     <div
-                      *ngIf="course.difficulty == 2"
+                      *ngIf="course.difficulty && course.difficulty == 2"
                       class="statistic-chip-2 mr8"
                     >
                       <img
@@ -85,7 +91,7 @@
                       {{ course.difficulty }}
                     </div>
                     <div
-                      *ngIf="course.difficulty == 3"
+                      *ngIf="course.difficulty && course.difficulty == 3"
                       class="statistic-chip-3 mr8"
                     >
                       <img
@@ -95,7 +101,7 @@
                       {{ course.difficulty }}
                     </div>
                     <div
-                      *ngIf="course.impaction == 1"
+                      *ngIf="course.impaction && course.impaction == 1"
                       class="statistic-chip-1 mr8"
                     >
                       <img
@@ -105,7 +111,7 @@
                       {{ course.impaction }}
                     </div>
                     <div
-                      *ngIf="course.impaction == 2"
+                      *ngIf="course.impaction && course.impaction == 2"
                       class="statistic-chip-2 mr8"
                     >
                       <img
@@ -115,7 +121,7 @@
                       {{ course.impaction }}
                     </div>
                     <div
-                      *ngIf="course.impaction == 3"
+                      *ngIf="course.impaction && course.impaction == 3"
                       class="statistic-chip-3 mr8"
                     >
                       <img
@@ -125,7 +131,7 @@
                       {{ course.impaction }}
                     </div>
                   </div>
-                  <span class="semester-card-course-units"
+                  <span *ngIf="course.credit" class="semester-card-course-units"
                     >{{ course.credit }} units</span
                   >
                 </div>
@@ -134,7 +140,9 @@
                   <div class="semester-card-course-chip-and-difficulty">
                     <div
                       *ngIf="
-                        semester.difficulty >= 1 && semester.difficulty < 2
+                        semester.difficulty &&
+                        semester.difficulty >= 1 &&
+                        semester.difficulty < 2
                       "
                       class="statistic-chip-1"
                     >
@@ -146,7 +154,9 @@
                     </div>
                     <div
                       *ngIf="
-                        semester.difficulty >= 2 && semester.difficulty < 3
+                        semester.difficulty &&
+                        semester.difficulty >= 2 &&
+                        semester.difficulty < 3
                       "
                       class="statistic-chip-2"
                     >
@@ -157,7 +167,7 @@
                       {{ semester.difficulty }}
                     </div>
                     <div
-                      *ngIf="semester.difficulty >= 3"
+                      *ngIf="semester.difficulty && semester.difficulty >= 3"
                       class="statistic-chip-3"
                     >
                       <img
@@ -167,7 +177,9 @@
                       {{ semester.difficulty }}
                     </div>
                   </div>
-                  <span class="semester-card-course-units"
+                  <span
+                    *ngIf="semester.units"
+                    class="semester-card-course-units"
                     >= {{ semester.units }} units</span
                   >
                 </div>
@@ -176,33 +188,41 @@
           </div>
           <div class="add-semester-card">
             <button
-              *ngIf="year.isAddingSemester === false"
+              *ngIf="
+                year.beginning &&
+                year.ending &&
+                year.newSemesterWidget.active === false
+              "
               mat-button
               (click)="toggleAddingSemester(yearIndex)"
               class="add-semester-font-clr w100"
             >
               + ADD A SEMESTER FOR {{ year.beginning }} - {{ year.ending }}
             </button>
-            <mat-form-field class="mr8" *ngIf="year.isAddingSemester === true">
+            <mat-form-field
+              class="mr8"
+              *ngIf="year.newSemesterWidget.active === true"
+            >
               <mat-label>Semester</mat-label>
-              <mat-select>
-                <mat-option value="SUMMER">Summer</mat-option>
-                <mat-option value="FALL">Fall</mat-option>
-                <mat-option value="SPRING">Spring</mat-option>
-                <mat-option value="WINTER">Winter</mat-option>
+              <mat-select [(ngModel)]="year.newSemesterWidget.termSelect">
+                <mat-option value="summer">Summer</mat-option>
+                <mat-option value="fall">Fall</mat-option>
+                <mat-option value="winter">Winter</mat-option>
+                <mat-option value="spring">Spring</mat-option>
               </mat-select>
             </mat-form-field>
             <button
               mat-button
-              *ngIf="year.isAddingSemester === true"
+              *ngIf="year.newSemesterWidget.active === true"
               (click)="toggleAddingSemester(yearIndex)"
             >
               CANCEL
             </button>
             <button
-              *ngIf="year.isAddingSemester === true"
+              *ngIf="year.newSemesterWidget.active === true"
               mat-raised-button
               color="primary"
+              (click)="onClickAddNewSemester(yearIndex)"
             >
               ADD SEMESTER
             </button>
