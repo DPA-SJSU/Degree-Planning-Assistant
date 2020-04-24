@@ -24,8 +24,13 @@
               <img
                 src="../../assets/delete-32.png"
                 class="semester-card-delete-btn"
+                (click)="onClickRemoveSemester(semeserIndex, yearIndex)"
               />
-              <div class="semester-card">
+              <div
+                class="semester-card"
+                (dragover)="(false)"
+                (drop)="onDropSemesterCard(semesterIndex, yearIndex)"
+              >
                 <div class="semester-card-term-and-status">
                   <span *ngIf="semester.term && semester.year">
                     {{ semester.term | uppercase }} {{ semester.year }}</span
@@ -53,6 +58,15 @@
                         *ngIf="course.department && course.code"
                         [matMenuTriggerFor]="menu"
                         class="chip"
+                        draggable="true"
+                        (dragstart)="
+                          onDragFromSemesterCard(
+                            courseIndex,
+                            semesterIndex,
+                            yearIndex,
+                            course
+                          )
+                        "
                       >
                         {{ course.department }}{{ course.code }}
                       </mat-chip>
@@ -141,7 +155,7 @@
                     <div
                       *ngIf="
                         semester.difficulty &&
-                        semester.difficulty >= 1 &&
+                        semester.difficulty >= 0 &&
                         semester.difficulty < 2
                       "
                       class="statistic-chip-1"
@@ -230,28 +244,34 @@
         </div>
         <div class="add-year-card">
           <button
-            *ngIf="plan.isAddingYear === false"
+            *ngIf="!addYearWidget.active"
             class="add-semester-font-clr w100 h100"
             mat-button
             (click)="toggleAddingYear()"
           >
             + ADD A NEW SCHOOL YEAR
           </button>
-          <mat-form-field *ngIf="plan.isAddingYear === true">
+          <mat-form-field *ngIf="addYearWidget.active">
             <mat-label>Beginning Year</mat-label>
-            <input matInput placeholder="Ex. Pizza" type="Number" value="" />
+            <input
+              matInput
+              placeholder="Ex. Pizza"
+              type="Number"
+              [(ngModel)]="addYearWidget.yearField"
+            />
           </mat-form-field>
           <button
             mat-button
-            *ngIf="plan.isAddingYear === true"
+            *ngIf="addYearWidget.active"
             (click)="toggleAddingYear()"
           >
             CANCEL
           </button>
           <button
-            *ngIf="plan.isAddingYear === true"
+            *ngIf="addYearWidget.active"
             mat-raised-button
             color="primary"
+            (click)="onClickAddNewYear()"
           >
             ADD YEAR
           </button>
@@ -265,6 +285,8 @@
             *ngFor="let course of courseList; index as i"
             [matMenuTriggerFor]="menu"
             class="chip"
+            draggable="true"
+            (dragstart)="onDragFromCourseList(course)"
           >
             {{ course.department }}{{ course.code }}
             <mat-menu #menu="matMenu" style="padding: 0px;">
