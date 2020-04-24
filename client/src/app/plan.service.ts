@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
 import { UserService, UserProfile } from "./user.service";
+import { HttpClient } from "@angular/common/http";
 import { CourseData } from "./course.service";
 import { map } from "rxjs/operators";
 import { Observable } from "rxjs";
+import { ReturnStatement } from "@angular/compiler";
 
 export interface Year {
   beginning: number;
@@ -19,6 +21,24 @@ export interface Semester {
   units?: number;
 }
 
+export interface Program {
+  school: string;
+  major: string;
+  catalogYear: string;
+  requirements?: Array<Requirement>;
+}
+
+export interface Requirement {
+  type: number;
+  area: string;
+  name: string;
+  school: string;
+  major: string;
+  requiredCredit: string;
+  courses: Array<CourseData>;
+  catalogYear: string;
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -32,7 +52,7 @@ export class PlanService {
 
   user: Observable<UserProfile>;
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService, private http: HttpClient) {
     this.user = this.userService.getUserData();
   }
 
@@ -96,6 +116,93 @@ export class PlanService {
     };
 
     return this.user.pipe(map(mapCallback));
+  }
+
+  /**
+   * Formats the courses in the program into an object that the component can read and render:
+   * courseList: Array<{
+   *  department: string;
+   *  courses: Array<{
+   *    department: string;
+   *    code: string;
+   *    school: string;
+   *    title: string;
+   *    description: string;
+   *    credit: string;
+   *    difficulty: number;
+   *    impaction: number;
+   *  }>;
+   * }>
+   * @param program The degree program object
+   */
+  getCourseList(program: any): Array<any> {
+    const { requirements } = program;
+    const courseList = [];
+    requirements.forEach((req) => {
+      req.courses.forEach((course) => {
+        const {
+          department,
+          code,
+          school,
+          title,
+          description,
+          credit,
+          difficulty,
+          impaction,
+        } = course;
+        const departmentAlreadyInList = courseList.findIndex((dep) => {
+          return dep.department === department;
+        });
+
+        if (departmentAlreadyInList > -1) {
+          const courseAlreadyInList = courseList[
+            departmentAlreadyInList
+          ].courses.findIndex((courseInList) => {
+            return courseInList.code === code;
+          });
+          if (courseAlreadyInList === -1) {
+            courseList[departmentAlreadyInList].courses.push({
+              department,
+              code,
+              school,
+              title,
+              description,
+              credit,
+              difficulty,
+              impaction,
+            });
+          }
+        } else {
+          courseList.push({
+            department,
+            courses: [
+              {
+                department,
+                code,
+                school,
+                title,
+                description,
+                credit,
+                difficulty,
+                impaction,
+              },
+            ],
+          });
+        }
+      });
+    });
+
+    courseList.sort((dep1, dep2) => {
+      return dep1.department.localeCompare(dep2.department);
+    });
+
+    courseList.forEach((department) => {
+      department.courses.sort((course1, course2) => {
+        return course1.code.localeCompare(course2.code);
+      });
+    });
+
+    return courseList;
   }
 
   /**
@@ -274,6 +381,16 @@ export class PlanService {
     } else {
       return false;
     }
+  }
+
+  /**
+   * Fetches the required courses of the user's program
+   */
+  getProgramCourses(): Observable<any> {
+    return this.http.get(
+      `${this.userService.uri}/program?major=Software Engineering`,
+      this.userService.getHttpHeaders()
+    );
   }
 
   /**
