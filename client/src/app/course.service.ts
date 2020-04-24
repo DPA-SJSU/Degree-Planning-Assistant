@@ -7,14 +7,17 @@ import { UserService } from "./user.service";
 export interface CourseData {
   _id?: string;
   school: string;
-  code: string;
   department: string;
+  code: string;
   title: string;
   description: string;
   prerequisites: [CourseData];
   corequisites: [CourseData];
+  area: string;
+  type: number;
   difficulty?: number;
   impaction?: number;
+  credit: number;
   termsOffered: string;
 }
 

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { throwError } from "rxjs";
+import { throwError, Observable } from "rxjs";
 import {
   EMAIL_IS_EMPTY,
   EMAIL_IS_IN_WRONG_FORMAT,
@@ -12,11 +12,11 @@ import {
   USER_EXISTS_ALREADY,
   USER_DOES_NOT_EXIST,
   TOKEN_IS_EMPTY,
-  NAME_IS_INVALID
+  NAME_IS_INVALID,
 } from "./constant";
 
 @Injectable({
-  providedIn: "root"
+  providedIn: "root",
 })
 export class ErrorHandlerService {
   constructor() {}
@@ -25,7 +25,7 @@ export class ErrorHandlerService {
    * Handle server errors
    * @param err
    */
-  handleError(err) {
+  handleError(err): Observable<never> {
     const errObj = err.error.errors;
     let errorMessage = "";
 
@@ -42,53 +42,34 @@ export class ErrorHandlerService {
    * Match err to the error type and alert user
    * @param err
    */
+
   findErrorType(errMsg): string {
-    console.log("This is the error: ", errMsg);
+    const errorsObj = {
+      SOME_THING_WENT_WRONG: "Oops, something went wrong.\n",
+      SERVER_ERROR: "Oops, something went wrong.\n",
+      TOKEN_IS_EMPTY: "Trying to access a restricted feature.\n",
+      KEY_IS_INVALID: "Trying to access a restricted feature.\n",
+      USER_EXISTS_ALREADY: "This email is already taken.\n",
+      USER_DOES_NOT_EXIST: "Email not recognized, please sign up.\n",
+      PASSWORD_LENGTH_MUST_BE_MORE_THAN_8:
+        "Password must be more than 8 characters.\n",
+      WRONG_PASSWORD: "Incorrect email or password. Please try again.\n",
+    };
 
-    let resultString = "";
-
-    switch (errMsg) {
-      case USER_NAME_IS_EMPTY:
-        resultString += "No username was entered.\n";
-        break;
-      case ROLE_IS_EMPTY:
-        resultString += "A role has not been assigned to this User.";
-        break;
-      case EMAIL_IS_EMPTY:
-        resultString += "No email was entered.\n";
-        break;
-      case EMAIL_IS_IN_WRONG_FORMAT:
-        resultString += "Email is not in the correct format.\n";
-        break;
-      case PASSWORD_IS_EMPTY:
-        resultString += "No password was entered.\n";
-        break;
-      case PASSWORD_LENGTH_MUST_BE_MORE_THAN_8:
-        resultString += "Password must be 8 characters or longer.\n";
-        break;
-      case WRONG_PASSWORD:
-        resultString += "Incorrect email or password. Please try again.\n";
-        break;
-      case USER_EXISTS_ALREADY:
-        resultString += "This email is already taken.\n";
-        break;
-      case USER_DOES_NOT_EXIST:
-        resultString += "Email not recognized, please sign up.\n";
-        break;
-      // user trying to access restricted feature
-      case TOKEN_IS_EMPTY:
-        resultString = "Trying to access a restricted feature.\n";
-        break;
-      case NAME_IS_INVALID:
-        resultString += "Name is invalid";
-        break;
-      case SOME_THING_WENT_WRONG:
-        resultString = "Something went wrong.\n";
-        break;
-      default:
-        resultString = "Something went wrong.\n";
-        break;
+    for (const entry of Object.entries(errorsObj)) {
+      if (entry[0] === errMsg) {
+        return entry[1];
+      }
     }
-    return resultString;
+
+    // If no matching custom error, return the error converted to a normal sentence.
+    return (
+      errMsg
+        .replace(/_/g, " ")
+        .toLowerCase()
+        .replace(/\w\S*/, (txt) => {
+          return txt.charAt(0).toUpperCase() + txt.substring(1);
+        }) + ".\n"
+    );
   }
 }

@@ -1,12 +1,9 @@
 import { Injectable } from "@angular/core";
-
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-
-import { Observable, Subject, from, forkJoin } from "rxjs";
-import { map, switchMap, mergeMap } from "rxjs/operators";
-
 import { ErrorHandlerService } from "./error-handler.service";
 import { CourseData } from "./course.service";
+import { Observable, Subject } from "rxjs";
+import { map, switchMap, catchError } from "rxjs/operators";
 
 export interface UserData {
   name?: string;
@@ -31,22 +28,6 @@ export interface UserProfile {
   avatarType: string;
   isAdmin: boolean;
   school: string;
-}
-
-export interface CourseData {
-  school: string;
-  department: string;
-  code: string;
-  title: string;
-  description: string;
-  prerequisites: [CourseData];
-  corequisites: [CourseData];
-  area: string;
-  type: number;
-  difficulty?: number;
-  impaction?: number;
-  credit: number;
-  termsOffered: string;
 }
 
 @Injectable({
@@ -152,7 +133,13 @@ export class UserService {
    * @param attribute (optional)
    */
   getProfile(attribute?: string) {
-    return this.http.get<UserProfile>(`${this.uri}/`, this.getHttpHeaders());
+    return this.http
+      .get<UserProfile>(`${this.uri}/`, this.getHttpHeaders())
+      .pipe(
+        catchError((err) => {
+          return this.errorHandler.handleError(err);
+        })
+      );
   }
 
   /**
@@ -167,11 +154,13 @@ export class UserService {
         user.coursesTaken.forEach((course) => courseIds.push(course._id))
       ),
       switchMap((ids) =>
-        this.http.put(
-          `${this.uri}/coursesTaken`,
-          courseIds,
-          this.getHttpHeaders()
-        )
+        this.http
+          .put(`${this.uri}/coursesTaken`, courseIds, this.getHttpHeaders())
+          .pipe(
+            catchError((err) => {
+              return this.errorHandler.handleError(err);
+            })
+          )
       )
     );
   }
@@ -191,6 +180,12 @@ export class UserService {
         tokenObj,
         this.getHttpHeaders()
       );
+
+      this.userData.subscribe({
+        error: (errorResponse) => {
+          this.errorHandler.handleError(errorResponse);
+        },
+      });
     }
     return true;
   }
@@ -200,11 +195,13 @@ export class UserService {
    * @param profileChanges
    */
   editProfile(profileChanges: object) {
-    return this.http.put(
-      `${this.uri}/profile`,
-      profileChanges,
-      this.getHttpHeaders()
-    );
+    return this.http
+      .put(`${this.uri}/profile`, profileChanges, this.getHttpHeaders())
+      .pipe(
+        catchError((err) => {
+          return this.errorHandler.handleError(err);
+        })
+      );
   }
 
   /**
@@ -238,14 +235,21 @@ export class UserService {
    * @param file
    * @param option
    */
-  scanFile(file, option: string) {
+  scanFile(file, option: string): Observable<any> {
     const formData = new FormData();
     formData.append("pdf", file);
 
-    return this.http.post(
-      `${this.uri}/scan?option=` + option,
-      formData,
-      this.getHttpHeadersFormData()
-    );
+    return this.http
+      .post(
+        `${this.uri}/scan?option=` + option,
+        formData,
+        this.getHttpHeadersFormData()
+      )
+      .pipe(
+        catchError((err) => {
+          console.log("Scanned file error", err);
+          return this.errorHandler.handleError(err);
+        })
+      );
   }
 }
