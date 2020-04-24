@@ -48,19 +48,15 @@ export class SProfileDashComponent implements OnInit {
     this.displayUploadSpinner = true;
     this.userService
       .scanFile(this.uploadForm.get("file").value, "transcript")
-      .subscribe({
-        complete: () => {
+      .subscribe(
+        (res) => {
           this.displayUploadSpinner = false;
           this.profileUpdated.emit(event);
         },
-        error: (err) => {
-          this.displayUploadSpinner = false;
-          console.log("Scanned file error", err);
-        },
-      });
+        (err) => (this.displayUploadSpinner = false)
+      );
   }
 
-  //----------------------------------------------
   onClickEditProfile() {
     this.router.navigate(["profile"]);
   }

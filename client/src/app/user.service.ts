@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { ErrorHandlerService } from "./error-handler.service";
 import { CourseData } from "./course.service";
 import { Observable, Subject } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { map, switchMap, catchError } from "rxjs/operators";
 
 export interface UserData {
   name?: string;
@@ -135,11 +135,11 @@ export class UserService {
   getProfile(attribute?: string) {
     return this.http
       .get<UserProfile>(`${this.uri}/`, this.getHttpHeaders())
-      .subscribe({
-        error: (errorResponse) => {
-          this.errorHandler.handleError(errorResponse);
-        },
-      });
+      .pipe(
+        catchError((err) => {
+          return this.errorHandler.handleError(err);
+        })
+      );
   }
 
   /**
@@ -154,11 +154,13 @@ export class UserService {
         user.coursesTaken.forEach((course) => courseIds.push(course._id))
       ),
       switchMap((ids) =>
-        this.http.put(
-          `${this.uri}/coursesTaken`,
-          courseIds,
-          this.getHttpHeaders()
-        )
+        this.http
+          .put(`${this.uri}/coursesTaken`, courseIds, this.getHttpHeaders())
+          .pipe(
+            catchError((err) => {
+              return this.errorHandler.handleError(err);
+            })
+          )
       )
     );
   }
@@ -195,11 +197,11 @@ export class UserService {
   editProfile(profileChanges: object) {
     return this.http
       .put(`${this.uri}/profile`, profileChanges, this.getHttpHeaders())
-      .subscribe({
-        error: (errorResponse) => {
-          this.errorHandler.handleError(errorResponse);
-        },
-      });
+      .pipe(
+        catchError((err) => {
+          return this.errorHandler.handleError(err);
+        })
+      );
   }
 
   /**
@@ -233,7 +235,7 @@ export class UserService {
    * @param file
    * @param option
    */
-  scanFile(file, option: string) {
+  scanFile(file, option: string): Observable<any> {
     const formData = new FormData();
     formData.append("pdf", file);
 
@@ -243,10 +245,11 @@ export class UserService {
         formData,
         this.getHttpHeadersFormData()
       )
-      .subscribe({
-        error: (errorResponse) => {
-          this.errorHandler.handleError(errorResponse);
-        },
-      });
+      .pipe(
+        catchError((err) => {
+          console.log("Scanned file error", err);
+          return this.errorHandler.handleError(err);
+        })
+      );
   }
 }
