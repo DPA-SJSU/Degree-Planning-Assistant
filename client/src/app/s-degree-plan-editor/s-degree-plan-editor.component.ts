@@ -30,9 +30,12 @@ export class SDegreePlanEditorComponent implements OnInit {
       this.plan.user = "";
       this.plan.program = "";
       this.plan.isAddingYear = false;
-      this.plan.years.forEach(
-        (semester) => (semester.isAddingSemester = false)
-      );
+      this.plan.years.forEach((year) => {
+        year.newSemesterWidget = {
+          active: false,
+          termSelect: "",
+        };
+      });
       console.log("The plan: ", result);
     });
     this.userService.getUserData().subscribe((result) => {
@@ -257,9 +260,21 @@ export class SDegreePlanEditorComponent implements OnInit {
 
   ngOnInit() {}
 
+  /**
+   * Handles click event on "Add Semester" button. Adds a new semester to plan
+   * @param yearIndex The
+   */
+  onClickAddNewSemester(yearIndex: number): void {
+    this.planService.addNewSemester(
+      this.plan.years[yearIndex].newSemesterWidget.termSelect,
+      yearIndex,
+      this.plan.years
+    );
+  }
+
   toggleAddingSemester(index: number) {
-    this.plan.years[index].isAddingSemester = !this.plan.years[index]
-      .isAddingSemester;
+    this.plan.years[index].newSemesterWidget.active = !this.plan.years[index]
+      .newSemesterWidget.active;
   }
 
   toggleAddingYear() {

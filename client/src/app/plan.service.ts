@@ -99,10 +99,63 @@ export class PlanService {
   }
 
   /**
+   * Adds a new semester into years chronologically. If term already exists, nothing is done.
+   * @param term The term in string form
+   * @param yearIndex  the Index of the year that the semester will be added to
+   * @param years The years array
+   */
+  addNewSemester(term: string, yearIndex: number, years: Array<any>): void {
+    const semesterDoesNotAlreadyExist = years[yearIndex].semesters.every(
+      (semester) => {
+        return semester.term.toLowerCase() !== term.toLowerCase();
+      }
+    );
+
+    if (semesterDoesNotAlreadyExist) {
+      const newSemester = {
+        term: term.toLowerCase(),
+        year:
+          this.TERMS[term.toLowerCase()] > 2
+            ? years[yearIndex].beginning + 1
+            : years[yearIndex].beginning,
+        difficulty: 0,
+        units: 0,
+        status: "planned",
+        courses: [],
+      };
+
+      years[yearIndex].semesters.push(newSemester);
+
+      this.sortSemestersChronologically(yearIndex, years);
+    } else {
+      window.alert("Semester already exists!");
+    }
+  }
+
+  /**
+   * Chronologically sorts the semesters at the given index of years
+   * @param yearIndex The index of the year in the year array
+   * @param years The years array
+   */
+  private sortSemestersChronologically(
+    yearIndex: number,
+    years: Array<any>
+  ): void {
+    years[yearIndex].semesters.sort((sem1, sem2) => {
+      return (
+        this.TERMS[sem1.term.toLowerCase()] -
+        this.TERMS[sem2.term.toLowerCase()]
+      );
+    });
+  }
+
+  /**
    * Helper method for calculating a semester's total difficulty and units
    * @param semester The semester to be calculated
    */
-  private calculateSemesterStatistics(semester: Semester) {
+  private calculateSemesterStatistics(
+    semester: Semester
+  ): { units: number; difficulty: number } {
     if (semester.courses && semester.courses.length > 0) {
       let unitsSum = 0;
       let difficultySum = 0;
