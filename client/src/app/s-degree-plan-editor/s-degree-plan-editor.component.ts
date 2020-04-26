@@ -66,7 +66,6 @@ export class SDegreePlanEditorComponent implements OnInit {
           termSelect: "",
         };
       });
-      console.log("The plan: ", result);
       this.userService.getUserData().subscribe((userResult) => {
         this.plan.user = userResult.firstName;
       });
@@ -75,7 +74,6 @@ export class SDegreePlanEditorComponent implements OnInit {
       next: (res) => {
         this.program = res[0];
         this.courseList = this.planService.getCourseList(this.program);
-        console.log(this.courseList);
       },
       error: (errRes) => {
         this.errorService.handleError(errRes);
@@ -327,11 +325,16 @@ export class SDegreePlanEditorComponent implements OnInit {
    * @param yearIndex The
    */
   onClickAddNewSemester(yearIndex: number): void {
-    this.planService.addNewSemester(
-      this.plan.years[yearIndex].newSemesterWidget.termSelect,
-      yearIndex,
-      this.plan.years
-    );
+    if (
+      this.plan.years[yearIndex].newSemesterWidget.termSelect &&
+      this.plan.years[yearIndex].newSemesterWidget.termSelect.length > 0
+    ) {
+      this.planService.addNewSemester(
+        this.plan.years[yearIndex].newSemesterWidget.termSelect,
+        yearIndex,
+        this.plan.years
+      );
+    }
   }
 
   /**
@@ -427,6 +430,16 @@ export class SDegreePlanEditorComponent implements OnInit {
         );
       }
       this.clearDraggedCourse();
+    }
+  }
+
+  /**
+   *  Handles drop events for course chips dragged out of a semester card; This removes the course from the semester
+   */
+  onDropRemoveCourse(): void {
+    const { from, indexes } = this.draggedCourse;
+    if (from === "semester-card") {
+      this.planService.removeCourse(indexes, this.plan.years);
     }
   }
 }

@@ -4,7 +4,6 @@ import { HttpClient } from "@angular/common/http";
 import { CourseData } from "./course.service";
 import { map } from "rxjs/operators";
 import { Observable } from "rxjs";
-import { ReturnStatement } from "@angular/compiler";
 
 export interface Year {
   beginning: number;
@@ -19,24 +18,6 @@ export interface Semester {
   courses?: Array<CourseData>;
   difficulty?: number;
   units?: number;
-}
-
-export interface Program {
-  school: string;
-  major: string;
-  catalogYear: string;
-  requirements?: Array<Requirement>;
-}
-
-export interface Requirement {
-  type: number;
-  area: string;
-  name: string;
-  school: string;
-  major: string;
-  requiredCredit: string;
-  courses: Array<CourseData>;
-  catalogYear: string;
 }
 
 @Injectable({
@@ -83,6 +64,21 @@ export class PlanService {
         let yearCounter = 0;
         semesters.forEach((semester) => {
           const semesterStats = this.calculateSemesterStatistics(semester);
+
+          switch (semester.status) {
+            case -1: {
+              semester.status = "planned";
+              break;
+            }
+            case 0: {
+              semester.status = "in-progress";
+              break;
+            }
+            case 1: {
+              semester.status = "completed";
+              break;
+            }
+          }
 
           const currentYear =
             semester.year -
@@ -254,6 +250,28 @@ export class PlanService {
     if (years[yearIndex].semesters.length === 0) {
       years.splice(yearIndex, 1);
     }
+  }
+
+  /**
+   * Removes a course from a specified semester in a years array
+   * @param indexes The indexes of the course in the years array
+   * @param years The years array
+   */
+  removeCourse(
+    indexes: { yearIndex: number; semesterIndex: number; courseIndex: number },
+    years: Array<any>
+  ): void {
+    const { yearIndex, semesterIndex, courseIndex } = indexes;
+    years[yearIndex].semesters[semesterIndex].courses.splice(courseIndex, 1);
+
+    const newSemesterStatistics = this.calculateSemesterStatistics(
+      years[yearIndex].semesters[semesterIndex]
+    );
+
+    years[yearIndex].semesters[semesterIndex].units =
+      newSemesterStatistics.units;
+    years[yearIndex].semesters[semesterIndex].difficulty =
+      newSemesterStatistics.difficulty;
   }
 
   /**
