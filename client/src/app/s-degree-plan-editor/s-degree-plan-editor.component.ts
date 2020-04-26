@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { PlanService } from "../plan.service";
 import { UserService } from "../user.service";
+import { CourseData } from "../course.service";
 
 @Component({
   selector: "app-s-degree-plan-editor",
@@ -8,8 +9,34 @@ import { UserService } from "../user.service";
   styleUrls: ["./s-degree-plan-editor.component.css"],
 })
 export class SDegreePlanEditorComponent implements OnInit {
-  plan: any;
-  courseList: any;
+  plan: any; // Holds the user's degree plan data and some frontend flags
+  courseList: any; // Holds the data of the courses the user can add to their plan;
+
+  // Variable used by the "ADD A NEW SCHOOL YEAR" widget
+  addYearWidget: {
+    active: boolean; // The flag used to toggle the widget
+    yearField: number; // The field containing the value of the textfield in the widget
+  };
+
+  // Variable that will hold data about the course chip being dragged by the user's mouse; Used for the drag/drop feature
+  draggedCourse: {
+    from: string; // Where the item is dragged from. Can either be from the course list or a semester card
+
+    /**
+     * If the course chip was dragged from a semester card. 'indexes' will contain the course's course, semester, and year indexes. These will be used to locate it within the 'plan' variable
+     * If the course chip was dragged from the course list. 'indexes' wll be undefined
+     */
+    indexes?: {
+      courseIndex: number;
+      semesterIndex: number;
+      yearIndex: number;
+    };
+
+    /**
+     * The course data of the course chip
+     */
+    course?: CourseData;
+  };
 
   /**
    * The following changes to types were made to make it easier to display them on the frontend.
@@ -29,7 +56,6 @@ export class SDegreePlanEditorComponent implements OnInit {
       this.plan = result;
       this.plan.user = "";
       this.plan.program = "";
-      this.plan.isAddingYear = false;
       this.plan.years.forEach((year) => {
         year.newSemesterWidget = {
           active: false,
@@ -44,6 +70,11 @@ export class SDegreePlanEditorComponent implements OnInit {
       this.plan.user = result.firstName;
     });
 
+    this.addYearWidget = {
+      active: false,
+      yearField: 0,
+    };
+
     // this.setDummyData();
   }
 
@@ -57,7 +88,10 @@ export class SDegreePlanEditorComponent implements OnInit {
         {
           beginning: 2017,
           ending: 2018,
-          isAddingSemester: false,
+          newSemesterWidget: {
+            active: false,
+            termSelect: "",
+          },
           semesters: [
             {
               term: "Fall",
@@ -142,7 +176,10 @@ export class SDegreePlanEditorComponent implements OnInit {
         {
           beginning: 2018,
           ending: 2019,
-          isAddingSemester: false,
+          newSemesterWidget: {
+            active: false,
+            termSelect: "",
+          },
           semesters: [
             {
               term: "Fall",
@@ -261,7 +298,20 @@ export class SDegreePlanEditorComponent implements OnInit {
   ngOnInit() {}
 
   /**
-   * Handles click event on "Add Semester" button. Adds a new semester to plan
+   * Handles click event of "Add New Year" button
+   * @param year The year to be added
+   */
+  onClickAddNewYear(year: number): void {
+    if (this.addYearWidget.yearField !== 0) {
+      this.planService.addNewYear(
+        this.addYearWidget.yearField,
+        this.plan.years
+      );
+    }
+  }
+
+  /**
+   * Handles click event of "Add Semester" button. Adds a new semester to plan
    * @param yearIndex The
    */
   onClickAddNewSemester(yearIndex: number): void {
@@ -272,12 +322,99 @@ export class SDegreePlanEditorComponent implements OnInit {
     );
   }
 
+  /**
+   * Handles click event on the remove semester button. Removes a semester from the plan
+   * @param semesterIndex The index of the semester to be removed
+   * @param yearIndex The index of the year to be removed
+   */
+  onClickRemoveSemester(semesterIndex: number, yearIndex: number): void {
+    this.planService.removeSemester(semesterIndex, yearIndex, this.plan.years);
+  }
+
+  /**
+   * Handles click events on the "add new semester" widget
+   * @param index The index of the year that the user wants to add a semester to
+   */
   toggleAddingSemester(index: number) {
     this.plan.years[index].newSemesterWidget.active = !this.plan.years[index]
       .newSemesterWidget.active;
   }
 
+  /**
+   * Handles clck events on the "Add A New School Year" widget
+   */
   toggleAddingYear() {
-    this.plan.isAddingYear = !this.plan.isAddingYear;
+    this.addYearWidget.active = !this.addYearWidget.active;
+  }
+
+  /**
+   * Sets the value of draggedCourse to the course data represented by the dragged course chip from course list
+   * @param course The course data represented by the dragged course chip
+   */
+  onDragFromCourseList(course: CourseData): void {
+    this.draggedCourse = {
+      from: "course-list",
+      course,
+    };
+  }
+
+  /**
+   * Sets the value of draggedCouse to the course data represented by the dragged course chip from a semester card
+   * @param courseIndex The index of the course in a semester
+   * @param semesterIndex The index of the semester that holds the course in a year
+   * @param yearIndex The index of the year in the plan
+   * @param course The course data represented by the dragged course chip
+   */
+  onDragFromSemesterCard(
+    courseIndex: number,
+    semesterIndex: number,
+    yearIndex: number,
+    course: CourseData
+  ): void {
+    this.draggedCourse = {
+      from: "semester-card",
+      indexes: {
+        courseIndex,
+        semesterIndex,
+        yearIndex,
+      },
+      course,
+    };
+  }
+
+  /**
+   * Clears dragged course
+   */
+  private clearDraggedCourse(): void {
+    this.draggedCourse = {
+      from: "",
+    };
+  }
+
+  /**
+   * Handles drop events for semester cards; Happens when a course chip is dropped on a semester card; Differentiates between course chips from course list and other semester cards
+   * @param semesterIndex The semester index of the semester card
+   * @param yearIndex The year inex of the semester card
+   */
+  onDropSemesterCard(semesterIndex: number, yearIndex: number): void {
+    if (this.draggedCourse && this.draggedCourse.from.length > 0) {
+      const { from, indexes, course } = this.draggedCourse;
+      if (from === "semester-card") {
+        this.planService.TransferCourseBetweenSemesters(
+          indexes,
+          { semesterIndex, yearIndex },
+          course,
+          this.plan.years
+        );
+      } else if (from === "course-list") {
+        this.planService.addCourseToSemester(
+          { semesterIndex, yearIndex },
+          course,
+          this.plan.years,
+          true
+        );
+      }
+      this.clearDraggedCourse();
+    }
   }
 }

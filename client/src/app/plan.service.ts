@@ -133,6 +133,174 @@ export class PlanService {
   }
 
   /**
+   * Removes a semester
+   * @param semesterIndex The index of the semester to be removed
+   * @param yearIndex The index of the year that contains the semester to be removed
+   * @param years The years array
+   */
+  removeSemester(
+    semesterIndex: number,
+    yearIndex: number,
+    years: Array<any>
+  ): void {
+    years[yearIndex].semesters.splice(semesterIndex, 1);
+    if (years[yearIndex].semesters.length === 0) {
+      years.splice(yearIndex, 1);
+    }
+  }
+
+  /**
+   * Adds a new year to years
+   * @param year The year to be created
+   * @param years The years array
+   */
+  addNewYear(year: number, years: Array<any>): void {
+    const yearDoesNotAlreadyExist = years.every((currentYear) => {
+      return currentYear.beginning !== year;
+    });
+
+    if (yearDoesNotAlreadyExist) {
+      const newYear = {
+        beginning: year,
+        ending: year + 1,
+        newSemesterWidget: {
+          active: false,
+          termSelect: "",
+        },
+        semesters: [],
+      };
+      years.push(newYear);
+
+      this.sortYearsChronologically(years);
+    } else {
+      window.alert(`${year} - ${year + 1} is already in the plan!`);
+    }
+  }
+
+  /**
+   * Adds a given course to a semester; Fired when the user drags a course from the course list to a semester card
+   * @param indexes The indexes of the semester in the plan
+   * @param course The course data to be added to a semester
+   * @param fromCourseList boolean determining if the course comes from the course list
+   * @return boolean whether the course was successfully added or not
+   */
+  addCourseToSemester(
+    indexes: { semesterIndex: number; yearIndex: number },
+    course: CourseData,
+    years: Array<any>,
+    fromCourseList: boolean = true
+  ): boolean {
+    const { semesterIndex, yearIndex } = indexes;
+
+    let courseIsNotAlreadyInSemester = false;
+
+    // If the course comes from the course list, we need to check the entire plan if the course is already in it
+    // If not, just check the destination semester
+    if (fromCourseList) {
+      courseIsNotAlreadyInSemester = this.isCourseAlreadyInPlanOrCompleted(
+        { department: course.department, code: course.code },
+        years
+      );
+    } else {
+      courseIsNotAlreadyInSemester = years[yearIndex].semesters[
+        semesterIndex
+      ].courses.every((currentCourse) => {
+        return (
+          currentCourse.department !== course.department ||
+          currentCourse.code !== course.code
+        );
+      });
+    }
+
+    if (courseIsNotAlreadyInSemester) {
+      years[yearIndex].semesters[semesterIndex].courses.push(course);
+
+      // recalculate the semester statistics (difficulty, impaction)
+      const newStatistics = this.calculateSemesterStatistics(
+        years[yearIndex].semesters[semesterIndex]
+      );
+
+      years[yearIndex].semesters[semesterIndex].units = newStatistics.units;
+      years[yearIndex].semesters[semesterIndex].difficulty =
+        newStatistics.difficulty;
+
+      return true;
+    } else {
+      if (fromCourseList) {
+        window.alert(
+          `${course.department}${course.code} is already in your plan!`
+        );
+      } else {
+        window.alert(
+          `${course.department}${course.code} is already in this semester!`
+        );
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Transfers a course from one semester to another; Fired when a user drags a course from one semester card to another
+   * @param from indexes of the origin semester
+   * @param to indexes of the destination semester
+   * @param course The course data to be transferred
+   * @return boolean whether the transfer was successful or not
+   */
+  TransferCourseBetweenSemesters(
+    from: { courseIndex: number; semesterIndex: number; yearIndex: number },
+    to: { semesterIndex: number; yearIndex: number },
+    course: CourseData,
+    years: Array<any>
+  ): boolean {
+    // Add course to the destination semester card
+    if (this.addCourseToSemester(to, course, years, false)) {
+      // Remove the course from the old semester card if successful
+      years[from.yearIndex].semesters[from.semesterIndex].courses.splice(
+        from.courseIndex,
+        1
+      );
+
+      // Recalculate semester statistics of origin semester
+      const newStatistics = this.calculateSemesterStatistics(
+        years[from.yearIndex].semesters[from.semesterIndex]
+      );
+
+      years[from.yearIndex].semesters[from.semesterIndex].units =
+        newStatistics.units;
+      years[from.yearIndex].semesters[from.semesterIndex].difficulty =
+        newStatistics.difficulty;
+
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Checks if the given course is already in the degree plan
+   * @param course The course to be checked
+   * @param years The years array
+   */
+  private isCourseAlreadyInPlanOrCompleted(
+    course: { department: string; code: string },
+    years: Array<any>
+  ): boolean {
+    let isCourseAlreadyInPlanOrCompleted = true;
+
+    isCourseAlreadyInPlanOrCompleted = years.every((year) => {
+      return year.semesters.every((semester) => {
+        return semester.courses.every((currentCourse) => {
+          return (
+            currentCourse.department !== course.department ||
+            currentCourse.code !== course.code
+          );
+        });
+      });
+    });
+
+    return isCourseAlreadyInPlanOrCompleted;
+  }
+  /**
    * Chronologically sorts the semesters at the given index of years
    * @param yearIndex The index of the year in the year array
    * @param years The years array
@@ -150,6 +318,16 @@ export class PlanService {
   }
 
   /**
+   * Chronologically sorts the years
+   * @param years The years array
+   */
+  private sortYearsChronologically(years: Array<any>): void {
+    years.sort((year1, year2) => {
+      return year1.beginning - year2.beginning;
+    });
+  }
+
+  /**
    * Helper method for calculating a semester's total difficulty and units
    * @param semester The semester to be calculated
    */
@@ -160,8 +338,8 @@ export class PlanService {
       let unitsSum = 0;
       let difficultySum = 0;
       semester.courses.forEach((course: CourseData) => {
-        unitsSum += Number(course.credit);
-        difficultySum += course.difficulty;
+        unitsSum += course.credit ? Number(course.credit) : 0;
+        difficultySum += course.difficulty ? Number(course.difficulty) : 0;
       });
 
       const numOfCourses = semester.courses.length;
