@@ -3,7 +3,12 @@
     <span class="editor-title">Edit Your Degree Plan</span>
     <div class="canvas-and-course-list-container">
       <!-- Canvas -->
-      <div *ngIf="plan" class="canvas">
+      <div
+        *ngIf="plan"
+        class="canvas"
+        (dragover)="(false)"
+        (drop)="onDropRemoveCourse()"
+      >
         <div
           *ngFor="let year of plan.years; let yearIndex = index"
           class="year mb8"
@@ -255,7 +260,7 @@
             <mat-label>Beginning Year</mat-label>
             <input
               matInput
-              placeholder="Ex. Pizza"
+              placeholder="ex. 2017"
               type="Number"
               [(ngModel)]="addYearWidget.yearField"
             />
@@ -278,30 +283,39 @@
         </div>
       </div>
       <!-- Course List -->
-      <div class="course-list">
-        <span class="h6 bold neutral-gray-clr mb16">Courses taken</span>
-        <mat-chip-list *ngIf="courseList" class="mb8">
-          <mat-chip
-            *ngFor="let course of courseList; index as i"
-            [matMenuTriggerFor]="menu"
-            class="chip"
-            draggable="true"
-            (dragstart)="onDragFromCourseList(course)"
-          >
-            {{ course.department }}{{ course.code }}
-            <mat-menu #menu="matMenu" style="padding: 0px;">
-              <app-popup
-                [title]="course.school + ' ' + course.department + course.code"
-                [subtitle]="course.title"
-                contentTitle="Description"
+      <div *ngIf="courseList" class="course-list-container">
+        <span class="h6 bold neutral-gray-clr mb16">Available Courses:</span>
+        <div class="course-list">
+          <div *ngFor="let department of courseList" class="mb16">
+            <span class="body1 neutral-gray-clr mb8">{{
+              department.department
+            }}</span>
+            <mat-chip-list>
+              <mat-chip
+                *ngFor="let course of department.courses"
+                [matMenuTriggerFor]="menu"
+                class="chip"
+                draggable="true"
+                (dragstart)="onDragFromCourseList(course)"
               >
-                <p *ngIf="course?.description">
-                  {{ course.description }}
-                </p>
-              </app-popup>
-            </mat-menu>
-          </mat-chip>
-        </mat-chip-list>
+                {{ course.department }}{{ course.code }}
+                <mat-menu #menu="matMenu" style="padding: 0px;">
+                  <app-popup
+                    [title]="
+                      course.school + ' ' + course.department + course.code
+                    "
+                    [subtitle]="course.title"
+                    contentTitle="Description"
+                  >
+                    <p *ngIf="course?.description">
+                      {{ course.description }}
+                    </p>
+                  </app-popup>
+                </mat-menu>
+              </mat-chip>
+            </mat-chip-list>
+          </div>
+        </div>
       </div>
     </div>
   </mat-card>

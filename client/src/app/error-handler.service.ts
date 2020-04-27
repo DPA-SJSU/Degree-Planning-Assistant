@@ -54,6 +54,7 @@ export class ErrorHandlerService {
       PASSWORD_LENGTH_MUST_BE_MORE_THAN_8:
         "Password must be more than 8 characters.\n",
       WRONG_PASSWORD: "Incorrect email or password. Please try again.\n",
+      DEGREE_PROGRAM_NOT_FOUND: "The student's program could not be found",
     };
 
     for (const entry of Object.entries(errorsObj)) {

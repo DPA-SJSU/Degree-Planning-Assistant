@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { PlanService } from "../plan.service";
 import { UserService } from "../user.service";
 import { CourseData } from "../course.service";
+import { ErrorHandlerService } from "../error-handler.service";
 
 @Component({
   selector: "app-s-degree-plan-editor",
@@ -11,6 +12,7 @@ import { CourseData } from "../course.service";
 export class SDegreePlanEditorComponent implements OnInit {
   plan: any; // Holds the user's degree plan data and some frontend flags
   courseList: any; // Holds the data of the courses the user can add to their plan;
+  program: any;
 
   // Variable used by the "ADD A NEW SCHOOL YEAR" widget
   addYearWidget: {
@@ -23,8 +25,9 @@ export class SDegreePlanEditorComponent implements OnInit {
     from: string; // Where the item is dragged from. Can either be from the course list or a semester card
 
     /**
-     * If the course chip was dragged from a semester card. 'indexes' will contain the course's course, semester, and year indexes. These will be used to locate it within the 'plan' variable
+     * If the course chip was dragged from a semester card. 'indexes' will contain the course's course, semester, and year indexes.
      * If the course chip was dragged from the course list. 'indexes' wll be undefined
+     * These will be used to locate it within the 'plan' variable
      */
     indexes?: {
       courseIndex: number;
@@ -50,7 +53,8 @@ export class SDegreePlanEditorComponent implements OnInit {
 
   constructor(
     private planService: PlanService,
-    private userService: UserService
+    private userService: UserService,
+    private errorService: ErrorHandlerService
   ) {
     this.planService.formatPlan().subscribe((result) => {
       this.plan = result;
@@ -62,12 +66,18 @@ export class SDegreePlanEditorComponent implements OnInit {
           termSelect: "",
         };
       });
-      console.log("The plan: ", result);
+      this.userService.getUserData().subscribe((userResult) => {
+        this.plan.user = userResult.firstName;
+      });
     });
-    this.userService.getUserData().subscribe((result) => {
-      console.log("course list: ", result.coursesTaken);
-      this.courseList = result.coursesTaken;
-      this.plan.user = result.firstName;
+    this.planService.getProgramCourses().subscribe({
+      next: (res) => {
+        this.program = res[0];
+        this.courseList = this.planService.getCourseList(this.program);
+      },
+      error: (errRes) => {
+        this.errorService.handleError(errRes);
+      },
     });
 
     this.addYearWidget = {
@@ -315,11 +325,16 @@ export class SDegreePlanEditorComponent implements OnInit {
    * @param yearIndex The
    */
   onClickAddNewSemester(yearIndex: number): void {
-    this.planService.addNewSemester(
-      this.plan.years[yearIndex].newSemesterWidget.termSelect,
-      yearIndex,
-      this.plan.years
-    );
+    if (
+      this.plan.years[yearIndex].newSemesterWidget.termSelect &&
+      this.plan.years[yearIndex].newSemesterWidget.termSelect.length > 0
+    ) {
+      this.planService.addNewSemester(
+        this.plan.years[yearIndex].newSemesterWidget.termSelect,
+        yearIndex,
+        this.plan.years
+      );
+    }
   }
 
   /**
@@ -415,6 +430,16 @@ export class SDegreePlanEditorComponent implements OnInit {
         );
       }
       this.clearDraggedCourse();
+    }
+  }
+
+  /**
+   *  Handles drop events for course chips dragged out of a semester card; This removes the course from the semester
+   */
+  onDropRemoveCourse(): void {
+    const { from, indexes } = this.draggedCourse;
+    if (from === "semester-card") {
+      this.planService.removeCourse(indexes, this.plan.years);
     }
   }
 }

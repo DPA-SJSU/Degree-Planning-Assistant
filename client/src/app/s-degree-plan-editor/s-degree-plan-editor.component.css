@@ -48,13 +48,22 @@
   width: 80%;
 }
 
-.course-list {
+.course-list-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 16px;
   width: 25%;
+  max-height: 100vh;
+  padding: 16px;
+  padding-right: 0px;
+  box-sizing: border-box;
+}
+
+.course-list {
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .add-semester-card {
