@@ -39,13 +39,13 @@ planController.errorHandler = (req, res, errors) => {
  * @access  Private
  */
 planController.post(
-  '/',
+  '/:planId',
   passport.authenticate('jwt', { session: false }),
   (req, res) => {
     const { user } = req;
     createSemesterList(req.body.semesters).then(semesters => {
       Plan.findOneAndUpdate(
-        { user: user._id },
+        { user: user._id, _id: req.params.planId },
         { semesters },
         { upsert: true, new: true }
       )
@@ -79,7 +79,7 @@ planController.post(
  */
 planController.get(
   '/',
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   (req, res) => {
     Plan.findById(req.query._id)
       .populate({

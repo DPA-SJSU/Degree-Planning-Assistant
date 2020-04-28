@@ -1,0 +1,50 @@
+{
+  "semesters": [
+    {
+      "_id": "5ea8970313dae25c1e4cdeb0",
+      "status": 0
+    },
+    {
+      "_id": "5ea8970313dae25c1e4cdeb1",
+      "status": 0
+    },
+    {
+      "_id": "5ea8970313dae25c1e4cdeaf",
+      "status": 0
+    },
+    {
+      "_id": "5ea8970313dae25c1e4cdeb2",
+      "status": 0
+    },
+    {
+      "_id": "5ea8970313dae25c1e4cdeb3",
+      "status": 0
+    },
+    {
+      "_id": "5ea8970313dae25c1e4cdeb4",
+      "status": 0
+    },
+    {
+      "courses": [
+        { "code": "CMPE 165" },
+        { "code": "CMPE 172" },
+        { "code": "CMPE 195B" },
+        { "code": "ENGR 195B" },
+        { "code": "CS 156" }
+      ],
+      "term": "SPRING",
+      "year": 2020,
+      "status": 1
+    },
+    {
+      "courses": [
+        { "code": "SE 102" },
+        { "code": "CS 174" },
+        { "code": "ISE 164" }
+      ],
+      "term": "FALL",
+      "year": 2020,
+      "status": 2
+    }
+  ]
+}

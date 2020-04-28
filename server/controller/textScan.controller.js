@@ -70,12 +70,15 @@ textScanController.post(
           .map(semester => semester.courses)
           .reduce((prev, current) => [...prev, ...current])
       ).then(remainingRequirements => {
-        return new Plan({
-          semesters: semesters.map(semester => semester._id),
-          remainingRequirements,
-          user: user._id,
-        })
-          .save()
+        Plan.findOneAndUpdate(
+          { user: user._id },
+          {
+            semesters: semesters.map(semester => semester._id),
+            remainingRequirements,
+            user: user._id,
+          },
+          { new: true, upsert: true }
+        )
           .then(newPlan => {
             User.findByIdAndUpdate(
               user._id,

@@ -239,36 +239,28 @@ export const getSemesterWithPopulatedCourse = (option, res) => {
 
 /**
  * Create A new Semester
- * @param {JSON Object} data
+ * @param {JSON Object} semester
  */
-export const createOneSemester = async data => {
+export const createOneSemester = semester => {
   return new Promise((resolve, reject) => {
-    if (data._id) {
-      Semester.findById(data._id)
-        .then(foundSemester => {
-          resolve(foundSemester);
-        })
-        .catch(e => {
-          reject(e);
-        });
-    } else {
-      const newData = data;
+    if (semester.status === 0 && semester._id)
+      Semester.findById(semester._id)
+        .then(foundSemester => resolve(foundSemester))
+        .catch(e => reject(e));
+    else {
+      const newSemester = semester;
 
-      createOrGetAllCourse(data.courses)
+      createOrGetAllCourse(semester.courses)
         .then(courses => {
-          if (courses.length > 0) {
-            newData.courses = courses.map(course => course._id);
-
+          if (courses.length) {
+            newSemester.courses = courses.map(course => course._id);
             Semester.findOne({
-              courses: { $all: newData.courses },
+              courses: { $all: newSemester.courses },
+              status: newSemester.status,
             })
               .then(foundSemester => {
-                if (!foundSemester) {
-                  // TO-DO: Add Pre-req check
-                  resolve(new Semester(newData).save());
-                } else {
-                  resolve(foundSemester);
-                }
+                if (!foundSemester) resolve(new Semester(newSemester).save());
+                else resolve(foundSemester);
               })
               .catch(e => reject(e));
           } else resolve(courses);
@@ -280,14 +272,12 @@ export const createOneSemester = async data => {
 
 export const createSemesterList = semesterList => {
   return new Promise(resolve => {
-    const tasks = semesterList
-      .filter(semester => semester.courses.length > 0)
-      .map(semester => {
-        return createOneSemester({
-          ...semester,
-          courses: semester.courses,
-        });
+    const tasks = semesterList.map(semester => {
+      return createOneSemester({
+        ...semester,
+        courses: semester.courses,
       });
+    });
     resolve(Promise.all(tasks));
   });
 };
