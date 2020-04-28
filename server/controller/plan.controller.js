@@ -3,8 +3,8 @@ import express from 'express';
 import passport from 'passport';
 
 import { Plan, User, Semester, Requirement, Course } from '../database/models';
-
 import { validateSemesters } from './validation/plan.validation';
+import { generateServerErrorCode, createSemesterList } from '../store/utils';
 
 import {
   SEMESTERS_FIELD_IS_REQUIRED,
@@ -14,12 +14,6 @@ import {
   PLAN_NOT_FOUND,
   FAILED_TO_UPDATE_USER,
 } from './constant';
-
-import {
-  generateServerErrorCode,
-  createSemesterList,
-  courseCheck,
-} from '../store/utils';
 
 const planController = express.Router();
 
@@ -45,50 +39,36 @@ planController.errorHandler = (req, res, errors) => {
  * @access  Private
  */
 planController.post(
-  '/:userId',
+  '/:planId',
   passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
+  (req, res) => {
     const { user } = req;
-    const { userId } = req.params;
-    if (user._id == userId) {
-      if (req.query.year === 1) {
-        // TO-DO: If Freshman, generate all fixed plans
-      } else {
-        const semesters = await createSemesterList(req.body.semesters);
-
-        courseCheck(userId, semesters);
-
-        // const randomSemesterList = await generateSemesters(
-        //   remainingCourses
-        // );
-        // semesters.push(randomSemesterList);
-        Plan.findOneAndUpdate(
-          { user: user._id },
-          { semesters },
-          {
-            upsert: true,
-            new: true,
-            runValidators: true,
-            setDefaultsOnInsert: true,
-          }
-        )
-          .then(degreePlan => {
-            User.findByIdAndUpdate(user._id, { degreePlan }, { new: true })
-              .then(updatedUser => {
-                const userToReturn = { ...updatedUser.toJSON() };
-                delete userToReturn.hashedPassword;
-                delete userToReturn.__v;
-                res.status(200).json(userToReturn);
-              })
-              .catch(e => {
-                generateServerErrorCode(res, 500, e, FAILED_TO_UPDATE_USER);
-              });
-          })
-          .catch(e => {
-            generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_PLAN);
-          });
-      }
-    }
+    createSemesterList(req.body.semesters).then(semesters => {
+      Plan.findOneAndUpdate(
+        { user: user._id, _id: req.params.planId },
+        { semesters },
+        { upsert: true, new: true }
+      )
+        .then(degreePlan => {
+          User.findByIdAndUpdate(
+            user._id,
+            { degreePlan: degreePlan._id },
+            { new: true }
+          )
+            .then(updatedUser => {
+              const userToReturn = { ...updatedUser.toJSON() };
+              delete userToReturn.hashedPassword;
+              delete userToReturn.__v;
+              res.status(200).json(userToReturn);
+            })
+            .catch(e => {
+              generateServerErrorCode(res, 500, e, FAILED_TO_UPDATE_USER);
+            });
+        })
+        .catch(e => {
+          generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_PLAN);
+        });
+    });
   }
 );
 
@@ -99,20 +79,16 @@ planController.post(
  */
 planController.get(
   '/',
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   (req, res) => {
-    const { _id } = req.query;
-
-    Plan.findById(_id)
+    Plan.findById(req.query._id)
       .populate({
         path: 'semesters',
         populate: { path: 'courses', model: 'Course' },
       })
-      .then((err, foundPlan) => {
-        if (err) generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
-        else if (foundPlan) res.status(200).json(foundPlan);
-        else generateServerErrorCode(res, 500, err, PLAN_NOT_FOUND);
-      });
+      .populate('remainingRequirements')
+      .then(foundPlan => res.status(200).json(foundPlan))
+      .catch(e => generateServerErrorCode(res, 500, e, PLAN_NOT_FOUND));
   }
 );
 

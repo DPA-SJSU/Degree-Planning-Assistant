@@ -36,8 +36,13 @@ semesterController.post(
   (req, res) => {
     validationHandler(req, res, async () => {
       try {
-        const { term, year, courses } = req.body;
-        const semester = await Semester.findOne({ term, year, courses });
+        const { term, year, courses, status } = req.body;
+        const semester = await Semester.findOne({
+          term,
+          year,
+          courses,
+          status,
+        });
 
         if (!semester) {
           const newSemester = await createOneSemester(req.body);

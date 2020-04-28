@@ -1,6 +1,7 @@
 [
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": ["COMM 20", "COMM 20N", "COMM 40", "HUM 002A", "CCS 074"],
@@ -10,6 +11,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": ["ENGL 001A", "ENGL 01AS", "HUM 001B"],
@@ -19,6 +21,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -40,6 +43,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -70,6 +74,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -94,6 +99,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 0,
     "courses": [
@@ -110,6 +116,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -141,6 +148,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -173,6 +181,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -231,6 +240,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -262,6 +272,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -287,6 +298,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -307,6 +319,7 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 0,
     "requiredCredit": 3,
     "courses": [
@@ -344,8 +357,8 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 1,
-    "major": "Software Engineering",
     "requiredCredit": 99,
     "area": "majorRequirement",
     "courses": [
@@ -376,6 +389,8 @@
       "CMPE 195B",
       "ENGR 195A",
       "ENGR 195B",
+      "CMPE 195E",
+      "CMPE 195F",
       "CS 146",
       "CS 149",
       "CS 151",
@@ -387,8 +402,8 @@
   },
   {
     "school": "SJSU",
+    "major": "SoftwareEngineering",
     "type": 2,
-    "major": "Software Engineering",
     "requiredCredit": 6,
     "area": "elective",
     "courses": [

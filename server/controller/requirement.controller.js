@@ -17,11 +17,31 @@ import {
   FAILED_TO_CREATE_COURSE,
   FAILED_TO_UPDATE_REQUIREMENT,
   FAILED_TO_DELETE_REQUIREMENT,
+  REQUIREMENT_DOES_NOT_EXIST,
 } from './constant';
 
 import requirementValidate from './validation/requirement.validation';
 
 const requirementController = express.Router();
+
+requirementController.get('/', (req, res) => {
+  const { _id, school, major, type, area, catalogYear } = req.query;
+  Requirement.find({
+    ...(_id && { _id }),
+    ...(school && { school: school.toUpperCase() }),
+    ...(major && { major }),
+    ...(type && { type }),
+    ...(area && { area }),
+    ...(catalogYear && { catalogYear }),
+  })
+    .populate('courses')
+    .then(foundRequirement => {
+      if (foundRequirement) res.status(200).json(foundRequirement);
+    })
+    .catch(e => {
+      generateServerErrorCode(res, 404, e, REQUIREMENT_DOES_NOT_EXIST);
+    });
+});
 
 /**
  * POST/
@@ -29,7 +49,7 @@ const requirementController = express.Router();
  */
 requirementController.post('/', async (req, res) => {
   for (const requirement of req.body) {
-    const { school, type, area, courses } = requirement;
+    const { school, type, area, courses, requiredCredit } = requirement;
     const courseObject = courses.map(course => {
       return { code: course, school, type, area };
     });
@@ -41,6 +61,7 @@ requirementController.post('/', async (req, res) => {
             school,
             type,
             area,
+            requiredCredit,
             courses: foundCourses.map(course => course._id),
           },
           { upsert: true },

@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable no-underscore-dangle */
@@ -75,9 +76,9 @@ export const isObjectEmpty = obj => {
   return Object.keys(obj).length === 0;
 };
 
-export const groupBy = (xs, key) => {
+export const groupBy = (xs, key1, key2) => {
   return xs.reduce((rv, x) => {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
+    (rv[`${x[key1]}-${x[key2]}`] = rv[`${x[key1]}-${x[key2]}`] || []).push(x);
     return rv;
   }, {});
 };
@@ -238,36 +239,28 @@ export const getSemesterWithPopulatedCourse = (option, res) => {
 
 /**
  * Create A new Semester
- * @param {JSON Object} data
+ * @param {JSON Object} semester
  */
-export const createOneSemester = async data => {
+export const createOneSemester = semester => {
   return new Promise((resolve, reject) => {
-    if (data._id) {
-      Semester.findById(data._id)
-        .then(foundSemester => {
-          resolve(foundSemester);
-        })
-        .catch(e => {
-          reject(e);
-        });
-    } else {
-      const newData = data;
+    if (semester.status === 0 && semester._id)
+      Semester.findById(semester._id)
+        .then(foundSemester => resolve(foundSemester))
+        .catch(e => reject(e));
+    else {
+      const newSemester = semester;
 
-      createOrGetAllCourse(data.courses)
+      createOrGetAllCourse(semester.courses)
         .then(courses => {
-          if (courses.length > 0) {
-            newData.courses = courses.map(course => course._id);
-
+          if (courses.length) {
+            newSemester.courses = courses.map(course => course._id);
             Semester.findOne({
-              courses: { $all: newData.courses },
+              courses: { $all: newSemester.courses },
+              status: newSemester.status,
             })
               .then(foundSemester => {
-                if (!foundSemester) {
-                  // TO-DO: Add Pre-req check
-                  resolve(new Semester(newData).save());
-                } else {
-                  resolve(foundSemester);
-                }
+                if (!foundSemester) resolve(new Semester(newSemester).save());
+                else resolve(foundSemester);
               })
               .catch(e => reject(e));
           } else resolve(courses);
@@ -279,14 +272,12 @@ export const createOneSemester = async data => {
 
 export const createSemesterList = semesterList => {
   return new Promise(resolve => {
-    const tasks = semesterList
-      .filter(semester => semester.courses.length > 0)
-      .map(semester => {
-        return createOneSemester({
-          ...semester,
-          courses: semester.courses,
-        });
+    const tasks = semesterList.map(semester => {
+      return createOneSemester({
+        ...semester,
+        courses: semester.courses,
       });
+    });
     resolve(Promise.all(tasks));
   });
 };
@@ -306,39 +297,22 @@ export const getRemainingRequirement = courses => {
   return new Promise(async (resolve, reject) => {
     const result = [];
     const typeMap = groupBy(courses, 'type', 'area');
-    console.log(typeMap);
-    const types = [
-      ...new Set(
-        Object.keys(typeMap)
-          .filter(type => type)
-          .map(el => {
-            if (!isNaN(parseInt(el, 10))) return parseInt(el, 10);
-          })
-      ),
-    ];
+    const types = [...new Set(Object.keys(typeMap))];
+    const remainingArea = [];
+
     for (const el of types) {
       const splitString = el.split('-');
-      const type = splitString[0];
-      const area = splitString[1];
-      console.log(type, area);
-      await Requirement.find({ type, area })
+      const type = splitString[0].split(',') || [];
+      const area = splitString[1] === 'undefined' ? ' ' : splitString[1];
+      remainingArea.push(area);
+
+      await Requirement.find({ type: { $in: type }, area })
         .then(foundRequirementList => {
-          foundRequirementList.forEach(requirement => {
+          foundRequirementList.forEach(async requirement => {
             const { requiredCredit } = requirement;
-            let coursesTaken = typeMap[type];
-            console.log(`Course taken in this type ${type}`, coursesTaken.area);
+            let coursesTaken = typeMap[`${type}-${area}`];
             const creditLeft = requiredCredit - coursesTaken.length * 3;
-            if (creditLeft > 0) {
-              coursesTaken = coursesTaken.map(course => course._id.toString());
-
-              const remainingCourse = requirement.courses.filter(
-                course =>
-                  !coursesTaken.includes(ObjectID(course._id).toString())
-              );
-
-              console.log(`remaining: `, remainingCourse, creditLeft, type);
-              result.push({ remainingCourse, creditLeft, type });
-            }
+            if (creditLeft > 0) result.push(requirement._id);
           });
         })
         .catch(e => {
@@ -346,24 +320,17 @@ export const getRemainingRequirement = courses => {
         });
     }
 
-    await Requirement.find(
-      { type: { $nin: types } },
-      (err, foundAllRequirement) => {
+    Requirement.find(
+      { area: { $nin: remainingArea } },
+      async (err, foundAllRequirement) => {
         if (err) reject(err);
-        if (foundAllRequirement.length > 0) {
-          const requirementMap = groupBy(foundAllRequirement, 'type')
-            .filter(type => type !== 'undefined')
-            .map(el => [el]);
-          const remainingType = Object.keys(requirementMap);
-
-          // for (const type of remainingType) {
-          //   result.push({type, requirementMap[type]});
-          // }
-        }
+        const tasks = foundAllRequirement.map(async requirement => {
+          result.push(requirement._id);
+        });
+        await Promise.all(tasks);
+        return resolve(result);
       }
     );
-
-    return resolve(result);
   });
 };
 
