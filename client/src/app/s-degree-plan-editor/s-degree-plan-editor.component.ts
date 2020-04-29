@@ -1,8 +1,11 @@
 import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+
 import { PlanService } from "../plan.service";
 import { UserService } from "../user.service";
-import { CourseData } from "../course.service";
 import { ErrorHandlerService } from "../error-handler.service";
+
+import { CourseData } from "../course.service";
 
 @Component({
   selector: "app-s-degree-plan-editor",
@@ -41,34 +44,27 @@ export class SDegreePlanEditorComponent implements OnInit {
     course?: CourseData;
   };
 
-  /**
-   * The following changes to types were made to make it easier to display them on the frontend.
-   * They will be reversed when using them for backend calls.
-   *
-   * (semester) status: Type Changed from Number to String
-   * (semester) units: Added field to semesters (Type Number)
-   * (semester) difficulty: Type Changed from String to Number
-   * (semester) isAddingSemester: Boolean, flag to check if user wants to add a semester
-   */
-
   constructor(
     private planService: PlanService,
     private userService: UserService,
-    private errorService: ErrorHandlerService
+    private errorService: ErrorHandlerService,
+    private router: Router
   ) {
+    this.plan = {};
+    this.courseList = [];
+    this.program = {};
+    this.draggedCourse = {
+      from: "",
+    };
+    this.addYearWidget = {
+      active: false,
+      yearField: 0,
+    };
+  }
+
+  ngOnInit() {
     this.planService.formatPlan().subscribe((result) => {
       this.plan = result;
-      this.plan.user = "";
-      this.plan.program = "";
-      this.plan.years.forEach((year) => {
-        year.newSemesterWidget = {
-          active: false,
-          termSelect: "",
-        };
-      });
-      this.userService.getUserData().subscribe((userResult) => {
-        this.plan.user = userResult.firstName;
-      });
     });
     this.planService.getProgramCourses().subscribe({
       next: (res) => {
@@ -79,233 +75,7 @@ export class SDegreePlanEditorComponent implements OnInit {
         this.errorService.handleError(errRes);
       },
     });
-
-    this.addYearWidget = {
-      active: false,
-      yearField: 0,
-    };
-
-    // this.setDummyData();
   }
-
-  /** Dummy data for plan used to demo markup */
-  setDummyData() {
-    this.plan = {
-      user: "",
-      program: "",
-      isAddingYear: false,
-      years: [
-        {
-          beginning: 2017,
-          ending: 2018,
-          newSemesterWidget: {
-            active: false,
-            termSelect: "",
-          },
-          semesters: [
-            {
-              term: "Fall",
-              year: 2017,
-              difficulty: 3.0,
-              units: 1.0,
-              courses: [
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 1.0,
-                  impaction: 3.0,
-                  termsOffered: "Fall, Spring",
-                },
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 2.0,
-                  impaction: 3.0,
-                  termsOffered: "Fall, Spring",
-                },
-              ],
-              status: "completed",
-            },
-            {
-              term: "Spring",
-              year: 2018,
-              difficulty: 1.4,
-              units: 1.0,
-              courses: [
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 3.0,
-                  impaction: 2.0,
-                  termsOffered: "Fall, Spring",
-                },
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 3.0,
-                  impaction: 1.0,
-                  termsOffered: "Fall, Spring",
-                },
-              ],
-              status: "completed",
-            },
-          ],
-        },
-        {
-          beginning: 2018,
-          ending: 2019,
-          newSemesterWidget: {
-            active: false,
-            termSelect: "",
-          },
-          semesters: [
-            {
-              term: "Fall",
-              year: 2018,
-              difficulty: 2.4,
-              units: 1.0,
-              courses: [
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 1.0,
-                  impaction: 3.0,
-                  termsOffered: "Fall, Spring",
-                },
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 2.0,
-                  impaction: 3.0,
-                  termsOffered: "Fall, Spring",
-                },
-              ],
-              status: "completed",
-            },
-            {
-              term: "Spring",
-              year: 2019,
-              difficulty: 3.2,
-              units: 1.0,
-              courses: [
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 3.0,
-                  impaction: 2.0,
-                  termsOffered: "Fall, Spring",
-                },
-                {
-                  school: "SJSU",
-                  department: "CMPE",
-                  code: "120",
-                  title: "Computer Architecture",
-                  credit: "3.0",
-                  description: "lorem ipsum",
-                  prerequisites: [],
-                  corequisites: [],
-                  area: "",
-                  type: [],
-                  difficulty: 3.0,
-                  impaction: 1.0,
-                  termsOffered: "Fall, Spring",
-                },
-              ],
-              status: "completed",
-            },
-          ],
-        },
-      ],
-    };
-
-    /* Dummy data for course list to demo markup */
-    this.courseList = [
-      {
-        department: "CMPE",
-        courses: [
-          {
-            department: "CMPE",
-            code: "120",
-          },
-          {
-            department: "CMPE",
-            code: "131",
-          },
-        ],
-      },
-      {
-        department: "CS",
-        courses: [
-          {
-            department: "CS",
-            code: "146",
-          },
-          {
-            department: "CS",
-            code: "149",
-          },
-        ],
-      },
-    ];
-  }
-
-  ngOnInit() {}
 
   /**
    * Handles click event of "Add New Year" button
@@ -317,6 +87,7 @@ export class SDegreePlanEditorComponent implements OnInit {
         this.addYearWidget.yearField,
         this.plan.years
       );
+      this.addYearWidget.active = false;
     }
   }
 
@@ -334,6 +105,7 @@ export class SDegreePlanEditorComponent implements OnInit {
         yearIndex,
         this.plan.years
       );
+      this.plan.years[yearIndex].newSemesterWidget.active = false;
     }
   }
 
@@ -441,5 +213,19 @@ export class SDegreePlanEditorComponent implements OnInit {
     if (from === "semester-card") {
       this.planService.removeCourse(indexes, this.plan.years);
     }
+  }
+
+  /**
+   * Handles clicking on the "Submit" button
+   */
+  onClickSubmitPlan(): void {
+    this.planService.submitPlan(this.plan).subscribe({
+      complete: () => {
+        this.router.navigate(["dashboard"]);
+      },
+      error: (errRes) => {
+        this.errorService.handleError(errRes);
+      },
+    });
   }
 }
