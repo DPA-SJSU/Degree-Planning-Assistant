@@ -63,12 +63,12 @@ textScanController.post(
 
       const coursesTaken = semesters
         .map(semester => semester.courses.map(course => course._id))
-        .reduce((prev, current) => [...prev, ...current]);
+        .reduce((prev, current) => [...prev, ...current], []);
 
       getRemainingRequirement(
         semesterList
           .map(semester => semester.courses)
-          .reduce((prev, current) => [...prev, ...current])
+          .reduce((prev, current) => [...prev, ...current], [])
       ).then(remainingRequirements => {
         Plan.findOneAndUpdate(
           { user: user._id },
