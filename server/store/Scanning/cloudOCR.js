@@ -48,10 +48,6 @@ const transcriptParser = async paragraph => {
     words.push(word.symbols.map(symbol => symbol.text).join(''))
   );
 
-  const removeCase = ['-', 'TOTAL', 'CUM', 'http', 'https'];
-
-  if (removeCase.some(el => words.includes(el))) return;
-
   const sentence = words.join(' ');
   switch (true) {
     // Check for Enrolling Semester
