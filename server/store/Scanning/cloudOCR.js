@@ -19,6 +19,7 @@ const csCode = ['146', '149', '166', '154'];
 const semesterStatus = ['IN PROGRESS', 'ENROLLED'];
 
 let startingTermFound = false;
+let missingStartingYear = false;
 let currentSemIndex = -1;
 let count = 0;
 let startingSem = {};
@@ -26,6 +27,7 @@ let TranscriptMap;
 
 const resetMap = () => {
   startingTermFound = false;
+  missingStartingYear = false;
   currentSemIndex = -1;
   count = 0;
   startingSem = {};
@@ -50,6 +52,16 @@ const transcriptParser = async paragraph => {
 
   const sentence = words.join(' ');
   switch (true) {
+    case missingStartingYear && startingTermFound: {
+      startingSem.year = sentence;
+      console.log(`[Semester] Found Starting year`, startingSem);
+      missingStartingYear = false;
+      if (semesterSeason.indexOf(words[0]) === 2) count += 1;
+      TranscriptMap.semesterList.push(startingSem);
+      currentSemIndex = TranscriptMap.semesterList.length - 1;
+      break;
+    }
+
     // Check for Enrolling Semester
     case semesterStatus.some(status => sentence.includes(status)): {
       const currentSem = TranscriptMap.semesterList[currentSemIndex];
@@ -64,26 +76,45 @@ const transcriptParser = async paragraph => {
       break;
 
     // GET SEMESTER
-    case words.includes('SEMESTER') && words.length === 3: {
-      // 0: Taken
-      // 1: In Progress
-      const semester = {
-        term: words[0],
-        year: parseInt(words[2], 10),
-        courses: [],
-        status: 0,
-      };
-      if (!startingTermFound) {
-        startingSem = semester;
+    case semesterSeason.some(semester => words[0].includes(semester)) &&
+      words.includes('SEMESTER'): {
+      if (!words[2]) {
+        missingStartingYear = true;
         startingTermFound = true;
-        console.log(`[Starting sem]`, startingSem.term, startingSem.year);
-      }
-      semester.year = startingSem.year + count;
-      if (semesterSeason.indexOf(words[0]) === 2) count += 1;
-      TranscriptMap.semesterList.push(semester);
-      currentSemIndex = TranscriptMap.semesterList.length - 1;
+        startingSem = {
+          term: words[0],
+          year: 0,
+          courses: [],
+          status: 0,
+        };
+        console.log(
+          `[Semester] Missing semester`,
+          startingSem,
+          missingStartingYear,
+          startingTermFound
+        );
+      } else {
+        // 0: Taken
+        // 1: In Progress
+        const semester = {
+          term: words[0],
+          year: parseInt(words[2], 10),
+          courses: [],
+          status: 0,
+        };
+        if (!startingTermFound) {
+          startingSem = semester;
+          startingTermFound = true;
+          console.log(`[Starting sem]`, startingSem.term, startingSem.year);
+        }
+        semester.year = startingSem.year + count;
+        if (semesterSeason.indexOf(words[0]) === 2) count += 1;
+        TranscriptMap.semesterList.push(semester);
+        currentSemIndex = TranscriptMap.semesterList.length - 1;
 
-      console.log(`[Enrolled Sem]`, semester.term, semester.year);
+        console.log(`[Enrolled Sem]`, semester.term, semester.year);
+      }
+
       break;
     }
 
