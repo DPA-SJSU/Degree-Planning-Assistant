@@ -1,11 +1,7 @@
 import { Component, OnInit, ErrorHandler, Input } from "@angular/core";
 import { Router } from "@angular/router";
-
-import { UserService, UserProfile } from "../user.service";
-import { PlanService, Year } from "../plan.service";
-
 import { Observable } from "rxjs";
-import { share } from "rxjs/operators";
+import { PlanService, Year } from "../plan.service";
 
 @Component({
   selector: "app-s-degree-plan",
@@ -22,8 +18,6 @@ export class SDegreePlanComponent implements OnInit {
     private planService: PlanService
   ) {
     this.yearArray = this.planService.formatPlan();
-    this.openPanel = true;
-    this.yearArray.subscribe((result) => console.log(result));
   }
 
   @Input() set hasNewProfile(event: Event) {
@@ -33,7 +27,9 @@ export class SDegreePlanComponent implements OnInit {
     }
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.openPanel = true;
+  }
 
   onClickEditPlan() {
     // TODO: ADD ROUTE AFTER ADDING EDIT PLAN
