@@ -1,4 +1,4 @@
-import { Component, OnInit, ErrorHandler } from "@angular/core";
+import { Component, OnInit, ErrorHandler, Input } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { UserService, UserProfile } from "../user.service";
@@ -14,6 +14,7 @@ import { share } from "rxjs/operators";
 })
 export class SDegreePlanComponent implements OnInit {
   yearArray: Observable<Array<Year>>;
+  openPanel = false;
 
   constructor(
     private router: Router,
@@ -21,7 +22,15 @@ export class SDegreePlanComponent implements OnInit {
     private planService: PlanService
   ) {
     this.yearArray = this.planService.formatPlan();
+    this.openPanel = true;
     this.yearArray.subscribe((result) => console.log(result));
+  }
+
+  @Input() set hasNewProfile(event: Event) {
+    if (event) {
+      this.yearArray = this.planService.formatPlan();
+      this.openPanel = true;
+    }
   }
 
   ngOnInit() {}
