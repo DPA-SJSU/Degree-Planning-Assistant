@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { UserService, UserProfile } from "./user.service";
+import { UserService } from "./user.service";
 import { HttpClient } from "@angular/common/http";
 import { CourseData } from "./course.service";
 import { map } from "rxjs/operators";
@@ -31,11 +31,7 @@ export class PlanService {
     spring: 4,
   };
 
-  user: Observable<UserProfile>;
-
-  constructor(private userService: UserService, private http: HttpClient) {
-    this.user = this.userService.getUserData();
-  }
+  constructor(private userService: UserService, private http: HttpClient) {}
 
   /**
    * Formats the user's plan from their profile
@@ -111,7 +107,8 @@ export class PlanService {
       return [];
     };
 
-    return this.user.pipe(map(mapCallback));
+    // must call getUserData() to refresh the use plan when new user logs in
+    return this.userService.getUserData().pipe(map(mapCallback));
   }
 
   /**

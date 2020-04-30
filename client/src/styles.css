@@ -360,11 +360,11 @@ button:disabled {
 }
 
 .btn.edit-plan-btn {
-  background-color: #2ecc71;
+  background-color: #1abc9c;
   color: #ffffff;
 }
 
 .btn.edit-plan-btn:hover {
-  background-color: #27ae60;
+  background-color: #1abc9c;
   color: #ffffff;
 }
