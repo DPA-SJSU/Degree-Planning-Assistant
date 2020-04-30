@@ -17,7 +17,7 @@ export class SDegreePlanComponent implements OnInit {
     private errorHandler: ErrorHandler,
     private planService: PlanService
   ) {
-    this.yearArray = this.planService.formatPlan();
+    this.openPanel = true;
   }
 
   @Input() set hasNewProfile(event: Event) {
@@ -28,11 +28,10 @@ export class SDegreePlanComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.openPanel = true;
+    this.yearArray = this.planService.formatPlan();
   }
 
   onClickEditPlan() {
-    // TODO: ADD ROUTE AFTER ADDING EDIT PLAN
     this.router.navigate(["plan-editor"]);
   }
 }
