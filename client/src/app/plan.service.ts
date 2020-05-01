@@ -1,13 +1,19 @@
 import { Injectable } from "@angular/core";
-import { UserService } from "./user.service";
 import { HttpClient } from "@angular/common/http";
-import { CourseData } from "./course.service";
-import { map } from "rxjs/operators";
+
 import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+
+import { UserService } from "./user.service";
+import { CourseData } from "./course.service";
 
 export interface Year {
   beginning: number;
   ending: number;
+  newSemesterWidget: {
+    active: boolean;
+    termSelect: string;
+  };
   semesters: Array<Semester>;
 }
 
@@ -62,16 +68,16 @@ export class PlanService {
           const semesterStats = this.calculateSemesterStatistics(semester);
 
           switch (semester.status) {
-            case -1: {
-              semester.status = "planned";
-              break;
-            }
             case 0: {
-              semester.status = "in-progress";
+              semester.status = "completed";
               break;
             }
             case 1: {
-              semester.status = "completed";
+              semester.status = "in-progress";
+              break;
+            }
+            case 2: {
+              semester.status = "planned";
               break;
             }
           }
@@ -83,6 +89,10 @@ export class PlanService {
             const newYear = {
               beginning: currentYear,
               ending: currentYear + 1,
+              newSemesterWidget: {
+                active: false,
+                termSelect: "",
+              },
               semesters: [
                 {
                   ...semester,
@@ -102,7 +112,9 @@ export class PlanService {
           }
         });
 
-        return JSON.parse(JSON.stringify({ years: yearArray }));
+        return JSON.parse(
+          JSON.stringify({ id: userData._id, years: yearArray })
+        );
       }
       return [];
     };
@@ -509,5 +521,68 @@ export class PlanService {
         difficulty: 0,
       };
     }
+  }
+
+  /**
+   * Creates an observable for submitting the edited degree plan to the server
+   * @param plan The transformed degree plan
+   */
+  submitPlan(plan: any): Observable<any> {
+    const semesters: Array<any> = this.convertSemestersForSubmission(
+      plan.years
+    );
+
+    return this.http.post(
+      `${this.userService.uri}/plan/${plan.id}`,
+      { semesters },
+      this.userService.getHttpHeaders()
+    );
+  }
+
+  /**
+   * Reverses the data transformation made by the component into the format the backend API can read
+   * @param years The years array
+   */
+  private convertSemestersForSubmission(years: Array<any>): Array<any> {
+    const semestersResult = [];
+
+    years.forEach((year) => {
+      const convertStatusToNumber = (status) => {
+        switch (status) {
+          case "in-progress": {
+            return 1;
+          }
+          case "planned": {
+            return 2;
+          }
+          case "completed": {
+            return 0;
+          }
+          default: {
+            return 0;
+          }
+        }
+      };
+
+      year.semesters.forEach((semester) => {
+        const courseIds = [];
+
+        semester.courses.forEach((course) => {
+          courseIds.push({
+            code: `${course.department} ${course.code}`,
+          });
+        });
+
+        semestersResult.push({
+          term: semester.term,
+          year: semester.year,
+          difficulty: semester.difficulty.toString(),
+          status: convertStatusToNumber(semester.status),
+          courses: courseIds,
+        });
+      });
+    });
+
+    return semestersResult;
   }
 }

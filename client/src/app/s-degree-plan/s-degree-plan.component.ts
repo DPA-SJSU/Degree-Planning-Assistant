@@ -12,11 +12,7 @@ export class SDegreePlanComponent implements OnInit {
   yearArray: Observable<Array<Year>>;
   openPanel = false;
 
-  constructor(
-    private router: Router,
-    private errorHandler: ErrorHandler,
-    private planService: PlanService
-  ) {
+  constructor(private router: Router, private planService: PlanService) {
     this.openPanel = true;
   }
 
