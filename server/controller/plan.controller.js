@@ -44,30 +44,36 @@ planController.post(
   (req, res) => {
     const { user } = req;
     createSemesterList(req.body.semesters).then(semesters => {
-      Plan.findOneAndUpdate(
-        { user: user._id, _id: req.params.planId },
-        { semesters },
-        { upsert: true, new: true }
-      )
-        .then(degreePlan => {
-          User.findByIdAndUpdate(
-            user._id,
-            { degreePlan: degreePlan._id },
-            { new: true }
-          )
-            .then(updatedUser => {
-              const userToReturn = { ...updatedUser.toJSON() };
-              delete userToReturn.hashedPassword;
-              delete userToReturn.__v;
-              res.status(200).json(userToReturn);
-            })
-            .catch(e => {
-              generateServerErrorCode(res, 500, e, FAILED_TO_UPDATE_USER);
-            });
-        })
-        .catch(e => {
-          generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_PLAN);
-        });
+      getRemainingRequirement(
+        semesters
+          .map(semester => semester.courses)
+          .reduce((prev, current) => [...prev, ...current], [])
+      ).then(remainingRequirement => {
+        Plan.findOneAndUpdate(
+          { user: user._id, _id: req.params.planId },
+          { semesters, remainingRequirement, user: user._id },
+          { upsert: true, new: true }
+        )
+          .then(degreePlan => {
+            User.findByIdAndUpdate(
+              user._id,
+              { degreePlan: degreePlan._id },
+              { new: true }
+            )
+              .then(updatedUser => {
+                const userToReturn = { ...updatedUser.toJSON() };
+                delete userToReturn.hashedPassword;
+                delete userToReturn.__v;
+                res.status(200).json(userToReturn);
+              })
+              .catch(e => {
+                generateServerErrorCode(res, 500, e, FAILED_TO_UPDATE_USER);
+              });
+          })
+          .catch(e => {
+            generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_PLAN);
+          });
+      });
     });
   }
 );
