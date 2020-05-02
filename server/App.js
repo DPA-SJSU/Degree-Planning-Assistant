@@ -59,3 +59,5 @@ app.listen(port, () => {
     });
   // mongoose.set('debug', true);
 });
+
+export default app;
