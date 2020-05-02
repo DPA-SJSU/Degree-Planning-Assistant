@@ -47,6 +47,7 @@ planController.post(
       getRemainingRequirement(
         semesters
           .map(semester => semester.courses)
+          .filter(semester => [0, 1].includes(semester.status))
           .reduce((prev, current) => [...prev, ...current], [])
       ).then(remainingRequirement => {
         Plan.findOneAndUpdate(
