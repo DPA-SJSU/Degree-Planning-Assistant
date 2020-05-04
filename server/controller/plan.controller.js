@@ -2,7 +2,14 @@
 import express from 'express';
 import passport from 'passport';
 
-import { Plan, User, Semester, Requirement, Course } from '../database/models';
+import {
+  Plan,
+  User,
+  Semester,
+  Requirement,
+  Course,
+  Program,
+} from '../database/models';
 import { validateSemesters } from './validation/plan.validation';
 import { generateServerErrorCode, createSemesterList } from '../store/utils';
 
@@ -140,6 +147,7 @@ planController.delete('/reset', (req, res) => {
   Course.deleteMany({}, (err, result) => {});
 
   Requirement.deleteMany({}, (err, result) => {});
+  Program.deleteMany({}, (err, result) => {});
   res.status(200).json();
 });
 

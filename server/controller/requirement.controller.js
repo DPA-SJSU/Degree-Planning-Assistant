@@ -5,7 +5,7 @@
 import express from 'express';
 import passport from 'passport';
 
-import { Requirement } from '../database/models';
+import { Requirement, Program } from '../database/models';
 
 import {
   generateServerErrorCode,
@@ -18,6 +18,7 @@ import {
   FAILED_TO_UPDATE_REQUIREMENT,
   FAILED_TO_DELETE_REQUIREMENT,
   REQUIREMENT_DOES_NOT_EXIST,
+  FAILED_TO_CREATE_PROGRAM,
 } from './constant';
 
 import requirementValidate from './validation/requirement.validation';
@@ -48,6 +49,7 @@ requirementController.get('/', (req, res) => {
  * Create all new requirements if not exist, otherwise update
  */
 requirementController.post('/', async (req, res) => {
+  const requirements = [];
   for (const requirement of req.body) {
     const { school, type, area, courses, requiredCredit } = requirement;
     const courseObject = courses.map(course => {
@@ -64,9 +66,8 @@ requirementController.post('/', async (req, res) => {
             requiredCredit,
             courses: foundCourses.map(course => course._id),
           },
-          { upsert: true },
+          { new: true, upsert: true },
           (err, requirement) => {
-            // console.log(requirement);
             if (err)
               generateServerErrorCode(
                 res,
@@ -74,6 +75,8 @@ requirementController.post('/', async (req, res) => {
                 err,
                 FAILED_TO_UPDATE_REQUIREMENT
               );
+
+            requirements.push(requirement._id);
           }
         );
       })
@@ -82,9 +85,20 @@ requirementController.post('/', async (req, res) => {
       );
   }
 
-  await Requirement.find({}).then(result => {
-    res.status(200).json({ ...result });
-  });
+  await Program.findOneAndUpdate(
+    { school: 'SJSU', major: 'SoftwareEngineering', catalogYear: '18-19' },
+    {
+      school: 'SJSU',
+      major: 'SoftwareEngineering',
+      catalogYear: '18-19',
+      requirements,
+    },
+    { new: true, upsert: true },
+    (err, existingDegreeProgram) => {
+      if (err) generateServerErrorCode(res, 500, e, FAILED_TO_CREATE_PROGRAM);
+      res.status(200).json(existingDegreeProgram);
+    }
+  );
 });
 
 /**
