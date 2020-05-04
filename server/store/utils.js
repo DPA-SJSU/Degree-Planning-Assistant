@@ -214,6 +214,9 @@ export const getPopulatedCourse = (options, res) => {
           SCHOOL_DOES_NOT_EXIST,
           'school'
         );
+    })
+    .catch(e => {
+      console.log('Error: ', e);
     });
 };
 

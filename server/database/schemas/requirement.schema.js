@@ -6,6 +6,9 @@ const requirementSchema = new mongoose.Schema(
     // 1: majorRequirement
     // 2: elective
     // 3: otherRequirement
+    school: { type: String },
+    major: { type: String },
+    catalogYear: { type: Number },
     type: { type: Number, required: true },
     area: { type: String, required: true },
     name: { type: String },

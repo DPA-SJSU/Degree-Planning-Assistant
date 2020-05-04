@@ -8,7 +8,7 @@
     "start-w": "set ENV=prod&& env && nodemon -r esm app.js",
     "dev-w": "set ENV=dev&& env && nodemon -r esm app.js",
     "mongo:install": "brew update && brew tap mongodb/brew && brew install mongodb-community@4.2",
-    "mongo:prod": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/test' --username calvin",
+    "mongo:prod": "mongo 'mongodb+srv://dpa-jmd2c.gcp.mongodb.net/prod' --username calvin",
     "mongo:dev": "mongo 'mongodb://localhost/dpa'",
     "mongo:start": "brew services start mongodb-community",
     "mongo:stop": "brew services stop mongodb-community",
