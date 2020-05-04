@@ -3,6 +3,8 @@
     "fullCourseCode": "BIOL 010",
     "credit": "3.0",
     "title": "The Living World",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "description": "Provides students with an understanding of the most fundamental concepts of modern biology including ecology (the interaction between organisms and their environment), human inheritance, the structure and function of living organisms, evolution, strategies for survival and reproduction, and biotechnology. GE Area: B2 Notes: Not an elective in the department majors.",
     "prerequisites": [{ "code": "ENGL 1A" }],
     "corequisites": []
@@ -11,6 +13,9 @@
   {
     "fullCourseCode": "ENGL 001B",
     "credit": "3.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGL 1A" }],
     "corequisites": []
   },
@@ -18,6 +23,9 @@
   {
     "fullCourseCode": "MATH 031",
     "credit": "4.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "MATH 030" }],
     "corequisites": [{ "code": "MATH 031W" }]
   },
@@ -25,6 +33,9 @@
   {
     "fullCourseCode": "MATH 032",
     "credit": "3.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "MATH 031" }],
     "corequisites": [{ "code": "MATH 032W" }]
   },
@@ -32,13 +43,20 @@
   {
     "fullCourseCode": "MATH 042",
     "credit": "3.0",
+    "title": "Discrete Mathematics",
+    "difficulty": "2.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "MATH 019" }, { "code": "MATH 030" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Sets, logic, methods of proof including mathematical induction, functions, relations, elementary combinatorics, probability, Boolean algebras. "
   },
 
   {
     "fullCourseCode": "PHYS 050",
     "credit": "4.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGL 1A" }, { "code": "MATH 030" }],
     "corequisites": []
   },
@@ -46,6 +64,9 @@
   {
     "fullCourseCode": "PHYS 051",
     "credit": "4.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "PHYS 050" }, { "code": "MATH 031" }],
     "corequisites": []
   },
@@ -53,30 +74,44 @@
   {
     "fullCourseCode": "ENGR 100W",
     "credit": "3.0",
+    "title": "Engineering Reports",
+    "difficulty": "2.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGL 1B" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Regular technical writing assignments and company-focused oral presentations while integrating effects of environmental factors as they relate to products, systems and engineering processes."
   },
   {
     "fullCourseCode": "CS 146",
     "credit": "3.0",
+    "title": "Data Structures and Algorithms",
+    "difficulty": "3.0",
+    "impaction": "3.0",
     "prerequisites": [
       { "code": "MATH 030" },
       { "code": "MATH 042" },
       { "code": "CS 49J" },
       { "code": "CS 046B" }
     ],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Implementations of advanced tree structures, priority queues, heaps, directed and undirected graphs. Advanced searching and sorting (radix sort, heapsort, mergesort, and quicksort). Design and analysis of data structures and algorithms. Divide-and-conquer, greedy, and dynamic programming algorithm design techniques."
   },
   {
     "fullCourseCode": "ENGL 001B",
     "credit": "3.0",
+    "title": "Argument and Analysis",
+    "difficulty": "3.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGL 1A" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "English 1B is a writing course that focuses on argumentation and analysis. Through the study of literary, rhetorical, and professional texts, students will develop the habits of mind required to write argumentative and critical essays. Particular emphasis is placed on writing and reading processes. Students will have repeated practice in prewriting, drafting, revising, and editing, and repeated practice in reading closely in a variety of forms, styles, structures, and modes."
   },
   {
     "fullCourseCode": "MATH 123",
     "credit": "3.0",
     "title": "Differential Equations and Linear Algebra",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "description": "Matrices, determinants, systems of linear equations, vector geometry, linear transformations, eigenvalues and eigenvectors, diagonalization, first order differential equations, linear systems of differential equations, higher order differential equations, Laplace transforms. Prerequisite: Math 31 (with a grade of 'C-' or better) or instructor consent.",
     "prerequisites": [{ "code": "MATH 031" }],
     "corequisites": []
@@ -85,6 +120,8 @@
     "fullCourseCode": "MATH 142",
     "credit": "3.0",
     "title": "Introduction to Combinatorics",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "description": "Sets, permutations, combinations, probability, mathematical induction, counting techniques, generating functions, partitions, recurrence relations, inclusion-exclusion. Polya's theorem and applications to computer science, mathematics, engineering and physical sciences. Prerequisite: MATH 31 and MATH 42 (with a grade of 'C-' or better in each) or instructor consent.",
     "prerequisites": [{ "code": "MATH 31" }, { "code": "MATH 42" }],
     "corequisites": []
@@ -92,6 +129,9 @@
   {
     "fullCourseCode": "ISE 130",
     "credit": "3.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "MATH 032" }, { "code": "MATH 071" }],
     "corequisites": []
   },
@@ -99,6 +139,9 @@
   {
     "fullCourseCode": "MATH 161A",
     "credit": "3.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGL 31" }],
     "corequisites": []
   },
@@ -106,6 +149,9 @@
   {
     "fullCourseCode": "CS 46A",
     "credit": "4.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [],
     "corequisites": []
   },
@@ -113,6 +159,9 @@
   {
     "fullCourseCode": "CS 46B",
     "credit": "4.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [
       { "code": "CS 46A", "credit": "3.0" },
       { "code": "MATH 042", "credit": "3.0" }
@@ -122,68 +171,107 @@
   {
     "fullCourseCode": "ENGR 010",
     "credit": "3.0",
+    "title": "Introduction to Engineering",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGL 1A" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Introduction to engineering through hands-on design projects, case studies, and problem-solving using computers. Students also acquire non-technical skills, such as team skills and the ability to deal with ethical dilemmas."
   },
 
   {
     "fullCourseCode": "CMPE 120",
     "credit": "3.0",
+    "title": "Computer Organization and Architecture",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "CS 46B" }, { "code": "CMPE 050" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Introduction to computer organization and architecture, system buses, internal memory and external memory, input/output, central processing unit CPU, instruction sets, CPU structure and function, RISC, control unit."
   },
 
   {
     "fullCourseCode": "CMPE 102",
     "credit": "3.0",
+    "title": "Assembly Language Programming",
+    "difficulty": "2.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "CS 46B" }, { "code": "CMPE 050" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Assembly programming; assembly-C interface; CPU and memory organization; addressing modes; arithmetic, logic and branch instructions; arrays, pointers, subroutines, stack and procedure calls; software interrupts; multiplication, division and floating point arithmetic."
   },
   {
     "fullCourseCode": "CMPE 131",
     "credit": "3.0",
+    "title": "Software Engineering 1",
+    "difficulty": "2.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "CS 46B" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Why software engineering? What is software engineering? Software development lifecycle activities: project planning and management requirements analysis, requirement specification. Software design, software testing, verification, validation, and documentation. Software quality assurance and review techniques, software maintenance, team-based projects."
   },
 
   {
     "fullCourseCode": "CMPE 133",
     "credit": "3.0",
+    "title": "Software Engineering 2",
+    "difficulty": "2.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "CMPE 131" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Software Architecture, Software Technical Metrics, evaluating products, processes, and resources, improving predictions, products, processes, and resources. Advanced topics such as: Formal Methods, Software Reuse, Reengineering, Client/Server Software Engineering, Computer-Aided Software Engineering, Team-Based Projects."
   },
 
   {
     "fullCourseCode": "CMPE 148",
     "credit": "3.0",
+    "title": "Computer Networks 1",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "CMPE 120" }, { "code": "CS 146" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Comparative evaluation of network architecture, layering model, standards, protocol examples for ISO and TCP/IP layers. Network applications, transport layer protocols, Internet routing, data link and physical transmissions. Applications in world wide web, file transfer, electronic mail, peer-to-peer and other areas."
   },
 
   {
     "fullCourseCode": "CMPE 165",
     "credit": "3.0",
+    "title": "Software Engineering Process Management",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "CMPE 131" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Integrated approach to managing development within small teams; including mission statement, synthesis of design concepts, tradeoff studies, risk assessment and the interactions encountered in the optimal design, development, manufacture and test of systems."
   },
 
   {
     "fullCourseCode": "CMPE 172",
     "credit": "3.0",
+    "title": "Enterprise Software Platforms",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "CS 149" }, { "code": "CMPE 142" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Introduction to enterprise software systems. Covers network operating systems, DBMS, transaction monitors, groupware, distributed objects, system management and the Web. Covers standards such as J2EE, CORBA, SQL, JDBC, and HTTP; and emerging software technologies."
   },
 
   {
     "fullCourseCode": "CMPE 187",
     "credit": "3.0",
+    "title": "Software Quality Engineering",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "CMPE 131" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Software testing and quality assurance engineering concepts, processes, models, criteria, and methods. Software unit testing, integration, function validation, system performance and reliability evaluation; Software security testing methods and tools; software quality management, control systems, standards, and evaluation metrics."
   },
 
   {
     "fullCourseCode": "CMPE 195A",
     "credit": "2.0",
+    "title": "",
+    "difficulty": "2.0",
+    "impaction": "1.0",
     "prerequisites": [
       { "code": "CMPE 133" },
       { "code": "ISE 130" },
@@ -196,6 +284,9 @@
   {
     "fullCourseCode": "CMPE 195B",
     "credit": "3.0",
+    "title": "",
+    "difficulty": "2.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "CMPE 195A" }],
     "corequisites": [{ "code": "ENGR 195B" }]
   },
@@ -203,12 +294,18 @@
   {
     "fullCourseCode": "ENGR 195A",
     "credit": "1.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGR 100W" }],
     "corequisites": []
   },
   {
     "fullCourseCode": "ENGR 195B",
     "credit": "1.0",
+    "title": "",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [{ "code": "ENGR 195A" }],
     "corequisites": []
   },
@@ -216,43 +313,63 @@
   {
     "fullCourseCode": "CS 149",
     "credit": "3.0",
+    "title": "",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "CS 146" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Fundamentals: Contiguous and non-contiguous memory management; processor scheduling and interrupts; concurrent, mutually exclusive, synchronized and deadlocked processes; files. Substantial programming project required."
   },
 
   {
     "fullCourseCode": "CS 151",
     "credit": "3.0",
+    "title": "Object-Oriented Design",
+    "difficulty": "2.0",
+    "impaction": "2.0",
     "prerequisites": [
       { "code": "CS 146" },
       { "code": "MATH 42" },
       { "code": "CS 46B" },
       { "code": "CS 49J" }
     ],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Design of classes and interfaces. Object-oriented design methodologies and notations. Design patterns. Generics and reflection. Exception handling. Concurrent programming. Graphical user interface programming. Software engineering concepts and tools. Required team-based programming assignment."
   },
 
   {
     "fullCourseCode": "CS 157A",
     "credit": "3.0",
+    "title": "Introduction to Database Management Systems",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "CS 146" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Current, classical database systems. Entity-relationship and enhanced entity models. Relational model, algebra, calculus. Current, emerging SQL standard. Embedded, Dynamic SQL. Application perspective on transactions and security. Interactive and programmatic interfaces to database systems. Application programming project using commercial database system."
   },
   {
     "fullCourseCode": "CS 166",
     "credit": "3.0",
+    "title": "Information Security",
+    "difficulty": "2.0",
+    "impaction": "2.0",
     "prerequisites": [
       { "code": "CS 146" },
       { "code": "CS 47" },
       { "code": "CMPE 102" },
       { "code": "CMPE 120" }
     ],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Fundamental security topics including cryptography, protocols, passwords, access control, software security, and network security. Additional topics selected from multilevel security, biometrics, tamper-resistant hardware, information warfare, e-commerce, system evaluation and assurance, and intrusion detection."
   },
   {
     "fullCourseCode": "ISE 164",
     "credit": "3.0",
+    "title": "Computer and Human Interaction",
+    "difficulty": "1.0",
+    "impaction": "1.0",
     "prerequisites": [],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Introduction to human/computer interaction, paradigms for interaction, human performance capabilities, computer input/output device analysis and design, pattern recognition 3D audio, 3D visualization, application to virtual reality and multimedia."
   }
 ]
