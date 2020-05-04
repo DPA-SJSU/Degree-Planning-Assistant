@@ -10,7 +10,7 @@ export const config = {
           port: 8080,
           mongoHostName: 'MongoDB Atlas',
           mongoDBUri:
-            'mongodb+srv://team31:w1TNAFsawdQKABWJ@dpa-jmd2c.gcp.mongodb.net/test?retryWrites=true&w=majority',
+            'mongodb+srv://team31:w1TNAFsawdQKABWJ@dpa-jmd2c.gcp.mongodb.net/prod?retryWrites=true&w=majority',
           clientURI: 'https://localhost:3000',
           serverURI: 'https://dpa-edu-server.wn.r.appspot.com',
         }
