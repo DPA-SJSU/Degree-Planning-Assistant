@@ -13,31 +13,34 @@
   {
     "fullCourseCode": "ENGL 001B",
     "credit": "3.0",
-    "title": "",
-    "difficulty": "1.0",
-    "impaction": "1.0",
+    "title": "Argument and Analysis",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "ENGL 1A" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "English 1B is a writing course that focuses on argumentation and analysis. Through the study of literary, rhetorical, and professional texts, students will develop the habits of mind required to write argumentative and critical essays. Particular emphasis is placed on writing and reading processes. Students will have repeated practice in prewriting, drafting, revising, and editing, and repeated practice in reading closely in a variety of forms, styles, structures, and modes."
   },
 
   {
     "fullCourseCode": "MATH 031",
     "credit": "4.0",
-    "title": "",
-    "difficulty": "1.0",
-    "impaction": "1.0",
+    "title": "Calculus 2",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "MATH 030" }],
-    "corequisites": [{ "code": "MATH 031W" }]
+    "corequisites": [{ "code": "MATH 031W" }],
+    "description": "Definite and indefinite integration with applications. Sequences and series. Graphical, algebraic and numerical methods of solving problems."
   },
 
   {
     "fullCourseCode": "MATH 032",
     "credit": "3.0",
-    "title": "",
-    "difficulty": "1.0",
-    "impaction": "1.0",
+    "title": "Calculus 3",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "MATH 031" }],
-    "corequisites": [{ "code": "MATH 032W" }]
+    "corequisites": [{ "code": "MATH 032W" }],
+    "description": "Functions of more than one variable, partial derivatives, multiple integrals and vector calculus. Graphical, algebraic and numerical methods of solving problems."
   },
 
   {
@@ -54,21 +57,23 @@
   {
     "fullCourseCode": "PHYS 050",
     "credit": "4.0",
-    "title": "",
-    "difficulty": "1.0",
-    "impaction": "1.0",
+    "title": "General Physics Mechanics",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "ENGL 1A" }, { "code": "MATH 030" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "A calculus-based treatment of particle kinematics and dynamics, work, energy, momentum, rotational motion, equilibrium, and simple harmonic motion."
   },
 
   {
     "fullCourseCode": "PHYS 051",
     "credit": "4.0",
-    "title": "",
-    "difficulty": "1.0",
-    "impaction": "1.0",
+    "title": "General Physics Electricity and Magnetism",
+    "difficulty": "3.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "PHYS 050" }, { "code": "MATH 031" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "A calculus-based introduction to electricity and magnetism, covering electric charges, electric and magnetic fields, dc and ac circuits, and electromagnetic waves."
   },
 
   {
@@ -129,44 +134,48 @@
   {
     "fullCourseCode": "ISE 130",
     "credit": "3.0",
-    "title": "",
-    "difficulty": "1.0",
+    "title": "Engineering Probability and Statistics",
+    "difficulty": "2.0",
     "impaction": "1.0",
     "prerequisites": [{ "code": "MATH 032" }, { "code": "MATH 071" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Probability theory, graphical displays of data, graphical methods of comparisons of samples and hypotheses testing. Statistical estimation and inference. Uses graphical statistical packages."
   },
 
   {
     "fullCourseCode": "MATH 161A",
     "credit": "3.0",
-    "title": "",
-    "difficulty": "1.0",
+    "title": "Applied Probability and Statistics 1",
+    "difficulty": "2.0",
     "impaction": "1.0",
     "prerequisites": [{ "code": "ENGL 31" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Descriptive and inferential statistics. Collection and analysis of data, discrete and continuous probability models, random variables, Central Limit Theorem, confidence intervals, hypothesis testing."
   },
 
   {
     "fullCourseCode": "CS 46A",
     "credit": "4.0",
-    "title": "",
-    "difficulty": "1.0",
-    "impaction": "1.0",
+    "title": "Introduction to Programming",
+    "difficulty": "3.0",
+    "impaction": "3.0",
     "prerequisites": [],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Basic skills and concepts of computer programming in an object-oriented approach using Java. Classes, methods and argument passing, control structures, iteration. Basic graphical user interface programming. Problem solving, class discovery and stepwise refinement. Programming and documentation style. Weekly hands-on activity."
   },
 
   {
     "fullCourseCode": "CS 46B",
     "credit": "4.0",
-    "title": "",
-    "difficulty": "1.0",
-    "impaction": "1.0",
+    "title": "Introduction to Data Structures",
+    "difficulty": "3.0",
+    "impaction": "3.0",
     "prerequisites": [
       { "code": "CS 46A", "credit": "3.0" },
       { "code": "MATH 042", "credit": "3.0" }
     ],
-    "corequisites": [{ "code": "MATH 042", "credit": "3.0" }]
+    "corequisites": [{ "code": "MATH 042", "credit": "3.0" }],
+    "description": "Stacks and queues, recursion, lists, dynamic arrays, binary search trees. Iteration over collections. Hashing. Searching, elementary sorting. Big-O notation. Standard collection classes. Weekly hands-on activity."
   },
   {
     "fullCourseCode": "ENGR 010",
@@ -269,7 +278,7 @@
   {
     "fullCourseCode": "CMPE 195A",
     "credit": "2.0",
-    "title": "",
+    "title": "Senior Design Project 1",
     "difficulty": "2.0",
     "impaction": "1.0",
     "prerequisites": [
@@ -278,36 +287,40 @@
       { "code": "MATH 161A" },
       { "code": "ENGR 100W" }
     ],
-    "corequisites": [{ "code": "ENGR 195A" }]
+    "corequisites": [{ "code": "ENGR 195A" }],
+    "description": "Comprehensive plan and preliminary design of a group computer/software engineering project; integration of knowledge in science, technologies and team processes; group written report and oral presentation; global and social issues in engineering; individual professional development plans."
   },
 
   {
     "fullCourseCode": "CMPE 195B",
     "credit": "3.0",
-    "title": "",
-    "difficulty": "2.0",
+    "title": "Senior Design Project 2",
+    "difficulty": "3.0",
     "impaction": "1.0",
     "prerequisites": [{ "code": "CMPE 195A" }],
-    "corequisites": [{ "code": "ENGR 195B" }]
+    "corequisites": [{ "code": "ENGR 195B" }],
+    "description": "Implementation of group design project initiated in CMPE 195A; group oral presentation and written report; integrated global and social issues in engineering."
   },
 
   {
     "fullCourseCode": "ENGR 195A",
     "credit": "1.0",
-    "title": "",
+    "title": "Global and Social Issues in Engineering",
     "difficulty": "1.0",
-    "impaction": "1.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "ENGR 100W" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Interdisciplinary seminar treating social and global impacts of technology and engineering. This integrated GE experience requires students to apply these concepts in their senior project classes. Students must enroll concurrently in their department senior project course Part A."
   },
   {
     "fullCourseCode": "ENGR 195B",
     "credit": "1.0",
-    "title": "",
+    "title": "Global and Social Issues in Engineering",
     "difficulty": "1.0",
-    "impaction": "1.0",
+    "impaction": "2.0",
     "prerequisites": [{ "code": "ENGR 195A" }],
-    "corequisites": []
+    "corequisites": [],
+    "description": "Second course in a two-course sequence to support the integration of General Education Area S and Area V into the engineering major. Case study approach to the relationship of engineering to social, ethical and cultural aspects of the broader community both in the U. S. and worldwide."
   },
 
   {
