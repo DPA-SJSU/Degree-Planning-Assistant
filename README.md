@@ -115,7 +115,7 @@ DPA
  ├── client
    ├── e2e                  — Builds and serves the app then runs end-to-end tests
    ├── src
-      ├── app               — Contains the source code of compnents
+      ├── app               — Contains the source code of components
       ├── assets            — Static asset files (.png, .gif, etc.)
       ├── environment       — Environment configurations
       ├── main.ts           — Entry point of the application
