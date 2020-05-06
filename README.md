@@ -12,6 +12,8 @@ A 3-tier web application that allow SJSU students monitor and schedule their deg
 </a>
 <img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/DPA-SJSU/Degree-Planning-Assistant">
 
+![DPA gif demo](docs/dpa-demo.gif)
+
 </div>
 
 ## 🌟 Features
