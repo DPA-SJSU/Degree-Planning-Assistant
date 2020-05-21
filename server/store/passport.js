@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { config, underscoreId } from './config';
 import { User } from '../database/models';

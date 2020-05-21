@@ -89,10 +89,11 @@ export const groupBy = (xs, key1, key2) => {
  * ============================================
  */
 
-export const createUser = (email, password) => {
+export const createUser = (email, password, token) => {
   const data = {
     hashedPassword: generateHashedPassword(password),
     email,
+    token,
     isAdmin: false,
     avatarType: '',
     firstName: '',

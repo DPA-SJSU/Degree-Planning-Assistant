@@ -3,6 +3,8 @@
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import ejs from 'ejs';
 
 import {
   validateRegisterUser,
@@ -33,11 +35,17 @@ import {
   INVALID_GRAD_DATE,
   USER_NOT_FOUND,
   NO_DATA_TO_UPDATE,
+  TOKEN_IS_INVALID,
+  EMAIL_IS_ALREADY_VERIFIED,
 } from './constant';
 
 import { User } from '../database/models';
 
+import Mailing from '../store/mailing';
+
 const userController = express.Router();
+const { serverURI, clientURI } = config.env;
+
 const { serverURI, clientURI } = config.env;
 
 /**
@@ -45,24 +53,30 @@ const { serverURI, clientURI } = config.env;
  * Register a user
  */
 userController.post('/register', validateRegisterUser, async (req, res) => {
-  validationHandler(req, res, async () => {
+  validationHandler(req, res, () => {
     try {
       const { email, password } = req.body;
       User.findOne({ email })
         .populate('coursesTaken')
-        .then(async foundUser => {
+        .then(foundUser => {
           if (!foundUser) {
-            await createUser(email, password);
-            // Sign token
-            const newUser = await User.findOne({ email });
-            const token = jwt.sign({ email }, config.passport.secret, {
-              expiresIn: 10000000,
-            });
+            const emailToken = crypto.randomBytes(20).toString('hex');
+            const confirmedURL = `${serverURI}/confirm?token=${emailToken}&email=${email}`;
+            const template = 'registerConfirmation';
 
-            const userToReturn = { ...newUser.toJSON(), ...{ token } };
+            createUser(email, password, emailToken);
 
-            delete userToReturn.hashedPassword;
-            res.status(200).json(userToReturn);
+            // Send Email
+            Mailing.sendEmail({ email, template, confirmedURL })
+              .then(info => res.status(200).json(info))
+              .catch(e => {
+                generateServerErrorCode(
+                  res,
+                  500,
+                  FAILED_TO_SEND_EMAIL,
+                  'email'
+                );
+              });
           } else
             generateServerErrorCode(
               res,
@@ -79,6 +93,40 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
 });
 
 /**
+ * GET/
+ * confirm email
+ */
+userController.get('/confirm', (req, res) => {
+  let { token, email } = req.query;
+  User.findOneAndUpdate(
+    { token },
+    { emailConfirmed: true, token: '' },
+    { new: true }
+  )
+    .then(updatedUser => {
+      if (!updatedUser) {
+        const error = {
+          errors: {
+            server: {
+              msg: EMAIL_IS_ALREADY_VERIFIED,
+            },
+          },
+          message: `Your email is already verified. Please login with ${email}`,
+        };
+        return res.status(403).json(error);
+      }
+
+      const filePath = `${__dirname}/../templates/confirmedEmail.ejs`;
+      const url = `${clientURI}/login`;
+      res.render(filePath, { email, url });
+    })
+    .catch(e => {
+      console.log(e);
+      return generateServerErrorCode(res, 403, TOKEN_IS_INVALID, 'email');
+    });
+});
+
+/**
  * POST/
  * Login a user
  */
@@ -86,50 +134,56 @@ userController.post('/login', validateLoginUser, (req, res) => {
   validationHandler(req, res, async () => {
     try {
       const { email, password } = req.body;
-      User.findOne({ email })
-        .populate({
-          path: 'degreePlan',
-          model: 'Plan',
-          populate: {
-            path: 'semesters',
-            model: 'Semester',
-            populate: {
-              path: 'courses',
-              model: 'Course',
-            },
-          },
-        })
-        .populate('coursesTaken')
-        .then(user => {
-          if (user && user.email) {
-            const isPasswordMatched = user.comparePassword(password);
-            if (isPasswordMatched) {
-              // Sign token
-              const token = jwt.sign({ email }, config.passport.secret, {
-                expiresIn: 1000000,
-              });
-              const userToReturn = { ...user.toJSON(), ...{ token } };
-              delete userToReturn.hashedPassword;
-              delete userToReturn.__v;
 
-              res.status(200).json(userToReturn);
+      // Check email confirmed
+      if (user && !user.emailConfirmed) {
+        generateServerErrorCode(res, 403, EMAIL_IS_NOT_CONFIRMED, 'email');
+      } else if (user && user.email && user.emailConfirmed) {
+        User.findOne({ email })
+          .populate({
+            path: 'degreePlan',
+            model: 'Plan',
+            populate: {
+              path: 'semesters',
+              model: 'Semester',
+              populate: {
+                path: 'courses',
+                model: 'Course',
+              },
+            },
+          })
+          .populate('coursesTaken')
+          .then(user => {
+            if (user && user.email) {
+              const isPasswordMatched = user.comparePassword(password);
+              if (isPasswordMatched) {
+                // Sign token
+                const token = jwt.sign({ email }, config.passport.secret, {
+                  expiresIn: 1000000,
+                });
+                const userToReturn = { ...user.toJSON(), ...{ token } };
+                delete userToReturn.hashedPassword;
+                delete userToReturn.__v;
+
+                res.status(200).json(userToReturn);
+              } else
+                generateServerErrorCode(
+                  res,
+                  403,
+                  'login password error',
+                  WRONG_PASSWORD,
+                  'password'
+                );
             } else
               generateServerErrorCode(
                 res,
-                403,
-                'login password error',
-                WRONG_PASSWORD,
-                'password'
+                404,
+                'login email error',
+                USER_DOES_NOT_EXIST,
+                'email'
               );
-          } else
-            generateServerErrorCode(
-              res,
-              404,
-              'login email error',
-              USER_DOES_NOT_EXIST,
-              'email'
-            );
-        });
+          });
+      }
     } catch (e) {
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
@@ -399,5 +453,17 @@ userController.get(
       .catch(e => generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG));
   }
 );
+/**
+ * DELETE/
+ * Remove a user
+ * Used by admin only
+ */
+userController.delete('/', (req, res) => {
+  const { email } = req.body;
+  User.deleteOne({ email }, (err, status) => {
+    if (err) res.status(500).json(`fail to remove user ${email}`);
+    else res.status(200).json(status);
+  });
+});
 
 export default userController;
