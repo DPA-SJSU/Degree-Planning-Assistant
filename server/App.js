@@ -19,8 +19,7 @@ import {
 
 const app = express();
 
-const { env, mongooseConfig } = config;
-const { port, mongoDBUri, mongoHostName } = env;
+const { port, mongoDBUri, mongoHostName } = config.env;
 
 const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
@@ -49,7 +48,11 @@ app.use('/plan', planController);
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);
   mongoose
-    .connect(mongoDBUri, mongooseConfig)
+    .connect(mongoDBUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    })
     .then(() => logger.info(`Connected to MongoDB at ${mongoHostName}`))
     .catch(() => logger.info(`Failed to connect to MongoDB`));
   // mongoose.set('debug', true);

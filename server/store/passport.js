@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { config, underscoreId } from './config';
 import { User } from '../database/models';
@@ -57,7 +58,7 @@ export const applyPassportStrategy = passport => {
             googleId: id,
             googleObj: {
               email,
-              name: displayName,
+              fullName: displayName,
               url: 'https://plus.google.com',
             },
           };

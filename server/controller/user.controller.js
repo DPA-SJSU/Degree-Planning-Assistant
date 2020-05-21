@@ -37,6 +37,7 @@ import {
   NO_DATA_TO_UPDATE,
   TOKEN_IS_INVALID,
   EMAIL_IS_ALREADY_VERIFIED,
+  EMAIL_IS_NOT_CONFIRMED,
 } from './constant';
 
 import { User } from '../database/models';
@@ -135,56 +136,55 @@ userController.post('/login', validateLoginUser, (req, res) => {
     try {
       const { email, password } = req.body;
 
-      // Check email confirmed
-      if (user && !user.emailConfirmed) {
-        generateServerErrorCode(res, 403, EMAIL_IS_NOT_CONFIRMED, 'email');
-      } else if (user && user.email && user.emailConfirmed) {
-        User.findOne({ email })
-          .populate({
-            path: 'degreePlan',
-            model: 'Plan',
+      User.findOne({ email })
+        .populate({
+          path: 'degreePlan',
+          model: 'Plan',
+          populate: {
+            path: 'semesters',
+            model: 'Semester',
             populate: {
-              path: 'semesters',
-              model: 'Semester',
-              populate: {
-                path: 'courses',
-                model: 'Course',
-              },
+              path: 'courses',
+              model: 'Course',
             },
-          })
-          .populate('coursesTaken')
-          .then(user => {
-            if (user && user.email) {
-              const isPasswordMatched = user.comparePassword(password);
-              if (isPasswordMatched) {
-                // Sign token
-                const token = jwt.sign({ email }, config.passport.secret, {
-                  expiresIn: 1000000,
-                });
-                const userToReturn = { ...user.toJSON(), ...{ token } };
-                delete userToReturn.hashedPassword;
-                delete userToReturn.__v;
+          },
+        })
+        .populate('coursesTaken')
+        .then(user => {
+          // Check email confirmed
+          if (user && !user.emailConfirmed) {
+            generateServerErrorCode(res, 403, EMAIL_IS_NOT_CONFIRMED, 'email');
+          } else if (user && user.email && user.emailConfirmed) {
+            const isPasswordMatched = user.comparePassword(password);
+            if (isPasswordMatched) {
+              // Sign token
+              const token = jwt.sign({ email }, config.passport.secret, {
+                expiresIn: 1000000,
+              });
+              const userToReturn = { ...user.toJSON(), ...{ token } };
+              delete userToReturn.hashedPassword;
+              delete userToReturn.__v;
 
-                res.status(200).json(userToReturn);
-              } else
-                generateServerErrorCode(
-                  res,
-                  403,
-                  'login password error',
-                  WRONG_PASSWORD,
-                  'password'
-                );
+              res.status(200).json(userToReturn);
             } else
               generateServerErrorCode(
                 res,
-                404,
-                'login email error',
-                USER_DOES_NOT_EXIST,
-                'email'
+                403,
+                'login password error',
+                WRONG_PASSWORD,
+                'password'
               );
-          });
-      }
+          } else
+            generateServerErrorCode(
+              res,
+              404,
+              'login email error',
+              USER_DOES_NOT_EXIST,
+              'email'
+            );
+        });
     } catch (e) {
+      console.log(e);
       generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
     }
   });

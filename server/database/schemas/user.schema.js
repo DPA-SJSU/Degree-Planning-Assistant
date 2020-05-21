@@ -18,11 +18,12 @@ const userSchema = new Schema(
     catalogYear: Number,
     degreePlan: { type: Schema.Types.ObjectId, ref: 'Plan' },
     coursesTaken: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
+    emailConfirmed: { type: Boolean, default: false },
     token: String,
     // Google Login
     googleId: String,
     googleObj: {
-      name: String,
+      fullName: String,
       email: String,
       url: String,
     },
