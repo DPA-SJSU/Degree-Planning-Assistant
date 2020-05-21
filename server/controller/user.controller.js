@@ -356,4 +356,42 @@ userController.post('/identity', validateToken, async (req, res) => {
   });
 });
 
+userController.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: ['https://www.googleapis.com/auth/plus.login'],
+  })
+);
+
+userController.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { session: false }),
+  (req, res) => {
+    const { user } = req;
+    const { email } = user;
+    User.findOne({ email }, { hashedPassword: 0 })
+      .lean()
+      .populate({
+        path: 'degreePlan',
+        model: 'Plan',
+        populate: {
+          path: 'semesters',
+          model: 'Semester',
+          populate: {
+            path: 'courses',
+            model: 'Course',
+          },
+        },
+      })
+      .populate('coursesTaken')
+      .then(user => {
+        const userToReturn = { ...user, ...{ token } };
+        res.status(200).json(userToReturn);
+      })
+      .catch(() => {
+        generateServerErrorCode(res, 500, SOME_THING_WENT_WRONG);
+      });
+  }
+);
+
 export default userController;
