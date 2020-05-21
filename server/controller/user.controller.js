@@ -38,6 +38,7 @@ import {
 import { User } from '../database/models';
 
 const userController = express.Router();
+const { serverURI, clientURI } = config.env;
 
 /**
  * POST/
@@ -359,13 +360,17 @@ userController.post('/identity', validateToken, async (req, res) => {
 userController.get(
   '/auth/google',
   passport.authenticate('google', {
-    scope: ['https://www.googleapis.com/auth/plus.login'],
+    scope: [
+      'https://www.googleapis.com/auth/plus.login',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ],
   })
 );
 
 userController.get(
   '/auth/google/callback',
-  passport.authenticate('google', { session: false }),
+  passport.authenticate('google', { failureRedirect: `${clientURI}/login` }),
   (req, res) => {
     const { user } = req;
     const { email } = user;
@@ -385,12 +390,13 @@ userController.get(
       })
       .populate('coursesTaken')
       .then(user => {
+        const token = jwt.sign({ email }, config.passport.secret, {
+          expiresIn: 10000000,
+        });
         const userToReturn = { ...user, ...{ token } };
         res.status(200).json(userToReturn);
       })
-      .catch(() => {
-        generateServerErrorCode(res, 500, SOME_THING_WENT_WRONG);
-      });
+      .catch(e => generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG));
   }
 );
 
