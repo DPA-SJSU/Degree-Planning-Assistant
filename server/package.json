@@ -12,7 +12,8 @@
     "mongo:dev": "mongo 'mongodb://localhost/dpa'",
     "mongo:start": "brew services start mongodb-community",
     "mongo:stop": "brew services stop mongodb-community",
-    "kill:server": "kill $(lsof -ti :8080)"
+    "kill:server": "kill $(lsof -ti :8080)",
+    "test": "ENV=dev mocha -r esm test/**/*.js"
   },
   "dependencies": {
     "@google-cloud/storage": "^4.3.1",
@@ -39,6 +40,7 @@
     "passport-jwt": "^4.0.0",
     "prettier": "^1.19.1",
     "sha256": "^0.2.0",
+    "supertest": "^4.0.2",
     "winston": "^3.2.1"
   },
   "devDependencies": {
@@ -47,12 +49,14 @@
     "@babel/register": "^7.6.0",
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.2.0",
     "eslint": "^6.1.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.18.0",
     "eslint-plugin-react-hooks": "^1.7.0",
+    "mocha": "^7.1.2",
     "nodemon": "^1.19.2"
   }
 }
