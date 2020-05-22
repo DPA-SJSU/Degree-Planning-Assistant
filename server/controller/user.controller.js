@@ -38,6 +38,7 @@ import {
 import { User } from '../database/models';
 
 const userController = express.Router();
+const { serverURI, clientURI } = config.env;
 
 /**
  * POST/
@@ -355,5 +356,48 @@ userController.post('/identity', validateToken, async (req, res) => {
     });
   });
 });
+
+userController.get(
+  '/auth/google',
+  passport.authenticate('google', {
+    scope: [
+      'https://www.googleapis.com/auth/plus.login',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ],
+  })
+);
+
+userController.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: `${clientURI}/login` }),
+  (req, res) => {
+    const { user } = req;
+    const { email } = user;
+    User.findOne({ email }, { hashedPassword: 0 })
+      .lean()
+      .populate({
+        path: 'degreePlan',
+        model: 'Plan',
+        populate: {
+          path: 'semesters',
+          model: 'Semester',
+          populate: {
+            path: 'courses',
+            model: 'Course',
+          },
+        },
+      })
+      .populate('coursesTaken')
+      .then(user => {
+        const token = jwt.sign({ email }, config.passport.secret, {
+          expiresIn: 10000000,
+        });
+        const userToReturn = { ...user, ...{ token } };
+        res.status(200).json(userToReturn);
+      })
+      .catch(e => generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG));
+  }
+);
 
 export default userController;
