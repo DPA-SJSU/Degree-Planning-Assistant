@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="refresh" content="5;url=<%= url %>" />
+  </head>
+  <body>
+    <% if (err) { %>
+    <p>Dear <%= email %></p>
+    <p>
+      Thanks for registering an account with us. This link has been expired, and
+      you will be redirected to home page and we'll automatically send you
+      another email.
+      <br />
+    </p>
+    <% } else { %>
+    <p>Welcome <%= email %></p>
+    <p>
+      Thanks for registering an account with us. Your email has been verified.
+      You will be redirected to our Login page in a few seconds.
+      <br />
+    </p>
+    <a href="<%= url %>">
+      Please click here if it doesn't automatically redirect</a
+    >
+    <%}%>
+  </body>
+</html>

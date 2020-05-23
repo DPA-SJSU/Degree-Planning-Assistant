@@ -10,7 +10,7 @@ const userSchema = new Schema(
     firstName: String,
     lastName: String,
     bio: String,
-    isAdmin: Boolean,
+    isAdmin: { type: Boolean, default: false },
     gradDate: { year: Number, term: String },
     school: String,
     major: String,
@@ -19,7 +19,6 @@ const userSchema = new Schema(
     degreePlan: { type: Schema.Types.ObjectId, ref: 'Plan' },
     coursesTaken: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
     emailConfirmed: { type: Boolean, default: false },
-    token: String,
     // Google Login
     googleId: String,
     googleObj: {

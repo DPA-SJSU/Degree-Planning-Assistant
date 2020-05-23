@@ -15,6 +15,7 @@ import {
   textScanController,
   planController,
   requirementController,
+  mailingController,
 } from './controller';
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/program', programController);
 app.use('/requirement', requirementController);
 app.use('/scan', textScanController);
 app.use('/plan', planController);
+app.use('/mailing', mailingController);
 
 app.listen(port, () => {
   logger.info(`Started server successfully at port ${port}`);

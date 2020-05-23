@@ -5,6 +5,7 @@ import programController from './program.controller';
 import textScanController from './textScan.controller';
 import planController from './plan.controller';
 import requirementController from './requirement.controller';
+import mailingController from './mailing.controller';
 
 export {
   userController,
@@ -14,4 +15,5 @@ export {
   textScanController,
   planController,
   requirementController,
+  mailingController,
 };

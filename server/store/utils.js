@@ -7,15 +7,28 @@
 import sha256 from 'sha256';
 import { validationResult } from 'express-validator';
 import Mongoose from 'mongoose';
-import { User, Course, Semester, Plan, Requirement } from '../database/models';
+import jwt from 'jsonwebtoken';
+import {
+  User,
+  Course,
+  Semester,
+  Plan,
+  Requirement,
+  Subscriber,
+} from '../database/models';
 
 import {
   SEMESTER_NOT_FOUND,
   SOME_THING_WENT_WRONG,
   SCHOOL_DOES_NOT_EXIST,
+  FAILED_TO_SEND_EMAIL,
 } from '../controller/constant';
+import Mailing from './mailing';
+
+import { config } from './config';
 
 const ObjectID = Mongoose.Types.ObjectId;
+const { serverURI, clientURI } = config.env;
 
 export const generateHashedPassword = password => sha256(password);
 
@@ -89,12 +102,10 @@ export const groupBy = (xs, key1, key2) => {
  * ============================================
  */
 
-export const createUser = (email, password, token) => {
+export const createUser = (email, password) => {
   const data = {
     hashedPassword: generateHashedPassword(password),
     email,
-    token,
-    isAdmin: false,
     avatarType: '',
     firstName: '',
     lastName: '',
@@ -350,18 +361,40 @@ export const generateSemesters = courses => {
   });
 };
 
-/**
- *
- * @param {String} userId
- * @param {[Semesters]} semesters
- * @returns [status, error]
- */
-export const courseCheck = (userId, semesters) => {
+export const sendEmail = (email, template, mode) => {
   return new Promise((resolve, reject) => {
-    const result = [];
+    switch (mode) {
+      // 1: Subscribe
+      // 2: Send an email with a template
+      case '1': {
+        return Subscriber.findOneAndUpdate(
+          { email },
+          { email, phase: 1 },
+          { new: true, upsert: true },
+          (err, updatedSubscriber) => {
+            if (err)
+              generateServerErrorCode(res, 500, err, SOME_THING_WENT_WRONG);
+            else {
+              Mailing.sendEmail({ email, template })
+                .then(info => resolve(info))
+                .catch(e => reject(e));
+            }
+          }
+        );
+      }
+      case '2': {
+        const token = jwt.sign({ email }, config.passport.secret, {
+          expiresIn: 300,
+        });
+        const confirmedURL = `${serverURI}/confirm?token=${token}&email=${email}`;
+        const template = 'registerConfirmation';
 
-    const coursesTaken = User.findById(userId).then(foundUser => {});
-
-    resolve(result);
+        return Mailing.sendEmail({ email, template, confirmedURL })
+          .then(info => resolve(info))
+          .catch(e => reject(e));
+      }
+      default:
+        break;
+    }
   });
 };

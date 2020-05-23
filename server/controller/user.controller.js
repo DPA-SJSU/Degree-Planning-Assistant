@@ -35,9 +35,10 @@ import {
   INVALID_GRAD_DATE,
   USER_NOT_FOUND,
   NO_DATA_TO_UPDATE,
-  TOKEN_IS_INVALID,
   EMAIL_IS_ALREADY_VERIFIED,
   EMAIL_IS_NOT_CONFIRMED,
+  TOKEN_IS_EXPIRED,
+  TOKEN_IS_INVALID,
 } from './constant';
 
 import { User } from '../database/models';
@@ -45,7 +46,6 @@ import { User } from '../database/models';
 import Mailing from '../store/mailing';
 
 const userController = express.Router();
-const { serverURI, clientURI } = config.env;
 
 const { serverURI, clientURI } = config.env;
 
@@ -55,41 +55,34 @@ const { serverURI, clientURI } = config.env;
  */
 userController.post('/register', validateRegisterUser, async (req, res) => {
   validationHandler(req, res, () => {
-    try {
-      const { email, password } = req.body;
-      User.findOne({ email })
-        .populate('coursesTaken')
-        .then(foundUser => {
-          if (!foundUser) {
-            const emailToken = crypto.randomBytes(20).toString('hex');
-            const confirmedURL = `${serverURI}/confirm?token=${emailToken}&email=${email}`;
-            const template = 'registerConfirmation';
+    const { email, password } = req.body;
+    User.findOne({ email })
+      .then(foundUser => {
+        if (!foundUser) {
+          const token = jwt.sign({ email }, config.passport.secret, {
+            expiresIn: 300,
+          });
+          const confirmedURL = `${serverURI}/confirm?token=${token}&email=${email}`;
+          const template = 'registerConfirmation';
 
-            createUser(email, password, emailToken);
+          createUser(email, password, token);
 
-            // Send Email
-            Mailing.sendEmail({ email, template, confirmedURL })
-              .then(info => res.status(200).json(info))
-              .catch(e => {
-                generateServerErrorCode(
-                  res,
-                  500,
-                  FAILED_TO_SEND_EMAIL,
-                  'email'
-                );
-              });
-          } else
-            generateServerErrorCode(
-              res,
-              403,
-              'register email error',
-              USER_EXISTS_ALREADY,
-              'email'
-            );
-        });
-    } catch (e) {
-      generateServerErrorCode(res, 500, e, SOME_THING_WENT_WRONG);
-    }
+          // Send Email
+          Mailing.sendEmail({ email, template, confirmedURL })
+            .then(info => res.status(200).json(info))
+            .catch(e => {
+              generateServerErrorCode(res, 500, FAILED_TO_SEND_EMAIL, 'email');
+            });
+        } else
+          generateServerErrorCode(
+            res,
+            403,
+            'register email error',
+            USER_EXISTS_ALREADY,
+            'email'
+          );
+      })
+      .catch(e => generateServerErrorCode(res, 403, e, SOME_THING_WENT_WRONG));
   });
 });
 
@@ -97,34 +90,42 @@ userController.post('/register', validateRegisterUser, async (req, res) => {
  * GET/
  * confirm email
  */
-userController.get('/confirm', (req, res) => {
-  let { token, email } = req.query;
-  User.findOneAndUpdate(
-    { token },
-    { emailConfirmed: true, token: '' },
-    { new: true }
-  )
-    .then(updatedUser => {
-      if (!updatedUser) {
-        const error = {
-          errors: {
-            server: {
-              msg: EMAIL_IS_ALREADY_VERIFIED,
-            },
-          },
-          message: `Your email is already verified. Please login with ${email}`,
-        };
-        return res.status(403).json(error);
+userController.get('/confirm', async (req, res) => {
+  const { token, email } = req.query;
+  const filePath = `${__dirname}/../templates/pages/confirmedEmail.ejs`;
+  const isVerified = await jwt.verify(
+    token,
+    config.passport.secret,
+    {
+      expiresIn: 300,
+    },
+    (err, decodedToken) => {
+      if (err) {
+        return res.render(filePath, {
+          err: true,
+          email,
+          url: `${serverURI}/mailing?email=${req.query.email}&template=registerConfirmation&mode=2`,
+        });
+      } else if (decodedToken) {
+        const { email } = decodedToken;
+        if (!email || email === '')
+          return generateServerErrorCode(res, 403, SOME_THING_WENT_WRONG);
+        return User.findOneAndUpdate({ email }, { emailConfirmed: true })
+          .then(foundUser => {
+            if (foundUser.emailConfirmed) {
+              // Email already verified
+            }
+            console.log(foundUser.emailConfirmed);
+            const url = `${clientURI}/login`;
+            res.render(filePath, { err: false, email, url });
+          })
+          .catch(e => {
+            console.log(e);
+            generateServerErrorCode(res, 403, e, TOKEN_IS_EXPIRED);
+          });
       }
-
-      const filePath = `${__dirname}/../templates/confirmedEmail.ejs`;
-      const url = `${clientURI}/login`;
-      res.render(filePath, { email, url });
-    })
-    .catch(e => {
-      console.log(e);
-      return generateServerErrorCode(res, 403, TOKEN_IS_INVALID, 'email');
-    });
+    }
+  );
 });
 
 /**

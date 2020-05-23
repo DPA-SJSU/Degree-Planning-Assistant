@@ -61,7 +61,7 @@ Mailing.sendEmail = data => {
         },
       });
 
-      const filePath = `${__dirname}/../templates/${
+      const filePath = `${__dirname}/../templates/email/${
         TEMPLATES[data.template].fileName
       }`;
 
