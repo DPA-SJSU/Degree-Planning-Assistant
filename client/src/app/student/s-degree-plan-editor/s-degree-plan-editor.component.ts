@@ -1,11 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
-
-import { PlanService } from "../plan.service";
-import { UserService } from "../user.service";
-import { ErrorHandlerService } from "../error-handler.service";
-
-import { CourseData } from "../course.service";
+import { PlanService } from "../../plan.service";
+import { UserService } from "../../user.service";
+import { ErrorHandlerService } from "../../error-handler.service";
+import { CourseData } from "../../course.service";
 
 @Component({
   selector: "app-s-degree-plan-editor",
