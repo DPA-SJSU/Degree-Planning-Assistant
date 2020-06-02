@@ -22,6 +22,7 @@ import { MatDividerModule } from "@angular/material/divider";
 
 import { UserService } from "./user.service";
 import { PlanService } from "./plan.service";
+import { ProgramService } from "./program.service";
 
 import { AppComponent } from "./app.component";
 import { LandingComponent } from "./landing/landing.component";
@@ -82,7 +83,7 @@ import { ADashboardComponent } from "./admin/a-dashboard/a-dashboard.component";
     MatDividerModule,
   ],
   entryComponents: [ModalComponent, PopupComponent],
-  providers: [UserService, PlanService],
+  providers: [UserService, PlanService, ProgramService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
