@@ -3,15 +3,15 @@ import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { share } from "rxjs/operators";
 
-import { UserService, UserProfile } from "../user.service";
-import { ErrorHandlerService } from "../error-handler.service";
+import { UserService, UserProfile } from "../../user.service";
+import { ErrorHandlerService } from "../../error-handler.service";
 
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 
 @Component({
   selector: "app-s-profile",
   templateUrl: "./s-profile.component.html",
-  styleUrls: ["./s-profile.component.css"]
+  styleUrls: ["./s-profile.component.css"],
 })
 export class SProfileComponent implements OnInit {
   profile: Observable<UserProfile>;
@@ -33,38 +33,38 @@ export class SProfileComponent implements OnInit {
       emailField: "",
       catalogYearField: "",
       gradTermField: "",
-      gradYearField: ""
+      gradYearField: "",
     };
 
     this.editProfileForm = new FormGroup({
       firstNameField: new FormControl("", [
         Validators.required,
-        Validators.pattern(/^[a-zA-Z ]*$/)
+        Validators.pattern(/^[a-zA-Z ]*$/),
       ]),
       lastNameField: new FormControl("", [
         Validators.required,
-        Validators.pattern(/^[a-zA-Z ]*$/)
+        Validators.pattern(/^[a-zA-Z ]*$/),
       ]),
       emailField: new FormControl("", [Validators.required, Validators.email]),
       bioField: new FormControl(""),
       catalogYearField: new FormControl("", [
         Validators.required,
-        Validators.pattern(/^\d+$/)
+        Validators.pattern(/^\d+$/),
       ]),
       gradTermField: new FormControl("", [
         Validators.required,
-        Validators.pattern(/^[a-zA-Z ]*$/)
+        Validators.pattern(/^[a-zA-Z ]*$/),
       ]),
       gradYearField: new FormControl("", [
         Validators.required,
-        Validators.pattern(/^\d+$/)
-      ])
+        Validators.pattern(/^\d+$/),
+      ]),
     });
   }
 
   ngOnInit() {
     this.profile.subscribe({
-      next: res => {
+      next: (res) => {
         this.editProfileForm.controls.firstNameField.setValue(res.firstName);
         this.editProfileForm.controls.lastNameField.setValue(res.lastName);
         this.editProfileForm.controls.emailField.setValue(res.email);
@@ -75,9 +75,9 @@ export class SProfileComponent implements OnInit {
         this.editProfileForm.controls.gradTermField.setValue(res.gradDate.term);
         this.editProfileForm.controls.gradYearField.setValue(res.gradDate.year);
       },
-      error: err => {
+      error: (err) => {
         this.errorHandler.handleError(err);
-      }
+      },
     });
   }
 
@@ -95,7 +95,7 @@ export class SProfileComponent implements OnInit {
       this.errors[prop] = "";
     });
 
-    Object.keys(this.editProfileForm.value).forEach(key => {
+    Object.keys(this.editProfileForm.value).forEach((key) => {
       if (this.editProfileForm.controls[key].errors) {
         const errors = this.editProfileForm.controls[key].errors;
         if (errors.hasOwnProperty("required")) {
@@ -108,8 +108,8 @@ export class SProfileComponent implements OnInit {
       }
     });
 
-    const objIsEmpty = obj => {
-      return Object.keys(obj).every(prop => {
+    const objIsEmpty = (obj) => {
+      return Object.keys(obj).every((prop) => {
         return obj[prop].length === 0;
       });
     };
@@ -126,19 +126,19 @@ export class SProfileComponent implements OnInit {
         catalogYear: Number(this.editProfileForm.value.catalogYearField),
         gradDate: {
           term: this.editProfileForm.value.gradTermField,
-          year: Number(this.editProfileForm.value.gradYearField)
-        }
+          year: Number(this.editProfileForm.value.gradYearField),
+        },
       };
 
       this.userService.editProfile(payload).subscribe({
-        error: errorMsg => {
+        error: (errorMsg) => {
           this.errorHandler.handleError(errorMsg);
         },
         complete: () => {
           this.userService.fetchUserData(true); // Make a 'hot' observable
           this.profile = this.userService.getUserData(); // Set reference to the new 'hot' observable
           this.editProfile = false;
-        }
+        },
       });
     } else {
       errorsObjKeys.forEach((prop, index) => {

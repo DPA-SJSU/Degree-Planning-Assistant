@@ -22,6 +22,7 @@ import { MatDividerModule } from "@angular/material/divider";
 
 import { UserService } from "./user.service";
 import { PlanService } from "./plan.service";
+import { ProgramService } from "./program.service";
 
 import { AppComponent } from "./app.component";
 import { LandingComponent } from "./landing/landing.component";
@@ -29,14 +30,17 @@ import { RegistrationComponent } from "./registration/registration.component";
 import { LoginComponent } from "./login/login.component";
 import { NavbarComponent } from "./navbar/navbar.component";
 import { FooterComponent } from "./footer/footer.component";
-import { SCoursesTakenComponent } from "./s-courses-taken/s-courses-taken.component";
 import { ModalComponent } from "./modal/modal.component";
 import { PopupComponent } from "./popup/popup.component";
-import { SDashboardComponent } from "./s-dashboard/s-dashboard.component";
-import { SProfileDashComponent } from "./s-profile-dash/s-profile-dash.component";
-import { SProfileComponent } from "./s-profile/s-profile.component";
-import { SDegreePlanComponent } from "./s-degree-plan/s-degree-plan.component";
-import { SDegreePlanEditorComponent } from "./s-degree-plan-editor/s-degree-plan-editor.component";
+
+import { SCoursesTakenComponent } from "./student/s-courses-taken/s-courses-taken.component";
+import { SDashboardComponent } from "./student/s-dashboard/s-dashboard.component";
+import { SDegreePlanComponent } from "./student/s-degree-plan/s-degree-plan.component";
+import { SDegreePlanEditorComponent } from "./student/s-degree-plan-editor/s-degree-plan-editor.component";
+import { SProfileComponent } from "./student/s-profile/s-profile.component";
+import { SProfileDashComponent } from "./student/s-profile-dash/s-profile-dash.component";
+
+import { ADashboardComponent } from "./admin/a-dashboard/a-dashboard.component";
 
 @NgModule({
   declarations: [
@@ -54,6 +58,7 @@ import { SDegreePlanEditorComponent } from "./s-degree-plan-editor/s-degree-plan
     SProfileComponent,
     SDegreePlanComponent,
     SDegreePlanEditorComponent,
+    ADashboardComponent,
   ],
   imports: [
     BrowserModule,
@@ -78,7 +83,7 @@ import { SDegreePlanEditorComponent } from "./s-degree-plan-editor/s-degree-plan
     MatDividerModule,
   ],
   entryComponents: [ModalComponent, PopupComponent],
-  providers: [UserService, PlanService],
+  providers: [UserService, PlanService, ProgramService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

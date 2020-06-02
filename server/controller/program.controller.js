@@ -107,7 +107,6 @@ programController.get(
         ID_OR_ANY_OF_THREE_PARAMETERS_IS_REQUIRED
       );
     }
-
     const formattedQuery = {};
 
     Object.keys(req.query).forEach(key => {
