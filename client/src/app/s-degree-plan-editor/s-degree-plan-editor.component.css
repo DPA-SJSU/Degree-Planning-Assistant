@@ -144,6 +144,14 @@
   width: 100%;
 }
 
+.semester-card-with-remove-btn {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+  flex-basis: 0;
+}
+
 .semester-card {
   display: flex;
   flex-direction: column;
@@ -157,10 +165,9 @@
   border-radius: 8px;
   box-shadow: 0px 3px 6px #ecf0f1;
   padding: 16px;
-  margin-left: 4px;
-  margin-right: 4px;
   background-color: #ffffff;
   transition: border 0.5s, box-shadow 0.5s;
+  box-sizing: border-box;
 }
 
 .semester-card-course {
@@ -232,22 +239,91 @@
   border-top: 1px solid #ecf0f1;
 }
 
-.semester-card-warning-max-units {
-  border: 3px solid orange;
-  box-shadow: 0px 2px 4px orange;
+.semester-card-warning {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex-grow: 1;
+  flex-basis: 0;
+  margin-top: 8px;
 }
 
-.semester-card-warning-max-units-text {
-  color: orange;
+.semester-card-warning-case {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  position: relative;
+  animation-name: fadeInDown;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-in;
 }
 
-.semester-card-warning-empty-term {
-  border: 3px solid red;
-  box-shadow: 0px 2px 4px red;
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    bottom: 8px;
+  }
+  to {
+    opacity: 1;
+    bottom: 0;
+  }
 }
 
-.semester-card-warning-empty-term-text {
-  color: red;
+.semester-card-warning-medium {
+  border: 3px solid #fdcb6e;
+  box-shadow: 0px 2px 4px #fdcb6e;
+}
+
+.semester-card-warning-medium-icon {
+  color: #fdcb6e;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.semester-card-warning-medium-text {
+  color: #fdcb6e;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.semester-card-warning-high {
+  border: 3px solid #d63031;
+  box-shadow: 0px 2px 4px #d63031;
+}
+
+.semester-card-warning-high-icon {
+  color: #d63031;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.semester-card-warning-high-text {
+  color: #d63031;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.semester-card-warning-low {
+  border: 3px solid #7f8c8d;
+  box-shadow: 0px 2px 4px #7f8c8d;
+}
+
+.semester-card-warning-low-icon {
+  color: #7f8c8d;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.semester-card-warning-low-text {
+  color: #7f8c8d;
+  font-weight: 500;
+  margin-left: 8px;
 }
 
 .statistic-chip-1 {

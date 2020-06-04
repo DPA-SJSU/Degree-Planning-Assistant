@@ -40,7 +40,9 @@ export class PlanService {
   MAX_UNITS_PER_TERM = 18;
   WARNINGS = {
     MAX_UNITS_EXCEEDED: "MAX_UNITS_EXCEEDED",
+    HIGH_WORKLOAD: "HIGH_WORKLOAD",
     EMPTY_TERM: "EMPTY_TERM",
+    NOT_FULL_TIME: "NOT_FULL_TIME",
   };
 
   constructor(private userService: UserService, private http: HttpClient) {}
@@ -615,12 +617,18 @@ export class PlanService {
     if (term.units && term.units > this.MAX_UNITS_PER_TERM) {
       warnings.push(this.WARNINGS.MAX_UNITS_EXCEEDED);
     }
+    if (term.units && term.units >= 15) {
+      warnings.push(this.WARNINGS.HIGH_WORKLOAD);
+    }
     if (term.courses && term.courses.length === 0) {
       warnings.push(this.WARNINGS.EMPTY_TERM);
     }
+    if (term.units && term.units < 12) {
+      console.log(term.units);
+      warnings.push(this.WARNINGS.NOT_FULL_TIME);
+    }
     // Add more warning conditions here...
 
-    // Add the warnings
     if (warnings.length > 0) {
       term.warnings = warnings;
     } else if (term.hasOwnProperty("warnings") === true) {

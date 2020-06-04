@@ -24,7 +24,7 @@
             <!-- Semester Cards -->
             <div
               *ngFor="let semester of year.semesters; let semesterIndex = index"
-              class="flex-row justify-content-center align-items-start"
+              class="semester-card-with-remove-btn"
             >
               <img
                 src="../../assets/delete-32.png"
@@ -34,10 +34,11 @@
               <div
                 [ngClass]="{
                   'semester-card': true,
-                  'semester-card-warning-max-units':
+                  'semester-card-warning-medium':
                     semester.warnings &&
-                    semester.warnings.includes('MAX_UNITS_EXCEEDED'),
-                  'semester-card-warning-empty-term':
+                    (semester.warnings.includes('MAX_UNITS_EXCEEDED') ||
+                      semester.warnings.includes('HIGH_WORKLOAD')),
+                  'semester-card-warning-high':
                     semester.warnings &&
                     semester.warnings.includes('EMPTY_TERM')
                 }"
@@ -211,20 +212,51 @@
                   >
                 </div>
                 <div
-                  class="flex-row justify-content-center align-items-center w100 mt8"
+                  *ngIf="semester.warnings"
+                  class="semester-card-warning mt8"
                 >
-                  <div [ngSwitch]="semester.warnings">
-                    <span
-                      *ngSwitchCase="'MAX_UNITS_EXCEEDED'"
-                      class="semester-card-warning-max-units-text"
-                      >Max units exceeded. Advisor approval may be
-                      required.</span
+                  <div
+                    *ngIf="semester.warnings.includes('MAX_UNITS_EXCEEDED')"
+                    class="semester-card-warning-case"
+                  >
+                    <mat-icon class="semester-card-warning-medium-icon"
+                      >error_outline</mat-icon
                     >
-                    <span
-                      *ngSwitchCase="'EMPTY_TERM'"
-                      class="semester-card-warning-empty-term-text"
+                    <span class="semester-card-warning-medium-text">
+                      Max units exceeded. Advisor approval may be required.
+                    </span>
+                  </div>
+                  <div
+                    *ngIf="semester.warnings.includes('HIGH_WORKLOAD')"
+                    class="semester-card-warning-case"
+                  >
+                    <mat-icon class="semester-card-warning-medium-icon"
+                      >error_outline</mat-icon
                     >
-                      Semesters cannot be empty
+                    <span class="semester-card-warning-medium-text">
+                      Possible high workload.
+                    </span>
+                  </div>
+                  <div
+                    *ngIf="semester.warnings.includes('EMPTY_TERM')"
+                    class="semester-card-warning-case"
+                  >
+                    <mat-icon class="semester-card-warning-high-icon"
+                      >error_outline</mat-icon
+                    >
+                    <span class="semester-card-warning-high-text">
+                      Terms cannot be left empty.
+                    </span>
+                  </div>
+                  <div
+                    *ngIf="semester.warnings.includes('NOT_FULL_TIME')"
+                    class="semester-card-warning-case"
+                  >
+                    <mat-icon class="semester-card-warning-low-icon"
+                      >error_outline</mat-icon
+                    >
+                    <span class="semester-card-warning-low-text">
+                      Not enough units for full-time enrollment status.
                     </span>
                   </div>
                 </div>
