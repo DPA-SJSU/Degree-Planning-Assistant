@@ -32,7 +32,15 @@
                 (click)="onClickRemoveSemester(semeserIndex, yearIndex)"
               />
               <div
-                class="semester-card"
+                [ngClass]="{
+                  'semester-card': true,
+                  'semester-card-warning-max-units':
+                    semester.warnings &&
+                    semester.warnings.includes('MAX_UNITS_EXCEEDED'),
+                  'semester-card-warning-empty-term':
+                    semester.warnings &&
+                    semester.warnings.includes('EMPTY_TERM')
+                }"
                 (dragover)="(false)"
                 (drop)="onDropSemesterCard(semesterIndex, yearIndex)"
               >
@@ -201,6 +209,24 @@
                     class="semester-card-course-units"
                     >= {{ semester.units }} units</span
                   >
+                </div>
+                <div
+                  class="flex-row justify-content-center align-items-center w100 mt8"
+                >
+                  <div [ngSwitch]="semester.warnings">
+                    <span
+                      *ngSwitchCase="'MAX_UNITS_EXCEEDED'"
+                      class="semester-card-warning-max-units-text"
+                      >Max units exceeded. Advisor approval may be
+                      required.</span
+                    >
+                    <span
+                      *ngSwitchCase="'EMPTY_TERM'"
+                      class="semester-card-warning-empty-term-text"
+                    >
+                      Semesters cannot be empty
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

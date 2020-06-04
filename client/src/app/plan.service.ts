@@ -37,6 +37,12 @@ export class PlanService {
     spring: 4,
   };
 
+  MAX_UNITS_PER_TERM = 18;
+  WARNINGS = {
+    MAX_UNITS_EXCEEDED: "MAX_UNITS_EXCEEDED",
+    EMPTY_TERM: "EMPTY_TERM",
+  };
+
   constructor(private userService: UserService, private http: HttpClient) {}
 
   /**
@@ -94,21 +100,23 @@ export class PlanService {
                 termSelect: "",
               },
               semesters: [
-                {
+                this.addWarnings({
                   ...semester,
                   units: semesterStats.units,
                   difficulty: semesterStats.difficulty,
-                },
+                }),
               ],
             } as Year;
             yearArray.push(newYear);
             yearCounter = currentYear;
           } else {
-            yearArray[yearArray.length - 1].semesters.push({
-              ...semester,
-              units: semesterStats.units,
-              difficulty: semesterStats.difficulty,
-            });
+            yearArray[yearArray.length - 1].semesters.push(
+              this.addWarnings({
+                ...semester,
+                units: semesterStats.units,
+                difficulty: semesterStats.difficulty,
+              })
+            );
           }
         });
 
@@ -236,7 +244,7 @@ export class PlanService {
         courses: [],
       };
 
-      years[yearIndex].semesters.push(newSemester);
+      years[yearIndex].semesters.push(this.addWarnings(newSemester));
 
       this.sortSemestersChronologically(yearIndex, years);
     } else {
@@ -281,6 +289,10 @@ export class PlanService {
       newSemesterStatistics.units;
     years[yearIndex].semesters[semesterIndex].difficulty =
       newSemesterStatistics.difficulty;
+
+    years[yearIndex].semesters[semesterIndex] = this.addWarnings(
+      years[yearIndex].semesters[semesterIndex]
+    );
   }
 
   /**
@@ -358,6 +370,10 @@ export class PlanService {
       years[yearIndex].semesters[semesterIndex].difficulty =
         newStatistics.difficulty;
 
+      years[yearIndex].semesters[semesterIndex] = this.addWarnings(
+        years[yearIndex].semesters[semesterIndex]
+      );
+
       return true;
     } else {
       if (fromCourseList) {
@@ -403,6 +419,10 @@ export class PlanService {
         newStatistics.units;
       years[from.yearIndex].semesters[from.semesterIndex].difficulty =
         newStatistics.difficulty;
+
+      years[from.yearIndex].semesters[from.semesterIndex] = this.addWarnings(
+        years[from.yearIndex].semesters[from.semesterIndex]
+      );
 
       return true;
     } else {
@@ -584,5 +604,36 @@ export class PlanService {
     });
 
     return semestersResult;
+  }
+
+  /**
+   * Add warnings to a term if there are any
+   * @param term The term to be used
+   */
+  private addWarnings(term: any): object {
+    const warnings = [];
+    if (term.units && term.units > this.MAX_UNITS_PER_TERM) {
+      warnings.push(this.WARNINGS.MAX_UNITS_EXCEEDED);
+    }
+    if (term.courses && term.courses.length === 0) {
+      warnings.push(this.WARNINGS.EMPTY_TERM);
+    }
+    // Add more warning conditions here...
+
+    // Add the warnings
+    if (warnings.length > 0) {
+      term.warnings = warnings;
+    } else if (term.hasOwnProperty("warnings") === true) {
+      // If no warnings, remove the 'warnings' prop if already exists
+      const termWithoutWarnings = {};
+      Object.keys(term).forEach((prop) => {
+        if (prop !== "warnings") {
+          termWithoutWarnings[prop] = term[prop];
+        }
+      });
+      term = termWithoutWarnings;
+    }
+
+    return term;
   }
 }
