@@ -37,10 +37,17 @@ export class PlanService {
     spring: 4,
   };
 
-  MAX_UNITS_PER_TERM = 18;
+  FULL_TIME_UNITS_THRESHOLD = 12; // The minimum number of units per term needed to reach full-time status
+  MAX_UNITS_PER_TERM = 18; // Stub for the maximum units a student can have before needing their advisor's approval to enroll for additional courses
+  HIGH_WORKLOAD_UNITS_THRESHOLD = 15; // The unit threshold needed before we warn the user that they will have a high workload in the current term
+  HIGH_DIFFICULTY_THRESHOLD = 2.35; // The term difficulty rating threshold needed before we warn the user that their term is very difficult
+  HIGH_IMPACTION_THRESHOLD = 2.1; // The course impaction rating threshold needed before we warn the user that they have an impacted course in the current term
+
   WARNINGS = {
     MAX_UNITS_EXCEEDED: "MAX_UNITS_EXCEEDED",
     HIGH_WORKLOAD: "HIGH_WORKLOAD",
+    HIGH_DIFFICULTY: "HIGH_DIFFICULTY",
+    HAS_IMPACTED_COURSE: "HAS_IMPACTED_COURSE",
     EMPTY_TERM: "EMPTY_TERM",
     NOT_FULL_TIME: "NOT_FULL_TIME",
   };
@@ -617,16 +624,29 @@ export class PlanService {
     if (term.units && term.units > this.MAX_UNITS_PER_TERM) {
       warnings.push(this.WARNINGS.MAX_UNITS_EXCEEDED);
     }
-    if (term.units && term.units >= 15) {
+    if (term.units && term.units >= this.HIGH_WORKLOAD_UNITS_THRESHOLD) {
       warnings.push(this.WARNINGS.HIGH_WORKLOAD);
+    }
+    if (term.difficulty && term.difficulty > this.HIGH_DIFFICULTY_THRESHOLD) {
+      warnings.push(this.WARNINGS.HIGH_DIFFICULTY);
     }
     if (term.courses && term.courses.length === 0) {
       warnings.push(this.WARNINGS.EMPTY_TERM);
+    } else if (term.courses) {
+      const hasImpactedCourse = term.courses.every((course) => {
+        if (course.impaction) {
+          return course.impaction < this.HIGH_IMPACTION_THRESHOLD;
+        }
+        return true;
+      });
+      if (!hasImpactedCourse) {
+        warnings.push(this.WARNINGS.HAS_IMPACTED_COURSE);
+      }
     }
-    if (term.units && term.units < 12) {
-      console.log(term.units);
+    if (term.units && term.units < this.FULL_TIME_UNITS_THRESHOLD) {
       warnings.push(this.WARNINGS.NOT_FULL_TIME);
     }
+
     // Add more warning conditions here...
 
     if (warnings.length > 0) {

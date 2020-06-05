@@ -37,7 +37,9 @@
                   'semester-card-warning-medium':
                     semester.warnings &&
                     (semester.warnings.includes('MAX_UNITS_EXCEEDED') ||
-                      semester.warnings.includes('HIGH_WORKLOAD')),
+                      semester.warnings.includes('HIGH_WORKLOAD') ||
+                      semester.warnings.includes('HIGH_DIFFICULTY') ||
+                      semester.warnings.includes('HAS_IMPACTED_COURSE')),
                   'semester-card-warning-high':
                     semester.warnings &&
                     semester.warnings.includes('EMPTY_TERM')
@@ -235,6 +237,28 @@
                     >
                     <span class="semester-card-warning-medium-text">
                       Possible high workload.
+                    </span>
+                  </div>
+                  <div
+                    *ngIf="semester.warnings.includes('HIGH_DIFFICULTY')"
+                    class="semester-card-warning-case"
+                  >
+                    <mat-icon class="semester-card-warning-medium-icon"
+                      >error_outline</mat-icon
+                    >
+                    <span class="semester-card-warning-medium-text">
+                      Possible high term overall difficulty.
+                    </span>
+                  </div>
+                  <div
+                    *ngIf="semester.warnings.includes('HAS_IMPACTED_COURSE')"
+                    class="semester-card-warning-case"
+                  >
+                    <mat-icon class="semester-card-warning-medium-icon"
+                      >error_outline</mat-icon
+                    >
+                    <span class="semester-card-warning-medium-text">
+                      There are impacted courses in this term.
                     </span>
                   </div>
                   <div
