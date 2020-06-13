@@ -37,6 +37,21 @@ export class PlanService {
     spring: 4,
   };
 
+  FULL_TIME_UNITS_THRESHOLD = 12; // The minimum number of units per term needed to reach full-time status
+  MAX_UNITS_PER_TERM = 18; // Stub for the maximum units a student can have before needing their advisor's approval to enroll for additional courses
+  HIGH_WORKLOAD_UNITS_THRESHOLD = 15; // The unit threshold needed before we warn the user that they will have a high workload in the current term
+  HIGH_DIFFICULTY_THRESHOLD = 2.35; // The term difficulty rating threshold needed before we warn the user that their term is very difficult
+  HIGH_IMPACTION_THRESHOLD = 2.1; // The course impaction rating threshold needed before we warn the user that they have an impacted course in the current term
+
+  WARNINGS = {
+    MAX_UNITS_EXCEEDED: "MAX_UNITS_EXCEEDED",
+    HIGH_WORKLOAD: "HIGH_WORKLOAD",
+    HIGH_DIFFICULTY: "HIGH_DIFFICULTY",
+    HAS_IMPACTED_COURSE: "HAS_IMPACTED_COURSE",
+    EMPTY_TERM: "EMPTY_TERM",
+    NOT_FULL_TIME: "NOT_FULL_TIME",
+  };
+
   constructor(private userService: UserService, private http: HttpClient) {}
 
   /**
@@ -94,21 +109,23 @@ export class PlanService {
                 termSelect: "",
               },
               semesters: [
-                {
+                this.addWarnings({
                   ...semester,
                   units: semesterStats.units,
                   difficulty: semesterStats.difficulty,
-                },
+                }),
               ],
             } as Year;
             yearArray.push(newYear);
             yearCounter = currentYear;
           } else {
-            yearArray[yearArray.length - 1].semesters.push({
-              ...semester,
-              units: semesterStats.units,
-              difficulty: semesterStats.difficulty,
-            });
+            yearArray[yearArray.length - 1].semesters.push(
+              this.addWarnings({
+                ...semester,
+                units: semesterStats.units,
+                difficulty: semesterStats.difficulty,
+              })
+            );
           }
         });
 
@@ -236,7 +253,7 @@ export class PlanService {
         courses: [],
       };
 
-      years[yearIndex].semesters.push(newSemester);
+      years[yearIndex].semesters.push(this.addWarnings(newSemester));
 
       this.sortSemestersChronologically(yearIndex, years);
     } else {
@@ -281,6 +298,10 @@ export class PlanService {
       newSemesterStatistics.units;
     years[yearIndex].semesters[semesterIndex].difficulty =
       newSemesterStatistics.difficulty;
+
+    years[yearIndex].semesters[semesterIndex] = this.addWarnings(
+      years[yearIndex].semesters[semesterIndex]
+    );
   }
 
   /**
@@ -358,6 +379,10 @@ export class PlanService {
       years[yearIndex].semesters[semesterIndex].difficulty =
         newStatistics.difficulty;
 
+      years[yearIndex].semesters[semesterIndex] = this.addWarnings(
+        years[yearIndex].semesters[semesterIndex]
+      );
+
       return true;
     } else {
       if (fromCourseList) {
@@ -403,6 +428,10 @@ export class PlanService {
         newStatistics.units;
       years[from.yearIndex].semesters[from.semesterIndex].difficulty =
         newStatistics.difficulty;
+
+      years[from.yearIndex].semesters[from.semesterIndex] = this.addWarnings(
+        years[from.yearIndex].semesters[from.semesterIndex]
+      );
 
       return true;
     } else {
@@ -508,12 +537,12 @@ export class PlanService {
         }
       }
 
-      const semesterDifficulty =
+      let semesterDifficulty =
         (difficultySum / numOfCourses) * difficultyModifier;
 
       return {
         units: unitsSum,
-        difficulty: semesterDifficulty,
+        difficulty: parseFloat(semesterDifficulty.toFixed(2)),
       };
     } else {
       return {
@@ -584,5 +613,55 @@ export class PlanService {
     });
 
     return semestersResult;
+  }
+
+  /**
+   * Add warnings to a term if there are any
+   * @param term The term to be used
+   */
+  private addWarnings(term: any): object {
+    const warnings = [];
+    if (term.units && term.units > this.MAX_UNITS_PER_TERM) {
+      warnings.push(this.WARNINGS.MAX_UNITS_EXCEEDED);
+    }
+    if (term.units && term.units >= this.HIGH_WORKLOAD_UNITS_THRESHOLD) {
+      warnings.push(this.WARNINGS.HIGH_WORKLOAD);
+    }
+    if (term.difficulty && term.difficulty > this.HIGH_DIFFICULTY_THRESHOLD) {
+      warnings.push(this.WARNINGS.HIGH_DIFFICULTY);
+    }
+    if (term.courses && term.courses.length === 0) {
+      warnings.push(this.WARNINGS.EMPTY_TERM);
+    } else if (term.courses) {
+      const hasImpactedCourse = term.courses.every((course) => {
+        if (course.impaction) {
+          return course.impaction < this.HIGH_IMPACTION_THRESHOLD;
+        }
+        return true;
+      });
+      if (!hasImpactedCourse) {
+        warnings.push(this.WARNINGS.HAS_IMPACTED_COURSE);
+      }
+    }
+    if (term.units && term.units < this.FULL_TIME_UNITS_THRESHOLD) {
+      warnings.push(this.WARNINGS.NOT_FULL_TIME);
+    }
+
+    // Add more warning conditions here...
+
+    if (warnings.length > 0) {
+      term.warnings = warnings;
+    } else if (term.hasOwnProperty("warnings") === true) {
+      // If no warnings, remove the 'warnings' prop if already exists
+      const termWithoutWarnings = {};
+      Object.keys(term).forEach((prop) => {
+        if (prop !== "warnings") {
+          termWithoutWarnings[prop] = term[prop];
+        }
+      });
+      term = termWithoutWarnings;
+    }
+
+    return term;
   }
 }
