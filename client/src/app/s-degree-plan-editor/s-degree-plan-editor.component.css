@@ -180,6 +180,9 @@
   padding-bottom: 8px;
   width: 100%;
   border-bottom: 1px solid #ecf0f1;
+  animation-name: fadeInDown;
+  animation-duration: 0.25s;
+  animation-timing-function: ease-in;
 }
 
 .semester-card-course-empty {
@@ -259,17 +262,6 @@
   animation-name: fadeInDown;
   animation-duration: 0.3s;
   animation-timing-function: ease-in;
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    bottom: 8px;
-  }
-  to {
-    opacity: 1;
-    bottom: 0;
-  }
 }
 
 .semester-card-warning-medium {
@@ -370,4 +362,16 @@
   background-color: #ecf0f1;
   color: #7f8c8d;
   padding: 8px;
+}
+
+/* Custom animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    bottom: 8px;
+  }
+  to {
+    opacity: 1;
+    bottom: 0;
+  }
 }

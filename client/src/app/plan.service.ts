@@ -537,12 +537,12 @@ export class PlanService {
         }
       }
 
-      const semesterDifficulty =
+      let semesterDifficulty =
         (difficultySum / numOfCourses) * difficultyModifier;
 
       return {
         units: unitsSum,
-        difficulty: semesterDifficulty,
+        difficulty: parseFloat(semesterDifficulty.toFixed(2)),
       };
     } else {
       return {
