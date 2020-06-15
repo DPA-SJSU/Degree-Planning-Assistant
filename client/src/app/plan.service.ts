@@ -415,7 +415,7 @@ export class PlanService {
    */
   getProgramCourses(): Observable<any> {
     return this.http.get(
-      `${this.userService.uri}/program?major=Software Engineering`,
+      `${this.userService.uri}/program?major=SoftwareEngineering`,
       this.userService.getHttpHeaders()
     );
   }
